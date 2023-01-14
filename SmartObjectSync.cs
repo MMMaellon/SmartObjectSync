@@ -3,6 +3,7 @@ using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
+using VRC.Udon.Common;
 
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
 using VRC.SDKBase.Editor.BuildPipeline;
@@ -137,7 +138,7 @@ namespace MMMaellon
         public const int STATE_LEFT_HAND_HELD = 4;
         public const int STATE_RIGHT_HAND_HELD = 5;
         public const int STATE_ATTACHED_TO_PLAYSPACE = 6;
-        //negative for attached to a human body bone where the absolute value is the int value of the HumanBodyBone enum
+        //negative for attached to a human body bone where the absolute value is the int value of the HumanBodyBone enum + 1
         
         
         
@@ -267,7 +268,7 @@ namespace MMMaellon
                         }
                     default:
                         {
-                            _print("state: " + ((HumanBodyBones) (-value)).ToString());
+                            _print("state: " + ((HumanBodyBones) (-1 - value)).ToString());
                             break;
                         }
                 }
@@ -385,7 +386,6 @@ namespace MMMaellon
         [System.NonSerialized] public bool hasBones;
         [System.NonSerialized] public Vector3 parentPosCache;
         [System.NonSerialized] public Quaternion parentRotCache;
-        [System.NonSerialized] public VRCPlayerApi.TrackingData trackingCache;
         public override void OnPreSerialization()
         {
             base.OnPreSerialization();
@@ -413,7 +413,23 @@ namespace MMMaellon
             velOnSync = CalcVel();
             spinOnSync = CalcSpin();
             lastSync = Time.timeSinceLevelLoad;
+            unsyncedCollisionCount = 0;
         }
+
+        public override void OnPostSerialization(SerializationResult result)
+        {
+            if (!result.success)
+            {
+                _printErr("failed to sync - retrying");
+                SendCustomEventDelayedSeconds(nameof(Serialize), Random.Range(0.1f, 2f));
+            }
+        }
+
+        public void Serialize()
+        {
+            RequestSerialization();
+        }
+
         public Vector3 CalcPos()
         {
             return Quaternion.Inverse(parentRotCache) * (transform.position - parentPosCache);
@@ -468,7 +484,7 @@ namespace MMMaellon
             {
                 rigid.WakeUp();
             }
-            //if we're attaching it to us, leave it attached;
+            //if we're attaching it to us, leave it attached
             state = state < 0 || state == STATE_ATTACHED_TO_PLAYSPACE ? state : STATE_LERPING;
         }
 
@@ -491,6 +507,7 @@ namespace MMMaellon
             }
         }
 
+        bool trackingMissing = false;
         public void CalcParentTransform()
         {
             switch (state)
@@ -531,10 +548,9 @@ namespace MMMaellon
                         {
                             parentPosCache = owner.GetBonePosition(HumanBodyBones.LeftHand);
                             parentRotCache = owner.GetBoneRotation(HumanBodyBones.LeftHand);
-                            trackingCache = owner.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand);
                             hasBones = parentPosCache != Vector3.zero;
-                            parentPosCache = hasBones ? parentPosCache : trackingCache.position;
-                            parentRotCache = hasBones ? parentRotCache : trackingCache.rotation;
+                            parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
+                            parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
                         }
                         break;
                     }
@@ -544,10 +560,9 @@ namespace MMMaellon
                         {
                             parentPosCache = owner.GetBonePosition(HumanBodyBones.RightHand);
                             parentRotCache = owner.GetBoneRotation(HumanBodyBones.RightHand);
-                            trackingCache = owner.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
                             hasBones = parentPosCache != Vector3.zero;
-                            parentPosCache = hasBones ? parentPosCache : trackingCache.position;
-                            parentRotCache = hasBones ? parentRotCache : trackingCache.rotation;
+                            parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
+                            parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
                         }
                         break;
                     }
@@ -564,8 +579,14 @@ namespace MMMaellon
                     {
                         if (owner != null && state < STATE_SLEEPING)
                         {
-                            parentPosCache = owner.GetBonePosition((HumanBodyBones)(-state));
-                            parentRotCache = owner.GetBoneRotation((HumanBodyBones)(-state));
+                            parentPosCache = owner.GetBonePosition((HumanBodyBones)(-1 - state));
+                            parentRotCache = owner.GetBoneRotation((HumanBodyBones)(-1 - state));
+                            hasBones = parentPosCache != Vector3.zero;
+                            parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
+                            parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
+                            if(!hasBones && owner.isLocal){
+                                state = STATE_ATTACHED_TO_PLAYSPACE;
+                            }
                         }
                         break;
                     }
@@ -645,6 +666,7 @@ namespace MMMaellon
         }
 
         SmartObjectSync otherSync;
+        int unsyncedCollisionCount = 0;
         public void OnCollisionEnter(Collision other)
         {
             if (owner == null || !owner.isLocal || rigid == null)
@@ -658,6 +680,13 @@ namespace MMMaellon
                     velOnSync = CalcVel();
                     spinOnSync = CalcSpin();
                     lastSync = Time.timeSinceLevelLoad;
+                    unsyncedCollisionCount++;
+                    if (unsyncedCollisionCount > 5 && Vector3.Distance(posOnSync, pos) > 0.1f)
+                    {
+                        _print("desync detected - requesting resync");
+                        //last network event didn't go through, and object is continually falling
+                        SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, nameof(Serialize));
+                    }
                 }
                 return;
             }

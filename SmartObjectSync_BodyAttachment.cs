@@ -20,12 +20,16 @@ namespace MMMaellon
     {
         SerializedProperty _allowedBones;
         SerializedProperty allowedBones;
+        SerializedProperty allowAttachOnPickupUseDown;
+        SerializedProperty allowAttachOnRightStickDown;
 
         void OnEnable()
         {
             // Fetch the objects from the MyScript script to display in the inspector
             _allowedBones = serializedObject.FindProperty("_allowedBones");
             allowedBones = serializedObject.FindProperty("allowedBones");
+            allowAttachOnPickupUseDown = serializedObject.FindProperty("allowAttachOnPickupUseDown");
+            allowAttachOnRightStickDown = serializedObject.FindProperty("allowAttachOnRightStickDown");
             SyncAllowedBones();
         }
         public override void OnInspectorGUI()
@@ -34,6 +38,8 @@ namespace MMMaellon
             
             serializedObject.Update();
             EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(allowAttachOnPickupUseDown, true);
+            EditorGUILayout.PropertyField(allowAttachOnRightStickDown, true);
             EditorGUILayout.PropertyField(_allowedBones, true);
             if (EditorGUI.EndChangeCheck())
             {
@@ -68,9 +74,8 @@ namespace MMMaellon
 
         public bool allowAttachOnPickupUseDown = true;
         public bool allowAttachOnRightStickDown = false;
-        int bone = -1001;
+        public int bone = -1001;
 
-        [HideInInspector]
         public int[] allowedBones = { 0 };
 
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
@@ -78,7 +83,7 @@ namespace MMMaellon
         public HumanBodyBones[] _allowedBones = { 0 };
 #endif
         VRCPlayerApi localPlayer;
-        bool beingHeld;
+        public bool beingHeld;
         SmartObjectSync sync;
         void Start()
         {
@@ -110,7 +115,7 @@ namespace MMMaellon
             beingHeld = false;
             if (bone >= 0)
             {
-                sync.state = -bone;
+                sync.state = -1 - bone;
             }
             bone = -1001;
             enabled = false;
