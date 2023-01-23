@@ -37,8 +37,9 @@ namespace MMMaellon
         public SmartObjectSync sync;
         public void Update()
         {
-            if (!sync || sync.owner == null)
+            if (!sync || !Utilities.IsValid(sync.owner))
             {
+                Debug.LogWarning(name + " is missing sync or sync owner");
                 enabled = false;
                 return;
             }
@@ -47,101 +48,104 @@ namespace MMMaellon
             {
                 if (sync.lastSync < 0)
                 {
+                    sync._printErr("waiting for first sync" + sync.lastSync);
                     //if we haven't received data yet, do nothing. Otherwise this will move the object to the origin
+                    enabled = false;
                     return;
                 }
-                sync.CalcSyncProgress();
+                sync.CalcLerpProgress();
                 sync.CalcParentTransform();
                 sync.LerpToSyncedTransform();
 
-                if (sync.syncProgress >= 1 && !sync.IsAttachedToPlayer())
+
+                if (sync.lerpProgress >= 1 && !sync.IsAttachedToPlayer() && (sync.rigid == null || sync.rigid.isKinematic || sync.state != SmartObjectSync.STATE_SLEEPING || sync.rigid.IsSleeping()))
                 {
                     //we no longer need to update every frame since we're already caught up
                     //unless we're attached to a player, then we need to set the sync local to a body part of the player every frame
+                    sync._print("fell asleep");
                     enabled = false;
                 }
                 return;
-            }
-            
-            switch (sync.state)
+            } else
             {
-                case (SmartObjectSync.STATE_SLEEPING):
-                case (SmartObjectSync.STATE_TELEPORTING):
-                case (SmartObjectSync.STATE_LERPING):
-                case (SmartObjectSync.STATE_FALLING):
-                    {
-                        //if we're here, that means we're being controlled entirely by physics and outside forces
-                        if (!SyncIntervalOver())
-                        {
-                            break;
-                        }
-                        
-                        if (ShouldBeSleeping())
-                        {
-                            if (sync.state != SmartObjectSync.STATE_SLEEPING)
-                            {
-                                sync.state = SmartObjectSync.STATE_SLEEPING;
-                            }
-                            //sleeping objects don't move so we disable the update loop on the helper
-                            enabled = false;
-                            break;
-                        }
-                        
-                        //we check to see if the current velocity has changed much from what we last synced over the network
-                        //we first take out the gravity component and then we doe a != compare. Unity docs say that kind of compare takes into account floating point imprecision
-                        if (NonGravitationalAcceleration())
-                        {
-                            sync.RequestSerialization();
-                            sync.lastSync = Time.timeSinceLevelLoad;
-                        }
-                        else
-                        {
-                            sync.lastSync = Time.timeSinceLevelLoad;
-                        }
 
-                        if (sync.transform.position.y < sync.respawn_height)
+                switch (sync.state)
+                {
+                    case (SmartObjectSync.STATE_SLEEPING):
+                    case (SmartObjectSync.STATE_TELEPORTING):
+                    case (SmartObjectSync.STATE_LERPING):
+                    case (SmartObjectSync.STATE_FALLING):
                         {
-                            sync.Respawn();
-                        }
-                        break;
-                    }
-                case (SmartObjectSync.STATE_LEFT_HAND_HELD):
-                case (SmartObjectSync.STATE_RIGHT_HAND_HELD):
-                    {
-                        //if we're manipulating the sync with our hands
-                        //then we continually check to see if the offset has changed because we used the ijkl keys or the pickup hit another collider or something
-                        if (!SyncIntervalOver())
-                        {
+                            //if we're here, that means we're being controlled entirely by physics and outside forces
+                            if (!sync.LerpDelayOver())
+                            {
+                                break;
+                            }
+
+                            if (ShouldBeSleeping())
+                            {
+                                if (sync.state != SmartObjectSync.STATE_SLEEPING)
+                                {
+                                    sync.state = SmartObjectSync.STATE_SLEEPING;
+                                }
+                                //sleeping objects don't move so we disable the update loop on the helper
+                                sync._print("should be sleeping");
+                                enabled = false;
+                                break;
+                            }
+
+                            //we check to see if the current velocity has changed much from what we last synced over the network
+                            //we first take out the gravity component and then we doe a != compare. Unity docs say that kind of compare takes into account floating point imprecision
+                            if (NonGravitationalAcceleration())
+                            {
+                                sync.Synchronize();
+                                sync.lastSync = Time.timeSinceLevelLoad;
+                            }
+                            else
+                            {
+                                sync.lastSync = Time.timeSinceLevelLoad;
+                            }
+
+                            if (sync.transform.position.y < sync.respawn_height)
+                            {
+                                sync.Respawn();
+                            }
                             break;
                         }
-                        if (ObjectMoved())
+                    case (SmartObjectSync.STATE_LEFT_HAND_HELD):
+                    case (SmartObjectSync.STATE_RIGHT_HAND_HELD):
                         {
-                            sync.RequestSerialization();
-                            sync.lastSync = Time.timeSinceLevelLoad;
+                            //if we're manipulating the sync with our hands
+                            //then we continually check to see if the offset has changed because we used the ijkl keys or the pickup hit another collider or something
+                            if (!sync.LerpDelayOver())
+                            {
+                                break;
+                            }
+                            if (sync.ObjectMoved())
+                            {
+                                sync.Synchronize();
+                                sync.lastSync = Time.timeSinceLevelLoad;
+                            }
+                            else
+                            {
+                                //everything is still in sync so we reset the timer on the sync interval
+                                sync.lastSync = Time.timeSinceLevelLoad;
+                            }
+                            break;
                         }
-                        else
+                    default:
                         {
-                            //everything is still in sync so we reset the timer on the sync interval
-                            sync.lastSync = Time.timeSinceLevelLoad;
+                            //if the sync is attached to the local player, then we have to move it local to our position just like the local clients do.
+                            //the difference being that we never lerp so syncProgress needs to be 1.0f
+                            sync.lerpProgress = 1.0f;
+                            sync.CalcParentTransform();
+                            sync.LerpToSyncedTransform();
+                            break;
                         }
-                        break;
-                    }
-                default:
-                    {
-                        //if the sync is attached to the local player, then we have to move it local to our position just like the local clients do.
-                        //the difference being that we never lerp so syncProgress needs to be 1.0f
-                        sync.syncProgress = 1.0f;
-                        sync.CalcParentTransform();
-                        sync.LerpToSyncedTransform();
-                        break;
-                    }
+                }
             }
         }
 
-        public bool SyncIntervalOver()
-        {
-            return sync.lastSync + sync.lerpTime < Time.timeSinceLevelLoad;
-        }
 
         public bool ShouldBeSleeping()
         {
@@ -176,10 +180,5 @@ namespace MMMaellon
             return Vector3.Distance(gravityLessVelocity, sync.rigid.velocity - gravityProjection) > 0.001f;
         }
 
-        public bool ObjectMoved()
-        {
-            sync.CalcParentTransform();
-            return Vector3.Distance(sync.pos, sync.CalcPos()) > 0.001f || Quaternion.Dot(sync.rot, sync.CalcRot()) < 0.99;
-        }
     }
 }

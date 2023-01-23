@@ -18,26 +18,23 @@ namespace MMMaellon
 
     public class SmartObjectSyncEditor : Editor
     {
-        public static void SetupSelectedSmartObjectSync(SmartObjectSync sync)
+        public static void SetupSmartObjectSync(SmartObjectSync sync)
         {
             if (sync)
             {
                 SerializedObject serializedSync = new SerializedObject(sync);
                 serializedSync.FindProperty("pickup").objectReferenceValue = sync.GetComponent<VRC_Pickup>();
                 serializedSync.FindProperty("rigid").objectReferenceValue = sync.GetComponent<Rigidbody>();
-                foreach (SmartObjectSyncHelper tempHelper in sync.GetComponents<SmartObjectSyncHelper>())
+
+                if (!sync.helper)
                 {
-                    if (tempHelper)
-                    {
-                        DestroyImmediate(tempHelper);
-                    }
+                    //we need to create the helper
+                    sync.helper = UdonSharpComponentExtensions.AddUdonSharpComponent<SmartObjectSyncHelper>(sync.gameObject);
+                    SerializedObject serializedHelper = new SerializedObject(sync.helper);
+                    serializedHelper.FindProperty("sync").objectReferenceValue = sync;
+                    serializedHelper.ApplyModifiedProperties();
+                    serializedSync.FindProperty("helper").objectReferenceValue = sync.helper;
                 }
-                //we need to create the helper
-                sync.helper = UdonSharpComponentExtensions.AddUdonSharpComponent<SmartObjectSyncHelper>(sync.gameObject);
-                SerializedObject serializedHelper = new SerializedObject(sync.helper);
-                serializedHelper.FindProperty("sync").objectReferenceValue = sync;
-                serializedHelper.ApplyModifiedProperties();
-                serializedSync.FindProperty("helper").objectReferenceValue = sync.helper;
                 if (VRC_SceneDescriptor.Instance)
                 {
                     serializedSync.FindProperty("respawn_height").floatValue = VRC_SceneDescriptor.Instance.RespawnHeightY;
@@ -49,36 +46,89 @@ namespace MMMaellon
                 Debug.LogFormat("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
             }
         }
+
+        public static void SetupSelectedSmartObjectSyncs()
+        {
+            bool syncFound = false;
+            foreach (SmartObjectSync sync in Selection.GetFiltered<SmartObjectSync>(SelectionMode.Editable))
+            {
+                syncFound = true;
+                SetupSmartObjectSync(sync);
+            }
+
+            if (syncFound)
+            {
+                Debug.LogFormat("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
+            }
+        }
         public override void OnInspectorGUI()
         {
-            SmartObjectSync sync = (SmartObjectSync)target;
-            bool setupNeeded = false;
-            if (sync)
+            int syncCount = 0;
+            int pickupSetupCount = 0;
+            int rigidSetupCount = 0;
+            int respawnYSetupCount = 0;
+            int helperSetupCount = 0;
+            foreach (SmartObjectSync sync in Selection.GetFiltered<SmartObjectSync>(SelectionMode.Editable))
             {
-                if (sync.pickup == null && sync.GetComponent<VRC_Pickup>() != null)
+                if (sync)
                 {
-                    setupNeeded = true;
-                    EditorGUILayout.HelpBox(@"Object has a VRC_Pickup component, but no VRC_Pickup was defined in SmartObjectSync", MessageType.Warning);
-                }
-                if (sync.rigid == null && sync.GetComponent<Rigidbody>() != null)
-                {
-                    setupNeeded = true;
-                    EditorGUILayout.HelpBox(@"Object has a RigidBody component, but no Rigidbody was defined in SmartObjectSync", MessageType.Warning);
-                }
-                if (VRC_SceneDescriptor.Instance != null && VRC_SceneDescriptor.Instance.RespawnHeightY != sync.respawn_height)
-                {
-                    setupNeeded = true;
-                    EditorGUILayout.HelpBox(@"Respawn Height is different from the scene's", MessageType.Info);
-                }
-                if (sync.helper == null)
-                {
-                    setupNeeded = true;
-                    EditorGUILayout.HelpBox(@"Helper not set up", MessageType.Warning);
+                    syncCount++;
+                    if (sync.pickup == null && sync.GetComponent<VRC_Pickup>() != null)
+                    {
+                        pickupSetupCount++;
+                    }
+                    if (sync.rigid == null && sync.GetComponent<Rigidbody>() != null)
+                    {
+                        rigidSetupCount++;
+                    }
+                    if (VRC_SceneDescriptor.Instance != null && VRC_SceneDescriptor.Instance.RespawnHeightY != sync.respawn_height)
+                    {
+                        respawnYSetupCount++;
+                    }
+                    if (sync.helper == null)
+                    {
+                        helperSetupCount++;
+                    }
                 }
             }
-            if (setupNeeded && GUILayout.Button(new GUIContent("Auto Setup")))
+            if ((pickupSetupCount > 0 || rigidSetupCount > 0 || respawnYSetupCount > 0 || helperSetupCount > 0))
             {
-                SetupSelectedSmartObjectSync(sync);
+                if (pickupSetupCount == 1)
+                {
+                    EditorGUILayout.HelpBox(@"Object has a VRC_Pickup component, but no VRC_Pickup was defined in SmartObjectSync", MessageType.Warning);
+                }
+                else if (pickupSetupCount > 1)
+                {
+                    EditorGUILayout.HelpBox(pickupSetupCount.ToString() + @" Objects have VRC_Pickup components, but no VRC_Pickup was defined in SmartObjectSync", MessageType.Warning);
+                }
+                if (rigidSetupCount == 1)
+                {
+                    EditorGUILayout.HelpBox(@"Object has a RigidBody component, but no Rigidbody was defined in SmartObjectSync", MessageType.Warning);
+                }
+                else if (rigidSetupCount > 1)
+                {
+                    EditorGUILayout.HelpBox(rigidSetupCount.ToString() + @" Objects have RigidBody components, but no RigidBody was defined in SmartObjectSync", MessageType.Warning);
+                }
+                if (respawnYSetupCount == 1)
+                {
+                    EditorGUILayout.HelpBox(@"Respawn Height is different from the scene's", MessageType.Info);
+                }
+                else if (respawnYSetupCount > 1)
+                {
+                    EditorGUILayout.HelpBox(respawnYSetupCount.ToString() + @" Objects have a Respawn Height that is different from the scene's", MessageType.Info);
+                }
+                if (helperSetupCount == 1)
+                {
+                    EditorGUILayout.HelpBox(@"Helper not set up", MessageType.Warning);
+                }
+                else if (helperSetupCount > 1)
+                {
+                    EditorGUILayout.HelpBox(helperSetupCount.ToString() + @" Helpers not set up", MessageType.Warning);
+                }
+                if (GUILayout.Button(new GUIContent("Auto Setup")))
+                {
+                    SetupSelectedSmartObjectSyncs();
+                }
             }
             EditorGUILayout.Space();
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
@@ -96,7 +146,8 @@ namespace MMMaellon
     public class SmartObjectSync : UdonSharpBehaviour
     {
         public bool printDebugMessages = false;
-        public bool takeOwnershipOnCollision = true;
+        public bool takeOwnershipOfOtherObjectsOnCollision = true;
+        public bool allowOthersToTakeOwnershipOnCollision = true;
 
         [HideInInspector]
         public SmartObjectSyncHelper helper;
@@ -119,7 +170,7 @@ namespace MMMaellon
         public Vector3 _spin;
         
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(state))]
-        public int _state;
+        public int _state = STATE_TELEPORTING;
 
 
 
@@ -145,7 +196,7 @@ namespace MMMaellon
         [System.NonSerialized, FieldChangeCallback(nameof(lastSync))]
         public float _lastSync = -1001f;
         [System.NonSerialized]
-        public float syncProgress = 0f;
+        public float lerpProgress = 0f;
         [System.NonSerialized]
         public Vector3 posOnSync;
         [System.NonSerialized]
@@ -174,7 +225,8 @@ namespace MMMaellon
             set
             {
                 _pos = value;
-                RequestSerialization();
+                
+                Synchronize();
             }
         }
         public Quaternion rot
@@ -183,7 +235,7 @@ namespace MMMaellon
             set
             {
                 _rot = value;
-                RequestSerialization();
+                Synchronize();
             }
         }
         public Vector3 vel
@@ -192,7 +244,7 @@ namespace MMMaellon
             set
             {
                 _vel = value;
-                RequestSerialization();
+                Synchronize();
             }
         }
         public Vector3 spin
@@ -201,9 +253,12 @@ namespace MMMaellon
             set
             {
                 _spin = value;
-                RequestSerialization();
+                Synchronize();
             }
         }
+
+        [System.NonSerialized]
+        public int lastState = 0;
         public int state
         {
             get => _state;
@@ -213,20 +268,18 @@ namespace MMMaellon
                 {
                     pickup.Drop();
                 }
+                lastState = _state;
                 _state = value;
 
-                if (owner != null && owner.isLocal)
+                if (Utilities.IsValid(owner) && owner.isLocal)
                 {
-                    RequestSerialization();
-                    CalcParentTransform();
-                    if (state != STATE_TELEPORTING)
-                    {
-                        //if we're teleporting we set the transforms before we requested serialization
-                        _pos = CalcPos();
-                        _rot = CalcRot();
-                        _vel = CalcVel();
-                        _spin = CalcSpin();
-                    }
+                    Synchronize();
+                    // CalcParentTransform();
+                    // pos = CalcPos();
+                    // _print("set pos from state " + pos.y);
+                    // rot = CalcRot();
+                    // vel = CalcVel();
+                    // spin = CalcSpin();
                 }
 
                 switch (value)
@@ -287,18 +340,24 @@ namespace MMMaellon
             {
                 if (_owner != value)
                 {
-                    _print("new owner " + (owner == null ? "null" : owner.displayName));
+                    _print("new owner: " + (!Utilities.IsValid(value) ? "invalid" : value.displayName));
+                    // if (_owner != value)
+                    // {
+                    //     RecordSyncTransforms();
+                    // }
                     _owner = value;
-                    if (_owner == null || !_owner.isLocal)
+                    // lastSync = -1001f;
+                    lastOwnershipChange = Time.timeSinceLevelLoad;
+                    if (!Utilities.IsValid(_owner) || !_owner.isLocal)
                     {
                         if (pickup)
                         {
                             pickup.Drop();
                         }
                     }
-                    if (helper)
+                    else
                     {
-                        helper.enabled = true;
+                        WakeUp();
                     }
                 }
             }
@@ -307,9 +366,10 @@ namespace MMMaellon
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
         public void Reset()
         {
-            SmartObjectSyncEditor.SetupSelectedSmartObjectSync(this);
+            SmartObjectSyncEditor.SetupSmartObjectSync(this);
         }
 #endif
+        bool startRan;
         public void Start()
         {
             if (!helper)
@@ -329,16 +389,41 @@ namespace MMMaellon
             }
             spawnPos = setSpawnFromLocalTransform ? transform.localPosition : transform.position;
             spawnRot = setSpawnFromLocalTransform ? transform.localRotation : transform.rotation;
-            _owner = Networking.GetOwner(gameObject);
-            if (owner != null && owner.isLocal)
+            owner = Networking.GetOwner(gameObject);
+            //setting owner also turns on the helper
+            pos = transform.position;
+            _print("set pos from start " + pos.y);
+            rot = transform.rotation;
+            if (Utilities.IsValid(owner) && owner.isLocal)
             {
-                state = STATE_SLEEPING;
-                pos = transform.position;
-                rot = transform.rotation;
+                RequestSerialization();
             }
-            if (helper)
+            startRan = true;
+        }
+
+        public void OnEnable()
+        {
+            if (startRan)
             {
-                helper.enabled = true;
+                if (helper)
+                {
+                    helper.enabled = true;
+                }
+                posOnSync = pos;
+                rotOnSync = rot;
+                velOnSync = vel;
+                spinOnSync = spin;
+                CalcParentTransform();
+                MoveToSyncedTransform();
+
+
+                _print("OnEnable - trying to find owner");
+                owner = Networking.GetOwner(gameObject);
+                _print("owner is null " + (!Utilities.IsValid(owner)));
+                if (Utilities.IsValid(owner))
+                {
+                    _print("owner: " + owner.displayName);
+                }
             }
         }
 
@@ -362,6 +447,10 @@ namespace MMMaellon
 
         public void Respawn()
         {
+            if (!Utilities.IsValid(owner) || !owner.isLocal)
+            {
+                Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            }
             if (setSpawnFromLocalTransform && transform.parent != null)
             {
                 TeleportTo(transform.parent.TransformPoint(spawnPos), transform.parent.rotation * spawnRot, Vector3.zero, Vector3.zero);
@@ -371,11 +460,27 @@ namespace MMMaellon
                 TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
             }
         }
+        // public void Respawn()
+        // {
+        //     if (!Utilities.IsValid(owner) || !owner.isLocal)
+        //     {
+        //         return;
+        //     }
+        //     if (setSpawnFromLocalTransform && transform.parent != null)
+        //     {
+        //         TeleportTo(transform.parent.TransformPoint(spawnPos), transform.parent.rotation * spawnRot, Vector3.zero, Vector3.zero);
+        //     }
+        //     else
+        //     {
+        //         TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
+        //     }
+        // }
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
             state = STATE_TELEPORTING;
             pos = newPos;
+            _print("set pos from teleport " + pos.y);
             rot = newRot;
             vel = newVel;
             spin = newSpin;
@@ -393,40 +498,81 @@ namespace MMMaellon
             //we set the last sync time here and in ondeserialization
             lastSync = Time.timeSinceLevelLoad;
             CalcParentTransform();
-            if (state != STATE_TELEPORTING)
-            {
-                //if we're teleporting we set the transforms before we requested serialization
-                _pos = CalcPos();
-                _rot = CalcRot();
-                _vel = CalcVel();
-                _spin = CalcSpin();
-            }
+            pos = CalcPos();
+            _print("set pos from OnPreSerialization " + pos.y);
+            rot = CalcRot();
+            vel = IsAttachedToPlayer() ? Vector3.zero : CalcVel();
+            spin = IsAttachedToPlayer() ? Vector3.zero : CalcSpin();
+
+            _print("pos at end of OnPreSerialization: " + pos.y);
         }
 
         public override void OnDeserialization()
         {
             base.OnDeserialization();
             _print("OnDeserialization");
+            RecordSyncTransforms();
+            lastSync = Time.timeSinceLevelLoad;
+            _print("pos at end of OnDeserialization: " + pos.y);
+        }
+
+        public void RecordSyncTransforms()
+        {
             CalcParentTransform();
             posOnSync = CalcPos();
             rotOnSync = CalcRot();
-            velOnSync = CalcVel();
-            spinOnSync = CalcSpin();
-            lastSync = Time.timeSinceLevelLoad;
-            unsyncedCollisionCount = 0;
+            velOnSync = LastStateIsAttachedToPlayer() ? Vector3.zero : CalcVel();
+            spinOnSync = LastStateIsAttachedToPlayer() ? Vector3.zero : CalcSpin();
         }
+
+        float resyncDelay = 0f;
+        float lastSyncFail = -1001f;
 
         public override void OnPostSerialization(SerializationResult result)
         {
+            _print("OnPostSerialization");
             if (!result.success)
             {
-                _printErr("failed to sync - retrying");
-                SendCustomEventDelayedSeconds(nameof(Serialize), Random.Range(0.1f, 2f));
+                OnSerializationFailure();
+            }
+            else
+            {
+                resyncDelay = 0;
             }
         }
 
-        public void Serialize()
+        public void OnSerializationFailure()
         {
+            //this gets called only when there's a problem with syncing
+            //we have to be careful about how we move forward
+            _printErr("OnSerializationFailure");
+            if (resyncDelay > 0 && lastSyncFail + resyncDelay > Time.timeSinceLevelLoad)
+            {
+                _printErr("sync failure came too soon after last sync failure");
+                //means that we already retried a failed sync and are just waiting for the Request to go through
+                return;
+            }
+            //we double the last delay in an attempt to recreate exponential backoff
+            resyncDelay = resyncDelay == 0 ? 0.1f : (resyncDelay * 2);
+            lastSyncFail = Time.timeSinceLevelLoad;
+            SendCustomEventDelayedSeconds(nameof(Synchronize), resyncDelay);
+        }
+
+        public void Synchronize()
+        {
+            if (!Utilities.IsValid(owner) || !owner.isLocal)
+            {
+                return;
+            }
+            if (resyncDelay > 0 && lastSyncFail + resyncDelay > Time.timeSinceLevelLoad + 0.1f)//0.1 is for floating point errors
+            {
+                _printErr("sync request came too soon after last sync failure");
+                _printErr("lastSyncFail: " + lastSyncFail);
+                _printErr("resyncDelay: " + resyncDelay);
+                _printErr("Time.timeSinceLevelLoad: " + Time.timeSinceLevelLoad);
+                return;
+            }
+
             RequestSerialization();
         }
 
@@ -447,20 +593,73 @@ namespace MMMaellon
             return rigid == null ? Vector3.zero : rigid.angularVelocity;
         }
 
+
+        public bool LerpDelayOver()
+        {
+            return lastSync + lerpTime < Time.timeSinceLevelLoad;
+        }
+
         public override void OnOwnershipTransferred(VRCPlayerApi player)
         {
-            base.OnOwnershipTransferred(player);
+            _print("OnOwnershipTransferred");
+            _print("new player is null: " + (player == null));
+            if (player != null)
+            {
+                _print("player name: " + player.displayName);
+            }
             owner = player;
-            if (IsAttachedToPlayer() && owner != null && owner.isLocal)
+            // if (LerpDelayOver())
+            // {
+                
+            // }
+
+            if (IsAttachedToPlayer() && Utilities.IsValid(owner) && owner.isLocal)
             {
                 state = STATE_LERPING;
             }
+            // base.OnOwnershipTransferred(player);
+        }
+
+        public void Sleep()
+        {
+            _print("sleep");
+            if (rigid)
+            {
+                // rigid.velocity = Vector3.zero;
+                // rigid.angularVelocity = Vector3.zero;
+                // rigid.constraints = RigidbodyConstraints.FreezeAll;
+                // rigid.Sleep();
+                // rigid.drag = 1000f;
+            }
+        }
+
+        public void WakeUp()
+        {
+            _print("wake");
+            if (rigid)
+            {
+                // rigid.constraints = RigidbodyConstraints.None;
+                // rigid.WakeUp();
+                // rigid.drag = 0f;
+            }
+        }
+
+        float lastOwnershipChange = -1001f;
+        public void TakeOwnership()
+        {
+            if (Networking.IsClogged)
+            {
+                //Let them cook
+                return;
+            }
+            _print("TakeOwnership");
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            RequestSerialization();
         }
 
         public override void OnPickup()
         {
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
-            owner = Networking.LocalPlayer;
+            TakeOwnership();
             if (pickup)
             {
                 if (pickup.currentHand == VRC_Pickup.PickupHand.Left)
@@ -474,15 +673,9 @@ namespace MMMaellon
         }
         public override void OnDrop()
         {
-            if (owner == null || !owner.isLocal)
+            if (!Utilities.IsValid(owner) || !owner.isLocal)
             {
                 return;
-            }
-            
-            //it takes a few frames for the rigid to take on a velocity, we'll hold off if it's not kinematic and wait for a velocity
-            if (rigid)
-            {
-                rigid.WakeUp();
             }
             //if we're attaching it to us, leave it attached
             state = state < 0 || state == STATE_ATTACHED_TO_PLAYSPACE ? state : STATE_LERPING;
@@ -492,18 +685,22 @@ namespace MMMaellon
         {
             return !(state >= STATE_SLEEPING && state <= STATE_FALLING);
         }
+        public bool LastStateIsAttachedToPlayer()
+        {
+            return !(state >= STATE_SLEEPING && state <= STATE_FALLING);
+        }
 
 
 
-        public void CalcSyncProgress()
+        public void CalcLerpProgress()
         {
             if (lastSync <= 0 || lerpTime <= 0 || (Time.timeSinceLevelLoad - lastSync) >= lerpTime || state == STATE_TELEPORTING)
             {
-                syncProgress = 1.0f;
+                lerpProgress = 1.0f;
             }
             else
             {
-                syncProgress = (Time.timeSinceLevelLoad - lastSync) / lerpTime;
+                lerpProgress = (Time.timeSinceLevelLoad - lastSync) / lerpTime;
             }
         }
 
@@ -517,16 +714,6 @@ namespace MMMaellon
                         parentPosCache = Vector3.zero;
                         parentRotCache = Quaternion.identity;
                         //slowly lerp to the resting spot
-                        if (syncProgress >= 1)
-                        {
-                            //we have lerped all the way to the sleeping position
-                            if (rigid)
-                            {
-                                rigid.velocity = Vector3.zero;
-                                rigid.angularVelocity = Vector3.zero;
-                                rigid.Sleep();
-                            }
-                        }
                         break;
                     }
                 case (STATE_TELEPORTING):
@@ -544,7 +731,7 @@ namespace MMMaellon
                     }
                 case (STATE_LEFT_HAND_HELD):
                     {
-                        if (owner != null)
+                        if (Utilities.IsValid(owner))
                         {
                             parentPosCache = owner.GetBonePosition(HumanBodyBones.LeftHand);
                             parentRotCache = owner.GetBoneRotation(HumanBodyBones.LeftHand);
@@ -556,7 +743,7 @@ namespace MMMaellon
                     }
                 case (STATE_RIGHT_HAND_HELD):
                     {
-                        if (owner != null)
+                        if (Utilities.IsValid(owner))
                         {
                             parentPosCache = owner.GetBonePosition(HumanBodyBones.RightHand);
                             parentRotCache = owner.GetBoneRotation(HumanBodyBones.RightHand);
@@ -568,7 +755,7 @@ namespace MMMaellon
                     }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
-                        if (owner != null)
+                        if (Utilities.IsValid(owner))
                         {
                             parentPosCache = owner.GetPosition();
                             parentRotCache = owner.GetRotation();
@@ -577,7 +764,7 @@ namespace MMMaellon
                     }
                 default:
                     {
-                        if (owner != null && state < STATE_SLEEPING)
+                        if (Utilities.IsValid(owner) && state < STATE_SLEEPING)
                         {
                             parentPosCache = owner.GetBonePosition((HumanBodyBones)(-1 - state));
                             parentRotCache = owner.GetBoneRotation((HumanBodyBones)(-1 - state));
@@ -592,15 +779,42 @@ namespace MMMaellon
                     }
             }
         }
+
+
+        public bool ObjectMoved()
+        {
+            CalcParentTransform();
+            return Vector3.Distance(pos, CalcPos()) > 0.001f || Quaternion.Dot(rot, CalcRot()) < 0.99;
+        }
+        
         public void MoveToSyncedTransform()
         {
-            transform.position = !IsAttachedToPlayer() ? pos : parentPosCache + parentRotCache * pos;
-            transform.rotation = !IsAttachedToPlayer() ? rot : parentRotCache * rot;
-            if (rigid)
+            if (state == STATE_SLEEPING)
             {
-                rigid.WakeUp();
-                rigid.velocity = vel;
-                rigid.angularVelocity = spin;
+                //only update transform if it moved so that it'll hopefully fall asleep on its own
+                if (ObjectMoved())
+                {
+                    transform.position = pos;
+                    transform.rotation = rot;
+                }
+                else
+                {
+                    //The rigid body should eventually go to sleep here
+                }
+            } else if (IsAttachedToPlayer())
+            {
+                transform.position = parentPosCache + parentRotCache * pos;
+                transform.rotation = parentRotCache * rot;
+            } else
+            {
+                //no parent transform because we are not attached to a player
+                transform.position = pos;
+                transform.rotation = rot;
+                if (rigid)
+                {
+                    rigid.velocity = vel;
+                    rigid.angularVelocity = spin;
+                }
             }
         }
 
@@ -617,7 +831,7 @@ namespace MMMaellon
         Vector3 endSpin;
         public void LerpToSyncedTransform()
         {
-            lerpCache = Mathf.Clamp01(syncProgress);
+            lerpCache = Mathf.Clamp01(lerpProgress);
             if (lerpCache < 1.0)
             {
                 switch (state)
@@ -635,7 +849,7 @@ namespace MMMaellon
                     case (STATE_FALLING):
                         {
                             startVel = velOnSync;
-                            endVel = velOnSync + Physics.gravity * lerpTime;
+                            endVel = (rigid != null && rigid.useGravity) ? velOnSync + Physics.gravity * lerpTime : startVel;
                             startSpin = spinOnSync;
                             endSpin = spinOnSync;
                             break;
@@ -650,11 +864,11 @@ namespace MMMaellon
                         }
                 }
                 
-                posControl1 = (parentPosCache + parentRotCache * posOnSync) + startVel * lerpTime * syncProgress / 3f;
-                posControl2 = (parentPosCache + parentRotCache * pos) - endVel * lerpTime * (1 - syncProgress) / 3f;
+                posControl1 = (parentPosCache + parentRotCache * posOnSync) + startVel * lerpTime * lerpProgress / 3f;
+                posControl2 = (parentPosCache + parentRotCache * pos) - endVel * lerpTime * (1 - lerpProgress) / 3f;
 
-                rotControl1 = (parentRotCache * rotOnSync) * Quaternion.Euler(startSpin * lerpTime * syncProgress / 3f);
-                rotControl2 = (parentRotCache * rot) * Quaternion.Euler(-1 * endSpin * lerpTime * (1 - syncProgress) / 3f);
+                rotControl1 = (parentRotCache * rotOnSync) * Quaternion.Euler(startSpin * lerpTime * lerpProgress / 3f);
+                rotControl2 = (parentRotCache * rot) * Quaternion.Euler(-1 * endSpin * lerpTime * (1 - lerpProgress) / 3f);
 
                 transform.position = Vector3.Lerp(posControl1, posControl2, lerpCache);
                 transform.rotation = Quaternion.Slerp(rotControl1, rotControl2, lerpCache);
@@ -666,65 +880,90 @@ namespace MMMaellon
         }
 
         SmartObjectSync otherSync;
-        int unsyncedCollisionCount = 0;
         public void OnCollisionEnter(Collision other)
         {
-            if (owner == null || !owner.isLocal || rigid == null)
+            if (!Utilities.IsValid(owner) || rigid == null || rigid.isKinematic)
             {
-                if (state == STATE_SLEEPING && helper && rigid)
-                {
-                    //restart the lerp to the sleeping position to ensure we don't get knocked out of sync with what's been synced
-                    CalcParentTransform();
-                    posOnSync = CalcPos();
-                    rotOnSync = CalcRot();
-                    velOnSync = CalcVel();
-                    spinOnSync = CalcSpin();
-                    lastSync = Time.timeSinceLevelLoad;
-                    unsyncedCollisionCount++;
-                    if (unsyncedCollisionCount > 5 && Vector3.Distance(posOnSync, pos) > 0.1f)
-                    {
-                        _print("desync detected - requesting resync");
-                        //last network event didn't go through, and object is continually falling
-                        SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, nameof(Serialize));
-                    }
-                }
+                //we are bound to get collision events before the first network event
+                //we want local physics to take over in this situation so we return early
                 return;
             }
-            
+            // if (!owner.isLocal)
+            // {
+            //     if (lastSync < 0)
+            //     {
+            //         return;
+            //     }
+            //     if (state == STATE_SLEEPING && helper && rigid && rigid.IsSleeping())
+            //     {
+            //         //restart the lerp to the sleeping position to ensure we don't get knocked out of sync with what's been synced
+            //         CalcParentTransform();
+            //         posOnSync = CalcPos();
+            //         rotOnSync = CalcRot();
+            //         velOnSync = CalcVel();
+            //         spinOnSync = CalcSpin();
+            //         lastSync = Time.timeSinceLevelLoad;
+            //         // if (Vector3.Distance(posOnSync, pos) > 0.1f)//0.1 is an arbitrary small distance
+            //         // {
+            //         //     _print("desync detected - requesting resync");
+            //         //     //object got knocked out of place
+            //         //     SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, nameof(Synchronize));
+            //         // }
+            //     }
+            //     return;
+            // }
+
+            if (!owner.isLocal)
+            {
+                return;
+            }
             if (!IsAttachedToPlayer())
             {
                 state = STATE_LERPING;
             }
 
-            //check if we need to take ownership
-            if (!takeOwnershipOnCollision || other == null || other.collider == null)
-            {
-                return;
-            }
 
-            otherSync = other.collider.GetComponent<SmartObjectSync>();
-            if (otherSync == null || otherSync.IsAttachedToPlayer() || otherSync.rigid == null || otherSync.rigid.velocity.sqrMagnitude > rigid.velocity.sqrMagnitude)
+            if (!takeOwnershipOfOtherObjectsOnCollision || other == null || other.collider == null)
             {
                 return;
             }
-            Networking.SetOwner(owner, otherSync.gameObject);
+            otherSync = other.collider.GetComponent<SmartObjectSync>();
+            if (otherSync && otherSync.allowOthersToTakeOwnershipOnCollision && !otherSync.IsAttachedToPlayer() && otherSync.rigid && (IsAttachedToPlayer() || otherSync.state == STATE_SLEEPING || !otherSync.takeOwnershipOfOtherObjectsOnCollision || otherSync.rigid.velocity.sqrMagnitude < rigid.velocity.sqrMagnitude))
+            {
+                _printErr("taking ownership of " + otherSync.name);
+                otherSync.TakeOwnership();
+                otherSync.RequestSerialization();
+                // otherSync.owner = owner;
+                // otherSync.state = STATE_LERPING;
+                // otherSync.WakeUp();
+            }
         }
         public void OnCollisionExit(Collision other)
         {
-            if (owner == null || !owner.isLocal || rigid == null)
+            if (!Utilities.IsValid(owner) || rigid == null || rigid.isKinematic)
             {
-                if (state == STATE_SLEEPING && helper && rigid)
-                {
-                    //restart the lerp to the sleeping position to ensure we don't get knocked out of sync with what's been synced
-                    CalcParentTransform();
-                    posOnSync = CalcPos();
-                    rotOnSync = CalcRot();
-                    velOnSync = CalcVel();
-                    spinOnSync = CalcSpin();
-                    lastSync = Time.timeSinceLevelLoad;
-                }
+                //we are bound to get collision events before the first network event
+                //we want local physics to take over in this situation so we return early
                 return;
             }
+            // if (!owner.isLocal)
+            // {
+            //     if (lastSync < 0)
+            //     {
+            //         return;
+            //     }
+            //     if (state == STATE_SLEEPING && helper && rigid)
+            //     {
+            //         //restart the lerp to the sleeping position to ensure we don't get knocked out of sync with what's been synced
+            //         CalcParentTransform();
+            //         posOnSync = CalcPos();
+            //         rotOnSync = CalcRot();
+            //         velOnSync = CalcVel();
+            //         spinOnSync = CalcSpin();
+            //         lastSync = Time.timeSinceLevelLoad;
+            //     }
+            //     return;
+            // }
             if (!IsAttachedToPlayer())
             {
                 state = STATE_FALLING;
