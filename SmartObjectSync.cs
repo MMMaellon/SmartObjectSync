@@ -47,6 +47,39 @@ namespace MMMaellon
             }
         }
 
+        public static void SetupExtensions(SmartObjectSync sync)
+        {
+            if (sync)
+            {
+                SerializedObject serializedSync = new SerializedObject(sync);
+                SmartObjectSyncExtension[] extensions = sync.GetComponents<SmartObjectSyncExtension>();
+                serializedSync.FindProperty("extensions").ClearArray();
+                int extensionCounter = 0;
+                foreach (SmartObjectSyncExtension extension in extensions)
+                {
+                    if (extension)
+                    {
+                        SerializedObject serializedExtension = new SerializedObject(extension);
+                        serializedExtension.FindProperty("state").intValue = extensionCounter + SmartObjectSync.STATE_CUSTOM;
+                        serializedExtension.FindProperty("sync").objectReferenceValue = sync;
+                        serializedExtension.ApplyModifiedProperties();
+
+                        serializedSync.FindProperty("extensions").InsertArrayElementAtIndex(extensionCounter);
+                        serializedSync.FindProperty("extensions").GetArrayElementAtIndex(extensionCounter).objectReferenceValue = extension;
+                        
+                        extensionCounter++;
+                    }
+                }
+                serializedSync.ApplyModifiedProperties();
+                if (sync.printDebugMessages)
+                    Debug.LogFormat("[SmartObjectSync] {0} Extension Setup complete:\n{1} Extensions Setup", sync.name, extensions.Length);
+            }
+            else
+            {
+                Debug.LogFormat("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
+            }
+        }
+
         public static void SetupSelectedSmartObjectSyncs()
         {
             bool syncFound = false;
@@ -56,7 +89,7 @@ namespace MMMaellon
                 SetupSmartObjectSync(sync);
             }
 
-            if (syncFound)
+            if (!syncFound)
             {
                 Debug.LogFormat("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
             }
@@ -73,17 +106,21 @@ namespace MMMaellon
                 if (sync)
                 {
                     syncCount++;
-                    if (sync.pickup == null && sync.GetComponent<VRC_Pickup>() != null)
+                    if (sync.pickup != sync.GetComponent<VRC_Pickup>())
                     {
                         pickupSetupCount++;
                     }
-                    if (sync.rigid == null && sync.GetComponent<Rigidbody>() != null)
+                    if (sync.rigid != sync.GetComponent<Rigidbody>())
                     {
                         rigidSetupCount++;
                     }
                     if (VRC_SceneDescriptor.Instance != null && VRC_SceneDescriptor.Instance.RespawnHeightY != sync.respawn_height)
                     {
                         respawnYSetupCount++;
+                    }
+                    if (sync.helper == null)
+                    {
+                        helperSetupCount++;
                     }
                     if (sync.helper == null)
                     {
@@ -189,6 +226,7 @@ namespace MMMaellon
         public const int STATE_LEFT_HAND_HELD = 4;
         public const int STATE_RIGHT_HAND_HELD = 5;
         public const int STATE_ATTACHED_TO_PLAYSPACE = 6;
+        public const int STATE_CUSTOM = 7;
         //negative for attached to a human body bone where the absolute value is the int value of the HumanBodyBone enum + 1
         
         
@@ -264,12 +302,13 @@ namespace MMMaellon
             get => _state;
             set
             {
+                lastState = _state;
+                _state = value;
+                
                 if (pickup != null && value != STATE_LEFT_HAND_HELD && value != STATE_RIGHT_HAND_HELD)
                 {
                     pickup.Drop();
                 }
-                lastState = _state;
-                _state = value;
 
                 if (Utilities.IsValid(owner) && owner.isLocal)
                 {
@@ -280,6 +319,16 @@ namespace MMMaellon
                     // rot = CalcRot();
                     // vel = CalcVel();
                     // spin = CalcSpin();
+                }
+
+                if (GetExtension(lastState))
+                {
+                    GetExtension(lastState)._OnDeactivate();
+                }
+
+                if (GetExtension(value))
+                {
+                    GetExtension(value)._OnActivate();
                 }
 
                 switch (value)
@@ -321,7 +370,16 @@ namespace MMMaellon
                         }
                     default:
                         {
-                            _print("state: " + ((HumanBodyBones) (-1 - value)).ToString());
+                            if (value < 0)
+                            {
+                                _print("state: " + ((HumanBodyBones)(-1 - value)).ToString());
+                            } else if (GetExtension(value))
+                            {
+                                _print("state: Extension " + (value - STATE_CUSTOM).ToString());
+                            } else
+                            {
+                                _printErr("state: INVALID STATE");
+                            }
                             break;
                         }
                 }
@@ -361,6 +419,18 @@ namespace MMMaellon
                     }
                 }
             }
+        }
+
+        [HideInInspector]
+        public SmartObjectSyncExtension[] extensions = { };
+        
+        public SmartObjectSyncExtension GetExtension(int extensionState)
+        {
+            if (extensionState < STATE_CUSTOM || extensionState >= STATE_CUSTOM + extensions.Length)
+            {
+                return null;
+            }
+            return extensions[extensionState - STATE_CUSTOM];
         }
 
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
@@ -578,11 +648,11 @@ namespace MMMaellon
 
         public Vector3 CalcPos()
         {
-            return Quaternion.Inverse(parentRotCache) * (transform.position - parentPosCache);
+            return GetExtension(state) != null ? GetExtension(state)._CalcPosition() : Quaternion.Inverse(parentRotCache) * (transform.position - parentPosCache);
         }
         public Quaternion CalcRot()
         {
-            return Quaternion.Inverse(parentRotCache) * transform.rotation;
+            return GetExtension(state) != null ? GetExtension(state)._CalcRotation() : Quaternion.Inverse(parentRotCache) * transform.rotation;
         }
         public Vector3 CalcVel()
         {
@@ -678,23 +748,23 @@ namespace MMMaellon
                 return;
             }
             //if we're attaching it to us, leave it attached
-            state = state < 0 || state == STATE_ATTACHED_TO_PLAYSPACE ? state : STATE_LERPING;
+            state = (IsAttachedToPlayer() && state != STATE_LEFT_HAND_HELD && state != STATE_RIGHT_HAND_HELD) || (GetExtension(state) != null) ? state : STATE_LERPING;
         }
 
         public bool IsAttachedToPlayer()
         {
-            return !(state >= STATE_SLEEPING && state <= STATE_FALLING);
+            return state < 0 || state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_ATTACHED_TO_PLAYSPACE;
         }
         public bool LastStateIsAttachedToPlayer()
         {
-            return !(state >= STATE_SLEEPING && state <= STATE_FALLING);
+            return lastState < 0 || lastState == STATE_LEFT_HAND_HELD || lastState == STATE_RIGHT_HAND_HELD || lastState == STATE_ATTACHED_TO_PLAYSPACE;
         }
 
 
 
         public void CalcLerpProgress()
         {
-            if (lastSync <= 0 || lerpTime <= 0 || (Time.timeSinceLevelLoad - lastSync) >= lerpTime || state == STATE_TELEPORTING)
+            if (lastSync <= 0 || lerpTime <= 0 || (Time.timeSinceLevelLoad - lastSync) >= lerpTime || state == STATE_TELEPORTING || (GetExtension(state) != null && GetExtension(state).IgnoreLerping))
             {
                 lerpProgress = 1.0f;
             }
@@ -703,8 +773,6 @@ namespace MMMaellon
                 lerpProgress = (Time.timeSinceLevelLoad - lastSync) / lerpTime;
             }
         }
-
-        bool trackingMissing = false;
         public void CalcParentTransform()
         {
             switch (state)
@@ -774,6 +842,10 @@ namespace MMMaellon
                             if(!hasBones && owner.isLocal){
                                 state = STATE_ATTACHED_TO_PLAYSPACE;
                             }
+                        } else
+                        {
+                            parentPosCache = Vector3.zero;
+                            parentRotCache = Quaternion.identity;
                         }
                         break;
                     }
@@ -789,7 +861,19 @@ namespace MMMaellon
         
         public void MoveToSyncedTransform()
         {
-            if (state == STATE_SLEEPING)
+            _print("MoveToSyncedTransform");
+            if (GetExtension(state))
+            {
+                _print("MoveToSyncedTransform Extension");
+                transform.position = GetExtension(state)._CalcPosition();
+                transform.rotation = GetExtension(state)._CalcRotation();
+                if (rigid)
+                {
+                    rigid.velocity = vel;
+                    rigid.angularVelocity = spin;
+                }
+                return;
+            } else if (state == STATE_SLEEPING)
             {
                 //only update transform if it moved so that it'll hopefully fall asleep on its own
                 if (ObjectMoved())
@@ -831,8 +915,21 @@ namespace MMMaellon
         Vector3 endSpin;
         public void LerpToSyncedTransform()
         {
+            if (lerpProgress >= 1)
+            {
+                MoveToSyncedTransform();
+                return;
+            }
+            
             lerpCache = Mathf.Clamp01(lerpProgress);
-            if (lerpCache < 1.0)
+            if (GetExtension(state))
+            {
+                posControl1 = posOnSync;
+                posControl2 = GetExtension(state)._CalcPosition();
+
+                rotControl1 = rotOnSync;
+                rotControl2 = GetExtension(state)._CalcRotation();
+            } else
             {
                 switch (state)
                 {
@@ -849,7 +946,7 @@ namespace MMMaellon
                     case (STATE_FALLING):
                         {
                             startVel = velOnSync;
-                            endVel = (rigid != null && rigid.useGravity) ? velOnSync + Physics.gravity * lerpTime : startVel;
+                            endVel = (rigid != null && rigid.useGravity) ? velOnSync + Physics.gravity * lerpTime : velOnSync;
                             startSpin = spinOnSync;
                             endSpin = spinOnSync;
                             break;
@@ -863,20 +960,16 @@ namespace MMMaellon
                             break;
                         }
                 }
-                
-                posControl1 = (parentPosCache + parentRotCache * posOnSync) + startVel * lerpTime * lerpProgress / 3f;
-                posControl2 = (parentPosCache + parentRotCache * pos) - endVel * lerpTime * (1 - lerpProgress) / 3f;
 
-                rotControl1 = (parentRotCache * rotOnSync) * Quaternion.Euler(startSpin * lerpTime * lerpProgress / 3f);
-                rotControl2 = (parentRotCache * rot) * Quaternion.Euler(-1 * endSpin * lerpTime * (1 - lerpProgress) / 3f);
+                posControl1 = (parentPosCache + parentRotCache * posOnSync) + startVel * lerpTime * lerpCache / 3f;
+                posControl2 = (parentPosCache + parentRotCache * pos) - endVel * lerpTime * (1 - lerpCache) / 3f;
 
-                transform.position = Vector3.Lerp(posControl1, posControl2, lerpCache);
-                transform.rotation = Quaternion.Slerp(rotControl1, rotControl2, lerpCache);
+                rotControl1 = (parentRotCache * rotOnSync) * Quaternion.Euler(startSpin * lerpTime * lerpCache / 3f);
+                rotControl2 = (parentRotCache * rot) * Quaternion.Euler(-1 * endSpin * lerpTime * (1 - lerpCache) / 3f);
             }
-            else
-            {
-                MoveToSyncedTransform();
-            }
+
+            transform.position = Vector3.Lerp(posControl1, posControl2, lerpCache);
+            transform.rotation = Quaternion.Slerp(rotControl1, rotControl2, lerpCache);
         }
 
         SmartObjectSync otherSync;
@@ -917,7 +1010,7 @@ namespace MMMaellon
             {
                 return;
             }
-            if (!IsAttachedToPlayer())
+            if (!IsAttachedToPlayer() && GetExtension(state) == null)
             {
                 state = STATE_LERPING;
             }
@@ -964,7 +1057,7 @@ namespace MMMaellon
             //     }
             //     return;
             // }
-            if (!IsAttachedToPlayer())
+            if (!IsAttachedToPlayer() && GetExtension(state) == null)
             {
                 state = STATE_FALLING;
             }

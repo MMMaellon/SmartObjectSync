@@ -58,12 +58,20 @@ namespace MMMaellon
                 sync.LerpToSyncedTransform();
 
 
-                if (sync.lerpProgress >= 1 && !sync.IsAttachedToPlayer() && (sync.rigid == null || sync.rigid.isKinematic || sync.state != SmartObjectSync.STATE_SLEEPING || sync.rigid.IsSleeping()))
+                if (sync.lerpProgress >= 1)
                 {
                     //we no longer need to update every frame since we're already caught up
-                    //unless we're attached to a player, then we need to set the sync local to a body part of the player every frame
-                    sync._print("fell asleep");
-                    enabled = false;
+                    //The exception is if we're using extensions or if we're attached to a player
+                    //if the object is meant to be asleep, we wait for the rigidbody to report that it's asleep
+                    //this allows objects to float in the air if that's what was synced
+                    if (sync.GetExtension(sync.state) != null)
+                    {
+                        enabled = sync.GetExtension(sync.state).RunEveryFrameOnNonOwner;
+                    } else if (!sync.IsAttachedToPlayer() || (sync.state == SmartObjectSync.STATE_SLEEPING && ShouldBeSleeping()))
+                    {
+                        sync._printErr("fell asleep");
+                        enabled = false;
+                    }
                 }
                 return;
             } else
@@ -82,7 +90,7 @@ namespace MMMaellon
                                 break;
                             }
 
-                            if (ShouldBeSleeping())
+                            if (ShouldBeSleeping() || sync.state == SmartObjectSync.STATE_SLEEPING)
                             {
                                 if (sync.state != SmartObjectSync.STATE_SLEEPING)
                                 {
@@ -135,11 +143,15 @@ namespace MMMaellon
                         }
                     default:
                         {
-                            //if the sync is attached to the local player, then we have to move it local to our position just like the local clients do.
-                            //the difference being that we never lerp so syncProgress needs to be 1.0f
                             sync.lerpProgress = 1.0f;
                             sync.CalcParentTransform();
+                            //if the sync is attached to the local player, then we have to move it local to our position just like the local clients do.
+                            //the difference being that we never lerp so syncProgress needs to be 1.0f
                             sync.LerpToSyncedTransform();
+                            if (sync.GetExtension(sync.state))
+                            {
+                                enabled = sync.GetExtension(sync.state).RunEveryFrameOnOwner;
+                            }
                             break;
                         }
                 }
@@ -149,7 +161,7 @@ namespace MMMaellon
 
         public bool ShouldBeSleeping()
         {
-            return sync.state == SmartObjectSync.STATE_SLEEPING || sync.rigid == null || sync.rigid.isKinematic || sync.rigid.IsSleeping();
+            return sync.rigid == null || sync.rigid.isKinematic || sync.rigid.IsSleeping();
         }
         
         Vector3 gravityLessVelocity;
