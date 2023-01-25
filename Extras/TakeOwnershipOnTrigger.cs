@@ -23,7 +23,7 @@ namespace MMMaellon
                 {
                     if (pickupOwner.owner.isLocal)
                     {
-                        puck.TakeOwnership();
+                        puck.TakeOwnership(true);
                     } else
                     {
                         //Slow down
