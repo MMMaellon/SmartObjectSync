@@ -19,6 +19,11 @@ namespace MMMaellon
             if (target)
                 target.hideFlags = SmartObjectSyncEditor.hideHelperComponents ? HideFlags.HideInInspector : HideFlags.None;
         }
+        public override void OnInspectorGUI()
+        {
+            if (target && UdonSharpEditor.UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            base.OnInspectorGUI();
+        }
     }
 }
 
@@ -34,11 +39,13 @@ namespace MMMaellon
         public Vector3 startVel;
         public Vector3 startSpin;
 
+        public Vector3 endPos;
+        public Quaternion endRot;
+
+        public bool interpolationEnded = false;
+
         public void Start()
         {
-            InterpolateOnOwner = false;
-            InterpolateAfterInterpolationPeriod = true;
-            ExitStateOnOwnershipTransfer = false;
         }
 
         public override void OnEnterState()
@@ -53,13 +60,15 @@ namespace MMMaellon
 
         public override void OnInterpolationStart()
         {
+            interpolationEnded = false;
             startPos = transform.position;
             startRot = transform.rotation;
             if (sync.rigid && !sync.rigid.isKinematic)
             {
                 startVel = sync.rigid.velocity;
                 startSpin = sync.rigid.angularVelocity;
-            } else
+            }
+            else
             {
                 startVel = Vector3.zero;
                 startSpin = Vector3.zero;
@@ -67,19 +76,41 @@ namespace MMMaellon
         }
         public override void Interpolate(float interpolation)
         {
-            transform.position = sync.HermiteInterpolatePosition(startPos, startVel, sync.pos, sync.vel, interpolation);
-            transform.rotation = sync.HermiteInterpolateRotation(startRot, startSpin, sync.rot, sync.spin, interpolation);
+            if (interpolationEnded || sync.IsLocalOwner())
+            {
+                return;
+            }
+            transform.position = sync.HermiteInterpolatePosition(startPos, startVel, sync.pos, Vector3.zero, interpolation);
+            transform.rotation = sync.HermiteInterpolateRotation(startRot, startSpin, sync.rot, Vector3.zero, interpolation);
+            
+            //because of weird floating point precision errors, it makes sense to note down what the "real" ending transform is
+            endPos = transform.position;
+            endRot = transform.rotation;
         }
 
-        public override void OnInterpolationEnd()
+        public override bool OnInterpolationEnd()
         {
-            startPos = sync.pos;
-            startRot = sync.rot;
-            if (sync.rigid && !sync.rigid.isKinematic)
+            interpolationEnded = true;
+            if (sync.IsLocalOwner() || sync.rigid == null || sync.rigid.isKinematic || sync.rigid.IsSleeping())
             {
+                return false;
+            }
+
+            sync._print("is sleeping: " + sync.rigid.IsSleeping());
+
+            //only update positions if we're not already where we should be
+            //if there's a frame where we don't set the position, there's a possibility of the rigidbody falling asleep which we want
+            if (ObjectMoved())
+            {
+                transform.position = sync.pos;
+                transform.rotation = sync.rot;
+                endPos = transform.position;
+                endRot = transform.rotation;
                 sync.rigid.velocity = Vector3.zero;
                 sync.rigid.angularVelocity = Vector3.zero;
             }
+            sync.rigid.Sleep();
+            return true;
         }
 
         public override void OnSmartObjectSerialize()
@@ -88,6 +119,11 @@ namespace MMMaellon
             sync.rot = transform.rotation;
             sync.vel = Vector3.zero;
             sync.spin = Vector3.zero;
+        }
+
+        public bool ObjectMoved()
+        {
+            return endPos != transform.position || endRot != transform.rotation;
         }
     }
 }

@@ -21,10 +21,6 @@ namespace MMMaellon
         [HideInInspector]
         public SmartObjectSync sync;
 
-        public bool InterpolateOnOwner = false;
-        public bool InterpolateAfterInterpolationPeriod = false;
-        public bool ExitStateOnOwnershipTransfer = true;
-
         public void EnterState()
         {
             if (sync && Utilities.IsValid(sync.owner))
@@ -53,21 +49,24 @@ namespace MMMaellon
         public abstract void OnExitState();
 
         // Summary:
-        //     The owner executes this command when serializing data to the other players.
-        //     You should override this function to set all the synced variables that other players need.
+        //     The owner executes this command when serializing data to the other players
+        //     You should override this function to set all the synced variables that other players need
         public abstract void OnSmartObjectSerialize();
 
-        /*
-        Non-owners execute this function right when they receive data from the owner
-        */
+
+        // Summary:
+        //     Non-owners execute this command when they receive data from the owner and begin interpolating towards the synced data
         public abstract void OnInterpolationStart();
-        /*
-        Return what the global rotation of the object should be.
-        */
+
+        // Summary:
+        //     All players execute this command during the interpolation period. The interpolation period for owners is one frame
+        //     the 'interpolation' parameter is a value between 0.0 and 1.0 representing how far along the interpolation period we are
         public abstract void Interpolate(float interpolation);
-        /*
-        Return what the global rotation of the object should be.
-        */
-        public abstract void OnInterpolationEnd();
+
+        // Summary:
+        //     All players execute once thie at the end of the interpolation period
+        //     Return true to extend the interpolation period by another frame
+        //     Return false to end the interpolation period and disable the update loop for optimization
+        public abstract bool OnInterpolationEnd();
     }
 }

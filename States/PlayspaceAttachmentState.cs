@@ -20,6 +20,11 @@ namespace MMMaellon
             if (target)
                 target.hideFlags = SmartObjectSyncEditor.hideHelperComponents ? HideFlags.HideInInspector : HideFlags.None;
         }
+        public override void OnInspectorGUI()
+        {
+            if (target && UdonSharpEditor.UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            base.OnInspectorGUI();
+        }
     }
 }
 
@@ -33,9 +38,6 @@ namespace MMMaellon
 
         void Start()
         {
-            InterpolateOnOwner = false;
-            InterpolateAfterInterpolationPeriod = false;
-            ExitStateOnOwnershipTransfer = false;
         }
 
         public override void OnEnterState()
@@ -57,9 +59,9 @@ namespace MMMaellon
         {
 
         }
-        public override void OnInterpolationEnd()
+        public override bool OnInterpolationEnd()
         {
-
+            return false;
         }
 
         public override void OnSmartObjectSerialize()

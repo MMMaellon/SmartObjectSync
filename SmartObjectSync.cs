@@ -260,6 +260,11 @@ namespace MMMaellon
         }
         public override void OnInspectorGUI()
         {
+
+            foreach (SmartObjectSyncHelper sync in Selection.GetFiltered<SmartObjectSyncHelper>(SelectionMode.Unfiltered))
+            {
+                sync.hideFlags = HideFlags.None;
+            }
             int syncCount = 0;
             int pickupSetupCount = 0;
             int rigidSetupCount = 0;
@@ -399,17 +404,17 @@ namespace MMMaellon
         public Rigidbody rigid;
         public float lerpTime = 0.1f;
 
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(pos))]
-        public Vector3 _pos;
+        [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
+        public Vector3 pos;
         
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(rot))]
-        public Quaternion _rot;
+        [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
+        public Quaternion rot;
         
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(vel))]
-        public Vector3 _vel;
+        [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
+        public Vector3 vel;
         
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(spin))]
-        public Vector3 _spin;
+        [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
+        public Vector3 spin;
         
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(state))]
         public int _state = STATE_TELEPORTING;
@@ -457,43 +462,6 @@ namespace MMMaellon
         public Vector3 velOnSync;
         [System.NonSerialized]
         public Vector3 spinOnSync;
-        public Vector3 pos
-        {
-            get => _pos;
-            set
-            {
-                _pos = value;
-                
-                Synchronize();
-            }
-        }
-        public Quaternion rot
-        {
-            get => _rot;
-            set
-            {
-                _rot = value;
-                Synchronize();
-            }
-        }
-        public Vector3 vel
-        {
-            get => _vel;
-            set
-            {
-                _vel = value;
-                Synchronize();
-            }
-        }
-        public Vector3 spin
-        {
-            get => _spin;
-            set
-            {
-                _spin = value;
-                Synchronize();
-            }
-        }
 
         [System.NonSerialized]
         public int lastState = 0;
@@ -502,81 +470,22 @@ namespace MMMaellon
             get => _state;
             set
             {
-                if (_state != value)
-                {
-                    activeState.OnExitState();
-                }
-                
-                lastState = _state;
+                activeState.OnExitState();
                 _state = value;
-                
-                if (_state != value)
+                lastState = _state;
+                activeState.OnEnterState();
+
+                if (pickup && pickup.IsHeld && value != STATE_LEFT_HAND_HELD && value != STATE_RIGHT_HAND_HELD)
                 {
-                    activeState.OnEnterState();
-                }
-                
-                if (pickup != null && value != STATE_LEFT_HAND_HELD && value != STATE_RIGHT_HAND_HELD)
-                {
+                    //no ownership check because there's another pickup.Drop() when ownership is transferred
                     pickup.Drop();
                 }
-
                 if (IsLocalOwner())
                 {
                     RequestSerialization();
                 }
 
-                switch (value)
-                {
-                    case (STATE_SLEEPING):
-                        {
-                            _print("state: STATE_SLEEPING");
-                            break;
-                        }
-                    case (STATE_TELEPORTING):
-                        {
-                            _print("state: STATE_TELEPORTING");
-                            break;
-                        }
-                    case (STATE_LERPING):
-                        {
-                            _print("state: STATE_LERPING");
-                            break;
-                        }
-                    case (STATE_FALLING):
-                        {
-                            _print("state: STATE_FALLING");
-                            break;
-                        }
-                    case (STATE_LEFT_HAND_HELD):
-                        {
-                            _print("state: STATE_LEFT_HAND_HELD");
-                            break;
-                        }
-                    case (STATE_RIGHT_HAND_HELD):
-                        {
-                            _print("state: STATE_RIGHT_HAND_HELD");
-                            break;
-                        }
-                    case (STATE_ATTACHED_TO_PLAYSPACE):
-                        {
-                            _print("state: STATE_ATTACHED_TO_PLAYSPACE");
-                            break;
-                        }
-                    default:
-                        {
-                            if (value < 0)
-                            {
-                                _print("state: " + ((HumanBodyBones)(-1 - value)).ToString());
-                            } else if (activeState)
-                            {
-                                _print("state: Custom State " + (value - STATE_CUSTOM).ToString());
-                            } else
-                            {
-                                _printErr("state: INVALID STATE");
-                            }
-                            break;
-                        }
-                }
+                _print("STATE: " + StateToString(value));
             }
         }
 
@@ -663,245 +572,221 @@ namespace MMMaellon
         }
 
 
-        [System.NonSerialized] public bool hasBones;
-        [System.NonSerialized] public Vector3 parentPosCache;
-        [System.NonSerialized] public Quaternion parentRotCache;
+        // [System.NonSerialized] public bool hasBones;
+        // [System.NonSerialized] public Vector3 parentPosCache;
+        // [System.NonSerialized] public Quaternion parentRotCache;
 
-        public void RecordSyncTransforms()
-        {
-            CalcParentTransform();
-            posOnSync = CalcPos();
-            rotOnSync = CalcRot();
-            velOnSync = LastStateIsAttachedToPlayer() ? Vector3.zero : CalcVel();
-            spinOnSync = LastStateIsAttachedToPlayer() ? Vector3.zero : CalcSpin();
-        }
-
-
-        public Vector3 CalcPos()
-        {
-            return Quaternion.Inverse(parentRotCache) * (transform.position - parentPosCache);
-        }
-        public Quaternion CalcRot()
-        {
-            return Quaternion.Inverse(parentRotCache) * transform.rotation;
-        }
-        public Vector3 CalcVel()
-        {
-            return rigid == null ? Vector3.zero : rigid.velocity;
-        }
-        public Vector3 CalcSpin()
-        {
-            return rigid == null ? Vector3.zero : rigid.angularVelocity;
-        }
+        // public void RecordSyncTransforms()
+        // {
+        //     CalcParentTransform();
+        //     posOnSync = CalcPos();
+        //     rotOnSync = CalcRot();
+        //     velOnSync = LastStateIsAttachedToPlayer() ? Vector3.zero : CalcVel();
+        //     spinOnSync = LastStateIsAttachedToPlayer() ? Vector3.zero : CalcSpin();
+        // }
 
 
-        public bool LerpDelayOver()
-        {
-            return interpolationStartTime + lerpTime < Time.timeSinceLevelLoad;
-        }
+        // public Vector3 CalcPos()
+        // {
+        //     return Quaternion.Inverse(parentRotCache) * (transform.position - parentPosCache);
+        // }
+        // public Quaternion CalcRot()
+        // {
+        //     return Quaternion.Inverse(parentRotCache) * transform.rotation;
+        // }
+        // public Vector3 CalcVel()
+        // {
+        //     return rigid == null ? Vector3.zero : rigid.velocity;
+        // }
+        // public Vector3 CalcSpin()
+        // {
+        //     return rigid == null ? Vector3.zero : rigid.angularVelocity;
+        // }
 
 
-        public override void OnPickup()
-        {
-            TakeOwnership(false);
-            if (pickup)
-            {
-                if (pickup.currentHand == VRC_Pickup.PickupHand.Left)
-                {
-                    state = STATE_LEFT_HAND_HELD;
-                } else if (pickup.currentHand == VRC_Pickup.PickupHand.Right)
-                {
-                    state = STATE_RIGHT_HAND_HELD;
-                }
-            }
-        }
-        public override void OnDrop()
-        {
-            if (IsLocalOwner())
-            {
-                return;
-            }
-            //if we're attaching it to us, leave it attached
-            state = state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD ? state : STATE_LERPING;
-        }
-
-        public void CalcParentTransform()
-        {
-            switch (state)
-            {
-                case (STATE_SLEEPING):
-                    {
-                        parentPosCache = Vector3.zero;
-                        parentRotCache = Quaternion.identity;
-                        //slowly lerp to the resting spot
-                        break;
-                    }
-                case (STATE_TELEPORTING):
-                    {
-                        parentPosCache = Vector3.zero;
-                        parentRotCache = Quaternion.identity;
-                        //TeleportToSyncedTransform is being run in the smartobjectsync state setter
-                        break;
-                    }
-                case (STATE_LERPING):
-                    {
-                        parentPosCache = Vector3.zero;
-                        parentRotCache = Quaternion.identity;
-                        break;
-                    }
-                case (STATE_LEFT_HAND_HELD):
-                    {
-                        if (Utilities.IsValid(owner))
-                        {
-                            parentPosCache = owner.GetBonePosition(HumanBodyBones.LeftHand);
-                            parentRotCache = owner.GetBoneRotation(HumanBodyBones.LeftHand);
-                            hasBones = parentPosCache != Vector3.zero;
-                            parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
-                            parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
-                        }
-                        break;
-                    }
-                case (STATE_RIGHT_HAND_HELD):
-                    {
-                        if (Utilities.IsValid(owner))
-                        {
-                            parentPosCache = owner.GetBonePosition(HumanBodyBones.RightHand);
-                            parentRotCache = owner.GetBoneRotation(HumanBodyBones.RightHand);
-                            hasBones = parentPosCache != Vector3.zero;
-                            parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
-                            parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
-                        }
-                        break;
-                    }
-                case (STATE_ATTACHED_TO_PLAYSPACE):
-                    {
-                        if (Utilities.IsValid(owner))
-                        {
-                            parentPosCache = owner.GetPosition();
-                            parentRotCache = owner.GetRotation();
-                        }
-                        break;
-                    }
-                default:
-                    {
-                        if (Utilities.IsValid(owner) && state < STATE_SLEEPING)
-                        {
-                            parentPosCache = owner.GetBonePosition((HumanBodyBones)(-1 - state));
-                            parentRotCache = owner.GetBoneRotation((HumanBodyBones)(-1 - state));
-                            hasBones = parentPosCache != Vector3.zero;
-                            parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
-                            parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
-                            if(!hasBones && owner.isLocal){
-                                state = STATE_ATTACHED_TO_PLAYSPACE;
-                            }
-                        } else
-                        {
-                            parentPosCache = Vector3.zero;
-                            parentRotCache = Quaternion.identity;
-                        }
-                        break;
-                    }
-            }
-        }
+        // public bool LerpDelayOver()
+        // {
+        //     return interpolationStartTime + lerpTime < Time.timeSinceLevelLoad;
+        // }
 
 
-        public bool ObjectMoved()
-        {
-            CalcParentTransform();
-            return Vector3.Distance(pos, CalcPos()) > 0.001f || Quaternion.Dot(rot, CalcRot()) < 0.99;
-        }
+        // public void CalcParentTransform()
+        // {
+        //     switch (state)
+        //     {
+        //         case (STATE_SLEEPING):
+        //             {
+        //                 parentPosCache = Vector3.zero;
+        //                 parentRotCache = Quaternion.identity;
+        //                 //slowly lerp to the resting spot
+        //                 break;
+        //             }
+        //         case (STATE_TELEPORTING):
+        //             {
+        //                 parentPosCache = Vector3.zero;
+        //                 parentRotCache = Quaternion.identity;
+        //                 //TeleportToSyncedTransform is being run in the smartobjectsync state setter
+        //                 break;
+        //             }
+        //         case (STATE_LERPING):
+        //             {
+        //                 parentPosCache = Vector3.zero;
+        //                 parentRotCache = Quaternion.identity;
+        //                 break;
+        //             }
+        //         case (STATE_LEFT_HAND_HELD):
+        //             {
+        //                 if (Utilities.IsValid(owner))
+        //                 {
+        //                     parentPosCache = owner.GetBonePosition(HumanBodyBones.LeftHand);
+        //                     parentRotCache = owner.GetBoneRotation(HumanBodyBones.LeftHand);
+        //                     hasBones = parentPosCache != Vector3.zero;
+        //                     parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
+        //                     parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
+        //                 }
+        //                 break;
+        //             }
+        //         case (STATE_RIGHT_HAND_HELD):
+        //             {
+        //                 if (Utilities.IsValid(owner))
+        //                 {
+        //                     parentPosCache = owner.GetBonePosition(HumanBodyBones.RightHand);
+        //                     parentRotCache = owner.GetBoneRotation(HumanBodyBones.RightHand);
+        //                     hasBones = parentPosCache != Vector3.zero;
+        //                     parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
+        //                     parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
+        //                 }
+        //                 break;
+        //             }
+        //         case (STATE_ATTACHED_TO_PLAYSPACE):
+        //             {
+        //                 if (Utilities.IsValid(owner))
+        //                 {
+        //                     parentPosCache = owner.GetPosition();
+        //                     parentRotCache = owner.GetRotation();
+        //                 }
+        //                 break;
+        //             }
+        //         default:
+        //             {
+        //                 if (Utilities.IsValid(owner) && state < STATE_SLEEPING)
+        //                 {
+        //                     parentPosCache = owner.GetBonePosition((HumanBodyBones)(-1 - state));
+        //                     parentRotCache = owner.GetBoneRotation((HumanBodyBones)(-1 - state));
+        //                     hasBones = parentPosCache != Vector3.zero;
+        //                     parentPosCache = hasBones ? parentPosCache : owner.GetPosition();
+        //                     parentRotCache = hasBones ? parentRotCache : owner.GetRotation();
+        //                     if(!hasBones && owner.isLocal){
+        //                         state = STATE_ATTACHED_TO_PLAYSPACE;
+        //                     }
+        //                 } else
+        //                 {
+        //                     parentPosCache = Vector3.zero;
+        //                     parentRotCache = Quaternion.identity;
+        //                 }
+        //                 break;
+        //             }
+        //     }
+        // }
+
+
+        // public bool ObjectMoved()
+        // {
+        //     CalcParentTransform();
+        //     return Vector3.Distance(pos, CalcPos()) > 0.001f || Quaternion.Dot(rot, CalcRot()) < 0.99;
+        // }
         
-        public void MoveToSyncedTransform()
-        {
-            _print("MoveToSyncedTransform");
-            if (state == STATE_SLEEPING)
-            {
-                //only update transform if it moved so that it'll hopefully fall asleep on its own
-                if (ObjectMoved())
-                {
-                    transform.position = pos;
-                    transform.rotation = rot;
-                }
-                else
-                {
-                    //The rigid body should eventually go to sleep here
-                }
-            } else if (IsAttachedToPlayer())
-            {
-                transform.position = parentPosCache + parentRotCache * pos;
-                transform.rotation = parentRotCache * rot;
-            } else
-            {
-                //no parent transform because we are not attached to a player
-                transform.position = pos;
-                transform.rotation = rot;
-                if (rigid)
-                {
-                    rigid.velocity = vel;
-                    rigid.angularVelocity = spin;
-                }
-            }
-        }
+        // public void MoveToSyncedTransform()
+        // {
+        //     _print("MoveToSyncedTransform");
+        //     if (state == STATE_SLEEPING)
+        //     {
+        //         //only update transform if it moved so that it'll hopefully fall asleep on its own
+        //         if (ObjectMoved())
+        //         {
+        //             transform.position = pos;
+        //             transform.rotation = rot;
+        //         }
+        //         else
+        //         {
+        //             //The rigid body should eventually go to sleep here
+        //         }
+        //     } else if (IsAttachedToPlayer())
+        //     {
+        //         transform.position = parentPosCache + parentRotCache * pos;
+        //         transform.rotation = parentRotCache * rot;
+        //     } else
+        //     {
+        //         //no parent transform because we are not attached to a player
+        //         transform.position = pos;
+        //         transform.rotation = rot;
+        //         if (rigid)
+        //         {
+        //             rigid.velocity = vel;
+        //             rigid.angularVelocity = spin;
+        //         }
+        //     }
+        // }
 
-        //We are using Hermite Splines which are like Bezier curves but with velocity
-        //This video says that all we have to do to convert Hermite to Bezier is divide the tangents by 3 https://www.youtube.com/watch?v=jvPPXbo87ds
-        float lerpCache;
-        Vector3 posControl1;
-        Vector3 posControl2;
-        Vector3 startVel;
-        Vector3 endVel;
-        Quaternion rotControl1;
-        Quaternion rotControl2;
-        Vector3 startSpin;
-        Vector3 endSpin;
-        public void LerpToSyncedTransform()
-        {
-            if (interpolation >= 1)
-            {
-                MoveToSyncedTransform();
-                return;
-            }
-            
-            lerpCache = Mathf.Clamp01(interpolation);
-            switch (state)
-            {
-                case (STATE_SLEEPING):
-                case (STATE_TELEPORTING):
-                case (STATE_LERPING):
-                    {
-                        startVel = velOnSync;
-                        endVel = vel;
-                        startSpin = spinOnSync;
-                        endSpin = spin;
-                        break;
-                    }
-                case (STATE_FALLING):
-                    {
-                        startVel = velOnSync;
-                        endVel = (rigid != null && rigid.useGravity) ? velOnSync + Physics.gravity * lerpTime : velOnSync;
-                        startSpin = spinOnSync;
-                        endSpin = spinOnSync;
-                        break;
-                    }
-                default:
-                    {
-                        startVel = Vector3.zero;
-                        endVel = Vector3.zero;
-                        startSpin = Vector3.zero;
-                        endSpin = Vector3.zero;
-                        break;
-                    }
-            }
+        // //We are using Hermite Splines which are like Bezier curves but with velocity
+        // //This video says that all we have to do to convert Hermite to Bezier is divide the tangents by 3 https://www.youtube.com/watch?v=jvPPXbo87ds
+        // float lerpCache;
+        // Vector3 posControl1;
+        // Vector3 posControl2;
+        // Vector3 startVel;
+        // Vector3 endVel;
+        // Quaternion rotControl1;
+        // Quaternion rotControl2;
+        // Vector3 startSpin;
+        // Vector3 endSpin;
+        // public void LerpToSyncedTransform()
+        // {
+        //     if (interpolation >= 1)
+        //     {
+        //         MoveToSyncedTransform();
+        //         return;
+        //     }
 
-            posControl1 = (parentPosCache + parentRotCache * posOnSync) + startVel * lerpTime * lerpCache / 3f;
-            posControl2 = (parentPosCache + parentRotCache * pos) - endVel * lerpTime * (1 - lerpCache) / 3f;
+        //     lerpCache = Mathf.Clamp01(interpolation);
+        //     switch (state)
+        //     {
+        //         case (STATE_SLEEPING):
+        //         case (STATE_TELEPORTING):
+        //         case (STATE_LERPING):
+        //             {
+        //                 startVel = velOnSync;
+        //                 endVel = vel;
+        //                 startSpin = spinOnSync;
+        //                 endSpin = spin;
+        //                 break;
+        //             }
+        //         case (STATE_FALLING):
+        //             {
+        //                 startVel = velOnSync;
+        //                 endVel = (rigid != null && rigid.useGravity) ? velOnSync + Physics.gravity * lerpTime : velOnSync;
+        //                 startSpin = spinOnSync;
+        //                 endSpin = spinOnSync;
+        //                 break;
+        //             }
+        //         default:
+        //             {
+        //                 startVel = Vector3.zero;
+        //                 endVel = Vector3.zero;
+        //                 startSpin = Vector3.zero;
+        //                 endSpin = Vector3.zero;
+        //                 break;
+        //             }
+        //     }
 
-            rotControl1 = (parentRotCache * rotOnSync) * Quaternion.Euler(startSpin * lerpTime * lerpCache / 3f);
-            rotControl2 = (parentRotCache * rot) * Quaternion.Euler(-1 * endSpin * lerpTime * (1 - lerpCache) / 3f);
+        //     posControl1 = (parentPosCache + parentRotCache * posOnSync) + startVel * lerpTime * lerpCache / 3f;
+        //     posControl2 = (parentPosCache + parentRotCache * pos) - endVel * lerpTime * (1 - lerpCache) / 3f;
 
-            transform.position = Vector3.Lerp(posControl1, posControl2, lerpCache);
-            transform.rotation = Quaternion.Slerp(rotControl1, rotControl2, lerpCache);
-        }
+        //     rotControl1 = (parentRotCache * rotOnSync) * Quaternion.Euler(startSpin * lerpTime * lerpCache / 3f);
+        //     rotControl2 = (parentRotCache * rot) * Quaternion.Euler(-1 * endSpin * lerpTime * (1 - lerpCache) / 3f);
+
+        //     transform.position = Vector3.Lerp(posControl1, posControl2, lerpCache);
+        //     transform.rotation = Quaternion.Slerp(rotControl1, rotControl2, lerpCache);
+        // }
 
 
 
@@ -914,6 +799,10 @@ namespace MMMaellon
 
 
         //Helpers
+        Vector3 posControl1;
+        Vector3 posControl2;
+        Quaternion rotControl1;
+        Quaternion rotControl2;
         public Vector3 HermiteInterpolatePosition(Vector3 startPos, Vector3 startVel, Vector3 endPos, Vector3 endVel, float interpolation)
         {
             posControl1 = startPos + startVel * lerpTime * interpolation / 3f;
@@ -938,9 +827,57 @@ namespace MMMaellon
         {
             return lastState < 0 || lastState == STATE_LEFT_HAND_HELD || lastState == STATE_RIGHT_HAND_HELD || lastState == STATE_ATTACHED_TO_PLAYSPACE;
         }
-        
-        
-        
+
+        public string StateToString(int value)
+        {
+            switch (value)
+            {
+                case (STATE_SLEEPING):
+                    {
+                        return "STATE_SLEEPING";
+                    }
+                case (STATE_TELEPORTING):
+                    {
+                        return "STATE_TELEPORTING";
+                    }
+                case (STATE_LERPING):
+                    {
+                        return "STATE_LERPING";
+                    }
+                case (STATE_FALLING):
+                    {
+                        return "STATE_FALLING";
+                    }
+                case (STATE_LEFT_HAND_HELD):
+                    {
+                        return "STATE_LEFT_HAND_HELD";
+                    }
+                case (STATE_RIGHT_HAND_HELD):
+                    {
+                        return "STATE_RIGHT_HAND_HELD";
+                    }
+                case (STATE_ATTACHED_TO_PLAYSPACE):
+                    {
+                        return "STATE_ATTACHED_TO_PLAYSPACE";
+                    }
+                default:
+                    {
+                        if (value < 0)
+                        {
+                            return ((HumanBodyBones)(-1 - value)).ToString();
+                        }
+                        else if (activeState)
+                        {
+                            return "Custom State " + (value - STATE_CUSTOM).ToString();
+                        }
+
+                        return "INVALID STATE";
+                    }
+            }
+        }
+
+
+
         bool startRan;
         [System.NonSerialized]
         public Vector3 spawnPos;
@@ -949,25 +886,38 @@ namespace MMMaellon
         public void Start()
         {
             SetSpawn();
+            if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
+            {
+                //set starting synced values
+                pos = transform.position;
+                rot = transform.rotation;
+                if (rigid && !rigid.isKinematic)
+                {
+                    vel = rigid.velocity;
+                    spin = rigid.angularVelocity;
+                }
+            }
             startRan = true;
-            OnEnable();
         }
         
         public void OnEnable()
         {
-            if (!startRan)
-            {
-                return;
-            }
             owner = Networking.GetOwner(gameObject);
             if (IsLocalOwner())
             {
-                RequestSerialization();
+                if (startRan)
+                {
+                    //force a reset
+                    state = state;
+                }
+            } else if (interpolationStartTime > 0)
+            {
+                //only do this after we've received some data from the owner to prevent being sucked into spawn
+                StartInterpolation();
+                //force no interpolation
+                interpolationStartTime = -1001f;
+                Interpolate();
             }
-            //force no interpolation
-            interpolationStartTime = -1001f;
-            activeState.Interpolate(1.0f);
-            activeState.OnInterpolationEnd();
         }
 
         public void SetSpawn()
@@ -987,11 +937,13 @@ namespace MMMaellon
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
-            state = STATE_TELEPORTING;
             pos = newPos;
             rot = newRot;
             vel = newVel;
             spin = newSpin;
+            //remember to set state last as it triggers interpolation
+            state = STATE_TELEPORTING;
+            //this doesn't actually do anything except turn off the helper for the teleport state
             Interpolate();
         }
 
@@ -1004,39 +956,30 @@ namespace MMMaellon
 
         public void Interpolate()
         {
-            if (IsLocalOwner() && !activeState.InterpolateOnOwner)
-            {
-                helper.enabled = false;
-                return;
-            }
+            _print("Interpolate " + interpolation + " - " + StateToString(state));
             activeState.Interpolate(interpolation);
             
             if (interpolation < 1.0)
             {
                 return;
             }
-            activeState.OnInterpolationEnd();
             //decide if we keep running the helper
-            helper.enabled = activeState.InterpolateAfterInterpolationPeriod;
+            helper.enabled = activeState.OnInterpolationEnd();
         }
 
         
         //Serialization
-
         public override void OnPreSerialization()
         {
             _print("OnPreSerialization");
-            //we set the last sync time here and in ondeserialization
-            interpolationStartTime = Time.timeSinceLevelLoad;
             activeState.OnSmartObjectSerialize();
+            StartInterpolation();
         }
 
         public override void OnDeserialization()
         {
             _print("OnDeserialization");
-            interpolationStartTime = Time.timeSinceLevelLoad;
-            activeState.OnInterpolationStart();
-            activeState.Interpolate(0.0f);
+            StartInterpolation();
         }
 
 
@@ -1103,7 +1046,8 @@ namespace MMMaellon
                 //check if we're in a state where physics matters
                 if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
                 {
-                    state = STATE_FALLING;
+                    // state = STATE_FALLING;
+                    state = STATE_LERPING;
                 }
             } else
             {
@@ -1136,8 +1080,8 @@ namespace MMMaellon
                 //check if we're in a state where physics matters
                 if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
                 {
-                    // state = STATE_FALLING;
-                    state = STATE_LERPING;
+                    state = STATE_FALLING;
+                    // state = STATE_LERPING;
                 }
             }
             else
@@ -1146,10 +1090,38 @@ namespace MMMaellon
                 StartInterpolation();
             }
         }
-        
-        
+
+
         //Pickup Events
-        
+
+        public override void OnPickup()
+        {
+            TakeOwnership(false);
+            if (pickup)
+            {
+                if (pickup.currentHand == VRC_Pickup.PickupHand.Left)
+                {
+                    state = STATE_LEFT_HAND_HELD;
+                }
+                else if (pickup.currentHand == VRC_Pickup.PickupHand.Right)
+                {
+                    state = STATE_RIGHT_HAND_HELD;
+                }
+            }
+        }
+        public override void OnDrop()
+        {
+            _print("OnDrop");
+            if (!IsLocalOwner())
+            {
+                return;
+            }
+            _print("we are local owner");
+            //if we're attaching it to us, leave it attached
+
+            state = state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD ? STATE_LERPING : state;
+            _print("set state to " + state);
+        }
         
 
         //Ownership Events
