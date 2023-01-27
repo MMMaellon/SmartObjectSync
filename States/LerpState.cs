@@ -11,18 +11,27 @@ using UnityEditor;
 
 namespace MMMaellon
 {
-    [CustomEditor(typeof(LerpState))]
+    [CustomEditor(typeof(LerpState)), CanEditMultipleObjects]
 
-    public class LerpStateEditor : Editor
+    public class LerpStateEditor : SmartObjectSyncStateEditor
     {
-        void OnEnable()
+        public void OnEnable()
         {
-            if (target)
-                target.hideFlags = SmartObjectSyncEditor.hideHelperComponents ? HideFlags.HideInInspector : HideFlags.None;
+            foreach (var target in targets)
+            {
+                var state = target as LerpState;
+                if (state && (state.sync == null || state.sync.states[state.stateID] != state))
+                {
+                    Component.DestroyImmediate(state);
+                    return;
+                }
+                target.hideFlags = SmartObjectSyncEditor.hideHelperComponentsAndNoErrors ? HideFlags.HideInInspector : HideFlags.None;
+            }
+            base.OnInspectorGUI();
         }
         public override void OnInspectorGUI()
         {
-            if (target && UdonSharpEditor.UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            OnEnable();
             base.OnInspectorGUI();
         }
     }
@@ -59,8 +68,9 @@ namespace MMMaellon
         {
             startPos = transform.position;
             startRot = transform.rotation;
-            if (sync.rigid && !sync.rigid.isKinematic)
+            if ((sync.lastState == SmartObjectSync.STATE_TELEPORTING || sync.lastState == SmartObjectSync.STATE_LERPING || sync.lastState == SmartObjectSync.STATE_FALLING) && sync.rigid && !sync.rigid.isKinematic)
             {
+                sync._print("last state was: " + sync.StateToString(sync.lastState));
                 startVel = sync.rigid.velocity;
                 startSpin = sync.rigid.angularVelocity;
             }

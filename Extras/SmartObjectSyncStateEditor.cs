@@ -89,9 +89,11 @@ namespace MMMaellon
                     }
                 }
             }
-            EditorGUILayout.Space();
+            if (target == null || target.hideFlags == HideFlags.HideInInspector)
+            {
+                return;
+            }
             if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-            EditorGUILayout.Space();
             base.OnInspectorGUI();
         }
     }

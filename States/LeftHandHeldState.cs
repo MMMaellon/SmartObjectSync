@@ -11,18 +11,27 @@ using UnityEditor;
 
 namespace MMMaellon
 {
-    [CustomEditor(typeof(LeftHandHeldState))]
+    [CustomEditor(typeof(LeftHandHeldState)), CanEditMultipleObjects]
 
-    public class LeftHandHeldStateEditor : Editor
+    public class LeftHandHeldStateEditor : SmartObjectSyncStateEditor
     {
-        void OnEnable()
+        public void OnEnable()
         {
-            if (target)
-                target.hideFlags = SmartObjectSyncEditor.hideHelperComponents ? HideFlags.HideInInspector : HideFlags.None;
+            foreach (var target in targets)
+            {
+                var state = target as LeftHandHeldState;
+                if (state && (state.sync == null || state.sync.states[state.stateID] != state))
+                {
+                    Component.DestroyImmediate(state);
+                    return;
+                }
+                target.hideFlags = SmartObjectSyncEditor.hideHelperComponentsAndNoErrors ? HideFlags.HideInInspector : HideFlags.None;
+            }
+            base.OnInspectorGUI();
         }
         public override void OnInspectorGUI()
         {
-            if (target && UdonSharpEditor.UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            OnEnable();
             base.OnInspectorGUI();
         }
     }
@@ -33,40 +42,24 @@ namespace MMMaellon
 namespace MMMaellon
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    public class LeftHandHeldState : SmartObjectSyncState
+    public class LeftHandHeldState : BoneAttachmentState
     {
-
-        void Start()
-        {
-        }
-
         public override void OnEnterState()
         {
-
-        }
-
-        public override void OnExitState()
-        {
-
-        }
-
-
-        public override void OnInterpolationStart()
-        {
-
+            bone = HumanBodyBones.LeftHand;
         }
         public override void Interpolate(float interpolation)
         {
-
-        }
-        public override bool OnInterpolationEnd()
-        {
-            return false;
-        }
-
-        public override void OnSmartObjectSerialize()
-        {
-
+            //let the VRC_pickup script handle transforms for the local owner
+            //only reposition it for non-owners
+            if (!sync.IsLocalOwner())
+            {
+                base.Interpolate(interpolation);
+            }
+            else
+            {
+                CalcParentTransform();
+            }
         }
     }
 }

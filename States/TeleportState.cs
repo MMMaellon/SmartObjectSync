@@ -11,19 +11,26 @@ using UnityEditor;
 
 namespace MMMaellon
 {
-    [CustomEditor(typeof(TeleportState))]
+    [CustomEditor(typeof(TeleportState)), CanEditMultipleObjects]
 
-    public class TeleportStateEditor : Editor
+    public class TeleportStateEditor : SmartObjectSyncStateEditor
     {
-        void OnEnable()
+        public void OnEnable()
         {
-            if (target)
-                target.hideFlags = SmartObjectSyncEditor.hideHelperComponents ? HideFlags.HideInInspector : HideFlags.None;
+            foreach (var target in targets)
+            {
+                var state = target as TeleportState;
+                if (state && (state.sync == null || state.sync.states[state.stateID] != state))
+                {
+                    Component.DestroyImmediate(state);
+                    return;
+                }
+                target.hideFlags = SmartObjectSyncEditor.hideHelperComponentsAndNoErrors ? HideFlags.HideInInspector : HideFlags.None;
+            }
         }
-
         public override void OnInspectorGUI()
         {
-            if (target && UdonSharpEditor.UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            OnEnable();
             base.OnInspectorGUI();
         }
     }

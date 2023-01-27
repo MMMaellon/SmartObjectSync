@@ -10,12 +10,12 @@ namespace MMMaellon
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class SmartObjectSyncState : UdonSharpBehaviour
     {
-#if !COMPILER_UDONSHARP && UNITY_EDITOR
-        public void Reset()
-        {
-            SmartObjectSyncEditor.SetupStates(GetComponent<SmartObjectSync>());
-        }
-#endif
+// #if !COMPILER_UDONSHARP && UNITY_EDITOR
+//         public void Reset()
+//         {
+//             SmartObjectSyncEditor.SetupStates(GetComponent<SmartObjectSync>());
+//         }
+// #endif
         [HideInInspector]
         public int stateID;
         [HideInInspector]

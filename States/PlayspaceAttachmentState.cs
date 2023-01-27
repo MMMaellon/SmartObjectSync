@@ -11,18 +11,27 @@ using UnityEditor;
 
 namespace MMMaellon
 {
-    [CustomEditor(typeof(PlayspaceAttachmentState))]
+    [CustomEditor(typeof(PlayspaceAttachmentState)), CanEditMultipleObjects]
 
-    public class PlayspaceAttachmentStateEditor : Editor
+    public class PlayspaceAttachmentStateEditor : SmartObjectSyncStateEditor
     {
-        void OnEnable()
+        public void OnEnable()
         {
-            if (target)
-                target.hideFlags = SmartObjectSyncEditor.hideHelperComponents ? HideFlags.HideInInspector : HideFlags.None;
+            foreach (var target in targets)
+            {
+                var state = target as PlayspaceAttachmentState;
+                if (state && (state.sync == null || state.sync.states[state.stateID] != state))
+                {
+                    Component.DestroyImmediate(state);
+                    return;
+                }
+                target.hideFlags = SmartObjectSyncEditor.hideHelperComponentsAndNoErrors ? HideFlags.HideInInspector : HideFlags.None;
+            }
+            base.OnInspectorGUI();
         }
         public override void OnInspectorGUI()
         {
-            if (target && UdonSharpEditor.UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            OnEnable();
             base.OnInspectorGUI();
         }
     }
@@ -33,40 +42,15 @@ namespace MMMaellon
 namespace MMMaellon
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    public class PlayspaceAttachmentState : SmartObjectSyncState
+    public class PlayspaceAttachmentState : GenericAttachmentState
     {
-
-        void Start()
+        public override void CalcParentTransform()
         {
-        }
-
-        public override void OnEnterState()
-        {
-
-        }
-
-        public override void OnExitState()
-        {
-
-        }
-
-
-        public override void OnInterpolationStart()
-        {
-
-        }
-        public override void Interpolate(float interpolation)
-        {
-
-        }
-        public override bool OnInterpolationEnd()
-        {
-            return false;
-        }
-
-        public override void OnSmartObjectSerialize()
-        {
-
+            if (Utilities.IsValid(sync.owner))
+            {
+                parentPos = sync.owner.GetPosition();
+                parentRot = sync.owner.GetRotation();
+            }
         }
     }
 }

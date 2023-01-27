@@ -30,13 +30,13 @@ namespace MMMaellon
             foreach (var target in targets)
             {
                 SmartObjectSyncHelper helper = target as SmartObjectSyncHelper;
-                if (helper && helper.sync == null)
+                if (helper && (helper.sync == null || helper.sync.helper != helper))
                 {
                     int deleteCount = 0;
 
                     foreach (SmartObjectSyncState state in helper.GetComponents<SmartObjectSyncState>())
                     {
-                        if (state)
+                        if (state && (state.sync == null || (state.stateID < 0 && state.sync._bone_attached_state != state) || (state.sync.states[state.stateID] != state)))
                         {
                             deleteCount++;
                             Component.DestroyImmediate(state);
@@ -45,8 +45,7 @@ namespace MMMaellon
                     if (deleteCount == 0)
                     {
                         Component.DestroyImmediate(helper);
-                        //quit early to avoid some red errors in the console
-                        return;
+                        return;//return early to avoid bugs with drawing the gui
                     }
                 }
             }
@@ -86,5 +85,18 @@ namespace MMMaellon
             sync.Interpolate();
         }
 
+        public void OnEnable()
+        {
+            if(sync){
+                sync._print("Helper OnEnable");
+            }
+        }
+
+        public void OnDisable()
+        {
+            if(sync){
+                sync._print("Helper OnDisable");
+            }
+        }
     }
 }

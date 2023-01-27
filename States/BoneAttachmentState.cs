@@ -11,18 +11,31 @@ using UnityEditor;
 
 namespace MMMaellon
 {
-    [CustomEditor(typeof(BoneAttachmentState))]
+    [CustomEditor(typeof(BoneAttachmentState)), CanEditMultipleObjects]
 
-    public class BoneAttachmentStateEditor : Editor
+    public class BoneAttachmentStateEditor : SmartObjectSyncStateEditor
     {
-        void OnEnable()
+        public void OnEnable()
         {
-            if(target)
-                target.hideFlags = SmartObjectSyncEditor.hideHelperComponents ? HideFlags.HideInInspector : HideFlags.None;
+            foreach (var target in targets)
+            {
+                var state = target as BoneAttachmentState;
+                if (state && (state.sync == null || state.sync._bone_attached_state != state))
+                {
+                    if (state.sync != null)
+                    {
+                        Debug.LogWarning("-------------------------------------------- EEEEEEEEEEE " + (state.sync._bone_attached_state == null));
+                    }
+                    Component.DestroyImmediate(state);
+                    return;
+                }
+                target.hideFlags = SmartObjectSyncEditor.hideHelperComponentsAndNoErrors ? HideFlags.HideInInspector : HideFlags.None;
+            }
+            base.OnInspectorGUI();
         }
         public override void OnInspectorGUI()
         {
-            if (target && UdonSharpEditor.UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            OnEnable();
             base.OnInspectorGUI();
         }
     }
@@ -33,40 +46,41 @@ namespace MMMaellon
 namespace MMMaellon
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-    public class BoneAttachmentState : SmartObjectSyncState
+    public class BoneAttachmentState : GenericAttachmentState
     {
-
-        void Start()
-        {
-        }
+        public bool hasBones = false;
+        public HumanBodyBones bone;
 
         public override void OnEnterState()
         {
-
-        }
-
-        public override void OnExitState()
-        {
-
+            bone = (HumanBodyBones) (-1 - sync.state);
         }
 
 
         public override void OnInterpolationStart()
         {
-
+            //if the avatar we're wearing doesn't have the bones required, fallback to attach to playspace
+            if (sync.IsLocalOwner())
+            {
+                CalcParentTransform();
+                if (!hasBones)
+                {
+                    sync._printErr("Avatar is missing the correct bone. Falling back to playspace attachment.");
+                    sync.state = SmartObjectSync.STATE_ATTACHED_TO_PLAYSPACE;
+                    return;
+                }
+            }
+            base.OnInterpolationStart();
         }
-        public override void Interpolate(float interpolation)
+        public override void CalcParentTransform()
         {
-
-        }
-        public override bool OnInterpolationEnd()
-        {
-            return false;
-        }
-
-        public override void OnSmartObjectSerialize()
-        {
-
+            if (Utilities.IsValid(sync.owner)){
+                parentPos = sync.owner.GetBonePosition(bone);
+                parentRot = sync.owner.GetBoneRotation(bone);
+                hasBones = parentPos != Vector3.zero;
+                parentPos = hasBones ? parentPos : sync.owner.GetPosition();
+                parentRot = hasBones ? parentRot : sync.owner.GetRotation();
+            }
         }
     }
 }
