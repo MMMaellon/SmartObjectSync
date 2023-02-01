@@ -18,9 +18,6 @@ namespace MMMaellon
 
     public class SmartObjectSyncEditor : Editor
     {
-        public static bool hideHelperComponents = true;
-        [System.NonSerialized]
-        public static bool hideHelperComponentsAndNoErrors = false;
 
         public static void _print(SmartObjectSync sync, string message)
         {
@@ -28,11 +25,6 @@ namespace MMMaellon
             {
                 Debug.LogFormat("[SmartObjectSync] {0}: {1}", sync.name, message);
             }
-        }
-
-        public void OnEnable()
-        {
-            hideHelperComponentsAndNoErrors = false;
         }
 
         public static void SetupSmartObjectSync(SmartObjectSync sync)
@@ -73,106 +65,8 @@ namespace MMMaellon
                 _print(sync, "SetupStates");
                 SerializedObject serializedSync = new SerializedObject(sync);
                 serializedSync.FindProperty("states").ClearArray();
-                foreach (SleepState state in sync.GetComponents<SleepState>())
-                {
-                    if(!state.GetType().IsSubclassOf(typeof(SleepState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (TeleportState state in sync.GetComponents<TeleportState>())
-                {
-                    if (!state.GetType().IsSubclassOf(typeof(TeleportState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (LerpState state in sync.GetComponents<LerpState>())
-                {
-                    if(!state.GetType().IsSubclassOf(typeof(LerpState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (FallState state in sync.GetComponents<FallState>())
-                {
-                    if(!state.GetType().IsSubclassOf(typeof(FallState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (LeftHandHeldState state in sync.GetComponents<LeftHandHeldState>())
-                {
-                    if(!state.GetType().IsSubclassOf(typeof(LeftHandHeldState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (RightHandHeldState state in sync.GetComponents<RightHandHeldState>())
-                {
-                    if(!state.GetType().IsSubclassOf(typeof(RightHandHeldState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (PlayspaceAttachmentState state in sync.GetComponents<PlayspaceAttachmentState>())
-                {
-                    if (!state.GetType().IsSubclassOf(typeof(PlayspaceAttachmentState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (WorldLockState state in sync.GetComponents<WorldLockState>())
-                {
-                    if (!state.GetType().IsSubclassOf(typeof(WorldLockState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
-                foreach (BoneAttachmentState state in sync.GetComponents<BoneAttachmentState>())
-                {
-                    if(!state.GetType().IsSubclassOf(typeof(BoneAttachmentState)))
-                    {
-                        Component.DestroyImmediate(state);
-                    }
-                }
                 SmartObjectSyncState[] states = sync.GetComponents<SmartObjectSyncState>();
-                SmartObjectSyncState[] defaultStates = new SmartObjectSyncState[SmartObjectSync.STATE_CUSTOM];
-
-                _print(sync, "adding sleeping state");
-                defaultStates[SmartObjectSync.STATE_SLEEPING] = UdonSharpComponentExtensions.AddUdonSharpComponent<SleepState>(sync.gameObject);
-                _print(sync, "adding teleporting state");
-                defaultStates[SmartObjectSync.STATE_TELEPORTING] = UdonSharpComponentExtensions.AddUdonSharpComponent<TeleportState>(sync.gameObject);
-                _print(sync, "adding lerping state");
-                defaultStates[SmartObjectSync.STATE_LERPING] = UdonSharpComponentExtensions.AddUdonSharpComponent<LerpState>(sync.gameObject);
-                _print(sync, "adding falling state");
-                defaultStates[SmartObjectSync.STATE_FALLING] = UdonSharpComponentExtensions.AddUdonSharpComponent<FallState>(sync.gameObject);
-                _print(sync, "adding left hand held state");
-                defaultStates[SmartObjectSync.STATE_LEFT_HAND_HELD] = UdonSharpComponentExtensions.AddUdonSharpComponent<LeftHandHeldState>(sync.gameObject);
-                _print(sync, "adding right hand held state");
-                defaultStates[SmartObjectSync.STATE_RIGHT_HAND_HELD] = UdonSharpComponentExtensions.AddUdonSharpComponent<RightHandHeldState>(sync.gameObject);
-                _print(sync, "adding attached to playspace state");
-                defaultStates[SmartObjectSync.STATE_ATTACHED_TO_PLAYSPACE] = UdonSharpComponentExtensions.AddUdonSharpComponent<PlayspaceAttachmentState>(sync.gameObject);
-                _print(sync, "adding world lock state");
-                defaultStates[SmartObjectSync.STATE_WORLD_LOCK] = UdonSharpComponentExtensions.AddUdonSharpComponent<WorldLockState>(sync.gameObject);
-                _print(sync, "adding bone attached state");
-                sync._bone_attached_state = UdonSharpComponentExtensions.AddUdonSharpComponent<BoneAttachmentState>(sync.gameObject);
-                serializedSync.FindProperty("_bone_attached_state").objectReferenceValue = sync._bone_attached_state;
-                sync._bone_attached_state.stateID = -1;
-                sync._bone_attached_state.sync = sync;
-                SerializedObject serializedState = new SerializedObject(sync._bone_attached_state);
-                serializedState.FindProperty("stateID").intValue = -1;
-                serializedState.FindProperty("sync").objectReferenceValue = sync;
-                serializedSync.ApplyModifiedProperties();
-              
-
                 int stateCounter = 0;
-                _print(sync, "adding default states: " + defaultStates.Length);
-                foreach (SmartObjectSyncState state in defaultStates)
-                {
-                    AddStateSerialized(ref sync, ref serializedSync, state, stateCounter);
-                    stateCounter++;
-                }
                 _print(sync, "adding custom states: " + states.Length);
                 foreach (SmartObjectSyncState state in states)
                 {
@@ -248,18 +142,35 @@ namespace MMMaellon
                         helperSetupCount++;
                     }
 
-                    if (sync._bone_attached_state == null || sync.states.Length < SmartObjectSync.STATE_CUSTOM || sync.states.Length + 1 != sync.GetComponents<SmartObjectSyncState>().Length)//+ 1 because of bone attachment
+                    SmartObjectSyncState[] stateComponents = sync.GetComponents<SmartObjectSyncState>();
+                    if (sync.states.Length != stateComponents.Length)//+ 1 because of bone attachment
                     {
                         stateSetupCount++;
                     } else
                     {
+                        bool errorFound = false;
                         foreach (SmartObjectSyncState state in sync.states)
                         {
-                            if (state == null)
+                            if (state == null || state.sync != sync || state.stateID < 0 || state.stateID >= sync.states.Length || sync.states[state.stateID] != state)
                             {
-                                stateSetupCount++;
+                                errorFound = true;
                                 break;
                             }
+                        }
+                        if (!errorFound)
+                        {
+                            foreach (SmartObjectSyncState state in stateComponents)
+                            {
+                                if (state != null && (state.sync != sync || state.stateID < 0 || state.stateID >= sync.states.Length || sync.states[state.stateID] != state))
+                                {
+                                    errorFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (errorFound)
+                        {
+                            stateSetupCount++;
                         }
                     }
                 }
@@ -312,24 +223,6 @@ namespace MMMaellon
                     SetupSelectedSmartObjectSyncs();
                 }
             }
-            if (EditorGUILayout.Toggle("Hide Helper Components", hideHelperComponents) != hideHelperComponents)
-            {
-                hideHelperComponents = !hideHelperComponents;
-            }
-            if(hideHelperComponentsAndNoErrors != hideHelperComponents && stateSetupCount == 0){
-                hideHelperComponentsAndNoErrors = hideHelperComponents && stateSetupCount == 0;
-                if (target)
-                {
-                    foreach (SmartObjectSyncState state in (target as SmartObjectSync).GetComponents<SmartObjectSyncState>())
-                    {
-                        if (state)
-                        {
-                            state.hideFlags = hideHelperComponentsAndNoErrors ? HideFlags.HideInInspector : HideFlags.None;
-                            EditorUtility.SetDirty(state);
-                        }
-                    }
-                }
-            }
             EditorGUILayout.Space();
             if (target && UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
             EditorGUILayout.Space();
@@ -343,11 +236,14 @@ namespace MMMaellon
 namespace MMMaellon
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
+    [RequireComponent(typeof(Rigidbody))]
     public partial class SmartObjectSync : UdonSharpBehaviour
     {
         public bool printDebugMessages = false;
         public bool takeOwnershipOfOtherObjectsOnCollision = true;
         public bool allowOthersToTakeOwnershipOnCollision = true;
+        public bool allowTheftFromOthers = true;
+        public bool allowTheftFromSelf = true;
 
         [HideInInspector]
         public SmartObjectSyncHelper helper;
@@ -376,10 +272,10 @@ namespace MMMaellon
         //slowly lerp to final synced transform and velocity and then put rigidbody to sleep
         public const int STATE_TELEPORTING = 1;
         //instantly teleport to last synced transform and velocity
-        public const int STATE_LERPING = 2;
+        public const int STATE_INTERPOLATING = 2;
         //just use a simple hermite spline to lerp it into place
         public const int STATE_FALLING = 3;
-        //similar to STATE_LERPING except we don't take the final velocity into account when lerping
+        //similar to STATE_INTERPOLATING except we don't take the final velocity into account when interpolating
         //instead we assume the object is in projectile motion
         //we use a hermite spline with the ending velocity being the starting velocity + (gravity * lerpTime)
         //once we reach the destination, we set the velocity to the synced velocity
@@ -393,11 +289,15 @@ namespace MMMaellon
         [HideInInspector]
         public SmartObjectSyncState[] states;
 
-        [HideInInspector]
-        public SmartObjectSyncState _bone_attached_state;
-
-        public SmartObjectSyncState activeState{
-            get => state < 0 ? _bone_attached_state : states[state];
+        public SmartObjectSyncState customState{
+            get
+            {
+                if (state >= STATE_CUSTOM && state - STATE_CUSTOM < states.Length)
+                {
+                    return states[state - STATE_CUSTOM];
+                }
+                return null;
+            }
         }
 
         [System.NonSerialized]
@@ -423,18 +323,14 @@ namespace MMMaellon
         public Vector3 velOnSync;
         [System.NonSerialized]
         public Vector3 spinOnSync;
-
-        [System.NonSerialized]
-        public int lastState = 0;
         public int state
         {
             get => _state;
             set
             {
-                activeState.OnExitState();
-                lastState = _state;
+                OnExitState();
                 _state = value;
-                activeState.OnEnterState();
+                OnEnterState();
 
 
                 if (pickup && pickup.IsHeld && value != STATE_LEFT_HAND_HELD && value != STATE_RIGHT_HAND_HELD)
@@ -446,7 +342,7 @@ namespace MMMaellon
                 {
                     //we start interpolation here to make it snappier for the local owner
                     //make sure to serialize all variables beforehand
-                    activeState.OnSmartObjectSerialize();
+                    OnSmartObjectSerialize();
                     StartInterpolation();
                     RequestSerialization();
                 }
@@ -469,7 +365,7 @@ namespace MMMaellon
                         //if the it was attached to the previous owner
                         if (IsAttachedToPlayer() && (pickup == null || !pickup.IsHeld))
                         {
-                            state = STATE_LERPING;
+                            state = STATE_INTERPOLATING;
                         }
                     } else {
                         if (pickup)
@@ -481,10 +377,16 @@ namespace MMMaellon
             }
         }
 
+        [HideInInspector]
+        public bool SetupRan = false;
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
         public void Reset()
         {
-            SmartObjectSyncEditor.SetupSmartObjectSync(this);
+            if (!SetupRan)
+            {
+                // SmartObjectSyncEditor.SetupSmartObjectSync(this);
+            }
+            SetupRan = true;
         }
 #endif
 
@@ -530,10 +432,6 @@ namespace MMMaellon
         {
             return state < 0 || state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_ATTACHED_TO_PLAYSPACE;
         }
-        public bool LastStateIsAttachedToPlayer()
-        {
-            return lastState < 0 || lastState == STATE_LEFT_HAND_HELD || lastState == STATE_RIGHT_HAND_HELD || lastState == STATE_ATTACHED_TO_PLAYSPACE;
-        }
 
         public string StateToString(int value)
         {
@@ -547,9 +445,9 @@ namespace MMMaellon
                     {
                         return "STATE_TELEPORTING";
                     }
-                case (STATE_LERPING):
+                case (STATE_INTERPOLATING):
                     {
-                        return "STATE_LERPING";
+                        return "STATE_INTERPOLATING";
                     }
                 case (STATE_FALLING):
                     {
@@ -577,9 +475,9 @@ namespace MMMaellon
                         {
                             return ((HumanBodyBones)(-1 - value)).ToString();
                         }
-                        else if (activeState)
+                        else if (customState)
                         {
-                            return "Custom State " + (value - STATE_CUSTOM).ToString();
+                            return "Custom State " + (value - STATE_CUSTOM).ToString() + " " + (value - STATE_CUSTOM >= 0 && value - STATE_CUSTOM < states.Length && states[value - STATE_CUSTOM] != null ? states[value - STATE_CUSTOM].GetType().ToString() : "NULL");
                         }
 
                         return "INVALID STATE";
@@ -640,19 +538,16 @@ namespace MMMaellon
         public void Respawn()
         {
             _print("Respawn");
-            if (!IsLocalOwner())
-            {
-                Networking.SetOwner(Networking.LocalPlayer, gameObject);
-            }
+            TakeOwnership(false);
             TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
         }
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
-            pos = newPos;
-            rot = newRot;
-            vel = newVel;
-            spin = newSpin;
+            transform.position = newPos;
+            transform.rotation = newRot;
+            rigid.velocity = newVel;
+            rigid.angularVelocity = newSpin;
             //remember to set state last as it triggers interpolation
             state = STATE_TELEPORTING;
             //this doesn't actually do anything except turn off the helper for the teleport state
@@ -662,28 +557,50 @@ namespace MMMaellon
         public void StartInterpolation()
         {
             interpolationStartTime = Time.timeSinceLevelLoad;
-            activeState.OnInterpolationStart();
+            OnInterpolationStart();
             helper.enabled = true;
         }
 
         public void Interpolate()
         {
-            activeState.Interpolate(interpolation);
+            RecordLastTransform();
+            OnInterpolate(interpolation);
             
             if (interpolation < 1.0)
             {
                 return;
             }
             //decide if we keep running the helper
-            helper.enabled = activeState.OnInterpolationEnd();
+            helper.enabled = OnInterpolationEnd();
+        }
+        // public void QueuePhysicsEvent(int eventState)
+        // {
+        //     _state = eventState;
+        //     helper.queuedPhysicsEvent = eventState;
+        // }
+
+        public void RecordLastTransform()
+        {
+            lastPos = transform.position;
+            lastRot = transform.rotation;
         }
 
-        
+        public void SetVelocityFromLastTransform()
+        {
+            if (helper.enabled)
+            {
+                //if the helper is on, then we were recording good transform data and we can calculate the perceived velocity
+                rigid.velocity = (transform.position - lastPos) / Time.deltaTime;
+                rigid.angularVelocity = (Quaternion.Inverse(lastRot) * transform.rotation).eulerAngles / Time.deltaTime;
+            }
+        }
+
+
         //Serialization
         public override void OnPreSerialization()
         {
             // _print("OnPreSerialization");
-            activeState.OnSmartObjectSerialize();
+            OnSmartObjectSerialize();
             StartInterpolation();
         }
 
@@ -694,56 +611,63 @@ namespace MMMaellon
         }
 
 
-        float resyncDelay = 0f;
-        float lastSyncFail = -1001f;
+        // float resyncDelay = 0f;
+        // float lastSyncFail = -1001f;
 
-        public override void OnPostSerialization(SerializationResult result)
-        {
-            // _print("OnPostSerialization");
-            if (!result.success)
-            {
-                OnSerializationFailure();
-            }
-            else
-            {
-                resyncDelay = 0;
-            }
-        }
+        // public override void OnPostSerialization(SerializationResult result)
+        // {
+        //     // _print("OnPostSerialization");
+        //     if (!result.success)
+        //     {
+        //         OnSerializationFailure();
+        //     }
+        //     else
+        //     {
+        //         resyncDelay = 0;
+        //     }
+        // }
 
-        public void OnSerializationFailure()
-        {
-            //this gets called only when there's a problem with syncing
-            //we have to be careful about how we move forward
-            _printErr("OnSerializationFailure");
-            if (resyncDelay > 0 && lastSyncFail + resyncDelay > Time.timeSinceLevelLoad + 0.1f)
-            {
-                _printErr("sync failure came too soon after last sync failure");
-                return;
-            }
-            //we double the last delay in an attempt to recreate exponential backoff
-            resyncDelay = resyncDelay == 0 ? 0.1f : (resyncDelay * 2);
-            lastSyncFail = Time.timeSinceLevelLoad;
-            SendCustomEventDelayedSeconds(nameof(LowPrioritySerialize), resyncDelay);
-        }
+        // public void OnSerializationFailure()
+        // {
+        //     //this gets called only when there's a problem with syncing
+        //     //we have to be careful about how we move forward
+        //     _printErr("OnSerializationFailure");
+        //     if (resyncDelay > 0 && lastSyncFail + resyncDelay > Time.timeSinceLevelLoad + 0.1f)
+        //     {
+        //         _printErr("sync failure came too soon after last sync failure");
+        //         return;
+        //     }
+        //     //we double the last delay in an attempt to recreate exponential backoff
+        //     resyncDelay = resyncDelay == 0 ? 0.1f : (resyncDelay * 2);
+        //     lastSyncFail = Time.timeSinceLevelLoad;
+        //     SendCustomEventDelayedSeconds(nameof(LowPrioritySerialize), resyncDelay);
+        // }
 
-        public void LowPrioritySerialize()
+        // public void LowPrioritySerialize()
+        // {
+        //     if (!IsLocalOwner())
+        //     {
+        //         return;
+        //     }
+
+        //     if (Networking.IsClogged)
+        //     {
+        //         OnSerializationFailure();
+        //     } else
+        //     {
+        //         RequestSerialization();
+        //     }
+        // }
+        public void AttachToBone(HumanBodyBones bone)
         {
             if (!IsLocalOwner())
             {
-                return;
+                TakeOwnership(false);
             }
-
-            if (Networking.IsClogged)
-            {
-                OnSerializationFailure();
-            } else
-            {
-                RequestSerialization();
-            }
+            state = (-1 - (int)bone);
         }
 
         //Collision Events
-
         SmartObjectSync otherSync;
         public void OnCollisionEnter(Collision other)
         {
@@ -757,29 +681,31 @@ namespace MMMaellon
                 //check if we're in a state where physics matters
                 if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
                 {
-                    // state = STATE_FALLING;
-                    state = STATE_LERPING;
+                    //It takes a frame for physics events to register, so we just wait it out
+                    // QueuePhysicsEvent(STATE_INTERPOLATING);
+                    state = STATE_INTERPOLATING;
                 }
-            } else if (state == STATE_SLEEPING)
+            } else if (state == STATE_SLEEPING && interpolationEnded)
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
-                _print("local collision woke up rigidbody");
                 StartInterpolation();
             }
 
 
             //decide if we need to take ownership of the object we collided with
-            if (!takeOwnershipOfOtherObjectsOnCollision || other == null || other.collider == null)
+            if (!IsLocalOwner() || !takeOwnershipOfOtherObjectsOnCollision || other == null || other.collider == null)
             {
                 return;
             }
             otherSync = other.collider.GetComponent<SmartObjectSync>();
-            if (otherSync && otherSync.allowOthersToTakeOwnershipOnCollision && !otherSync.IsAttachedToPlayer() && otherSync.rigid && (IsAttachedToPlayer() || otherSync.state == STATE_SLEEPING || !otherSync.takeOwnershipOfOtherObjectsOnCollision || otherSync.rigid.velocity.sqrMagnitude < rigid.velocity.sqrMagnitude))
+            if (otherSync && !otherSync.IsLocalOwner() && otherSync.allowOthersToTakeOwnershipOnCollision && !otherSync.IsAttachedToPlayer() && otherSync.rigid && (IsAttachedToPlayer() || otherSync.state == STATE_SLEEPING || !otherSync.takeOwnershipOfOtherObjectsOnCollision || otherSync.rigid.velocity.sqrMagnitude < rigid.velocity.sqrMagnitude))
             {
                 otherSync.TakeOwnership(true);
-                otherSync.LowPrioritySerialize();
+                otherSync.RequestSerialization();
+                // otherSync.LowPrioritySerialize();
             }
         }
+
         public void OnCollisionExit(Collision other)
         {
             if (rigid == null || rigid.isKinematic)
@@ -792,24 +718,23 @@ namespace MMMaellon
                 //check if we're in a state where physics matters
                 if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
                 {
+                    // QueuePhysicsEvent(STATE_FALLING);
                     state = STATE_FALLING;
-                    // state = STATE_LERPING;
                 }
             }
-            else if (state == STATE_SLEEPING)
+            else if (state == STATE_SLEEPING && interpolationEnded)
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
-                _print("local collision woke up rigidbody");
                 StartInterpolation();
+                return;
             }
         }
 
 
         //Pickup Events
-
         public override void OnPickup()
         {
-            TakeOwnership(false);
+            Networking.SetOwner(Networking.LocalPlayer, gameObject);
             if (pickup)
             {
                 if (pickup.currentHand == VRC_Pickup.PickupHand.Left)
@@ -826,21 +751,18 @@ namespace MMMaellon
         {
             _print("OnDrop");
             //it takes 1 frame for VRChat to give the pickup the correct velocity, so let's wait 1 frame
+            //we use _state here to not trigger any of the events that happen when you set state
+            _state = _state == STATE_LEFT_HAND_HELD || _state == STATE_RIGHT_HAND_HELD ? STATE_INTERPOLATING : _state;
             SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
         }
 
         public void OnDropDelayed(){
-            if (!IsLocalOwner())
+            if (!IsLocalOwner() || (state != STATE_INTERPOLATING))
             {
                 return;
             }
-            _print("we are local owner");
-            //if we're attaching it to us, leave it attached
-
-            state = state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD ? STATE_LERPING : state;
-            _print("set state to " + state);
+            state = state;
         }
-
 
         //Ownership Events
         public override void OnOwnershipTransferred(VRCPlayerApi player)
@@ -851,13 +773,891 @@ namespace MMMaellon
 
         public void TakeOwnership(bool checkIfClogged)
         {
-            if (checkIfClogged && Networking.IsClogged)
+            if ((checkIfClogged && Networking.IsClogged) || IsLocalOwner())
             {
                 //Let them cook
                 return;
             }
             _print("TakeOwnership");
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
+        }
+
+        //STATES
+        //If Udon supported custom classes that aren't subclasses of UdonBehaviour, these would be in separate files
+        //Look at the 2.0 Prerelease on the github if you want to see what I mean
+        //Instead, I'm going to copy all the functions in those files here
+        [System.NonSerialized]
+        public Vector3 startPos;
+        [System.NonSerialized]
+        public Quaternion startRot;
+        [System.NonSerialized]
+        public Vector3 startVel;
+        [System.NonSerialized]
+        public Vector3 startSpin;
+        [System.NonSerialized]
+        public Vector3 endPos;
+        [System.NonSerialized]
+        public Quaternion endRot;
+        [System.NonSerialized]
+        public bool interpolationEnded = false;
+        [System.NonSerialized]
+        public Vector3 lastPos;
+        [System.NonSerialized]
+        public Quaternion lastRot;
+
+        public void OnEnterState(){
+            switch (state)
+            {
+                case (STATE_SLEEPING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_TELEPORTING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_INTERPOLATING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_FALLING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_LEFT_HAND_HELD):
+                    {
+                        left_OnEnterState();
+                        return;
+                    }
+                case (STATE_RIGHT_HAND_HELD):
+                    {
+                        right_OnEnterState();
+                        return;
+                    }
+                case (STATE_ATTACHED_TO_PLAYSPACE):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_WORLD_LOCK):
+                    {
+                        //do nothing
+                        return;
+                    }
+                default:
+                    {
+                        if (state < 0)
+                        {
+                            bone_OnEnterState();
+                        }
+                        else if (customState)
+                        {
+                            customState.OnEnterState();
+                        }
+                        return;
+                    }
+            }
+            
+        }
+        public void OnExitState(){
+            switch (state)
+            {
+                case (STATE_SLEEPING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_TELEPORTING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_INTERPOLATING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_FALLING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_LEFT_HAND_HELD):
+                    {
+                        left_OnExitState();
+                        return;
+                    }
+                case (STATE_RIGHT_HAND_HELD):
+                    {
+                        right_OnExitState();
+                        return;
+                    }
+                case (STATE_ATTACHED_TO_PLAYSPACE):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_WORLD_LOCK):
+                    {
+                        //do nothing
+                        return;
+                    }
+                default:
+                    {
+                        SetVelocityFromLastTransform();
+                        if (state < 0)
+                        {
+                            //do nothing
+                        }
+                        else if (customState)
+                        {
+                            customState.OnExitState();
+                        }
+                        return;
+                    }
+            }
+            
+        }
+        public void OnSmartObjectSerialize(){
+            switch (state)
+            {
+                case (STATE_SLEEPING):
+                    {
+                        sleep_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_TELEPORTING):
+                    {
+                        teleport_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_INTERPOLATING):
+                    {
+                        interpolate_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_FALLING):
+                    {
+                        falling_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_LEFT_HAND_HELD):
+                    {
+                        bone_CalcParentTransform();
+                        generic_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_RIGHT_HAND_HELD):
+                    {
+                        bone_CalcParentTransform();
+                        generic_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_ATTACHED_TO_PLAYSPACE):
+                    {
+                        playspace_CalcParentTransform();
+                        generic_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_WORLD_LOCK):
+                    {
+                        world_OnSmartObjectSerialize();
+                        return;
+                    }
+                default:
+                    {
+                        if (state < 0)
+                        {
+                            bone_CalcParentTransform();
+                            generic_OnSmartObjectSerialize();
+                        }
+                        else if (customState)
+                        {
+                            customState.OnSmartObjectSerialize();
+                        }
+                        return;
+                    }
+            }
+        }
+        public void OnInterpolationStart()
+        {
+            switch (state)
+            {
+                case (STATE_SLEEPING):
+                    {
+                        sleep_OnInterpolationStart();
+                        return;
+                    }
+                case (STATE_TELEPORTING):
+                    {
+                        teleport_OnInterpolationStart();
+                        return;
+                    }
+                case (STATE_INTERPOLATING):
+                    {
+                        interpolate_OnInterpolationStart();
+                        return;
+                    }
+                case (STATE_FALLING):
+                    {
+                        falling_OnInterpolationStart();
+                        return;
+                    }
+                case (STATE_LEFT_HAND_HELD):
+                    {
+                        bone_OnInterpolationStart();
+                        return;
+                    }
+                case (STATE_RIGHT_HAND_HELD):
+                    {
+                        bone_OnInterpolationStart();
+                        return;
+                    }
+                case (STATE_ATTACHED_TO_PLAYSPACE):
+                    {
+                        playspace_CalcParentTransform();
+                        generic_OnInterpolationStart();
+                        return;
+                    }
+                case (STATE_WORLD_LOCK):
+                    {
+                        world_OnInterpolationStart();
+                        return;
+                    }
+                default:
+                    {
+                        if (state < 0)
+                        {
+                            bone_OnInterpolationStart();
+                        }
+                        else if (customState)
+                        {
+                            customState.OnInterpolationStart();
+                        }
+                        return;
+                    }
+            }
+        }
+        public void OnInterpolate(float interpolation)
+        {
+            switch (state)
+            {
+                case (STATE_SLEEPING):
+                    {
+                        sleep_Interpolate(interpolation);
+                        return;
+                    }
+                case (STATE_TELEPORTING):
+                    {
+                        //do nothing
+                        return;
+                    }
+                case (STATE_INTERPOLATING):
+                    {
+                        interpolate_Interpolate(interpolation);
+                        return;
+                    }
+                case (STATE_FALLING):
+                    {
+                        falling_Interpolate(interpolation);
+                        return;
+                    }
+                case (STATE_LEFT_HAND_HELD):
+                    {
+                        left_Interpolate(interpolation);
+                        return;
+                    }
+                case (STATE_RIGHT_HAND_HELD):
+                    {
+                        right_Interpolate(interpolation);
+                        return;
+                    }
+                case (STATE_ATTACHED_TO_PLAYSPACE):
+                    {
+                        playspace_CalcParentTransform();
+                        generic_Interpolate(interpolation);
+                        return;
+                    }
+                case (STATE_WORLD_LOCK):
+                    {
+                        world_Interpolate(interpolation);
+                        return;
+                    }
+                default:
+                    {
+                        if (state < 0)
+                        {
+                            bone_CalcParentTransform();
+                            generic_Interpolate(interpolation);
+                        }
+                        else if (customState)
+                        {
+                            customState.Interpolate(interpolation);
+                        }
+                        return;
+                    }
+            }
+        }
+        public bool OnInterpolationEnd(){
+            switch (state)
+            {
+                case (STATE_SLEEPING):
+                    {
+                        return sleep_OnInterpolationEnd();
+                    }
+                case (STATE_TELEPORTING):
+                    {
+                        return false;//do nothing
+                    }
+                case (STATE_INTERPOLATING):
+                    {
+                        return interpolate_OnInterpolationEnd();
+                    }
+                case (STATE_FALLING):
+                    {
+                        return falling_OnInterpolationEnd();
+                    }
+                case (STATE_LEFT_HAND_HELD):
+                    {
+                        return generic_OnInterpolationEnd();
+                    }
+                case (STATE_RIGHT_HAND_HELD):
+                    {
+                        return generic_OnInterpolationEnd();
+                    }
+                case (STATE_ATTACHED_TO_PLAYSPACE):
+                    {
+                        return generic_OnInterpolationEnd();
+                    }
+                case (STATE_WORLD_LOCK):
+                    {
+                        return world_OnInterpolationEnd();
+                    }
+                default:
+                    {
+                        if (state < 0)
+                        {
+                            return generic_OnInterpolationEnd();
+                        } else if (customState)
+                        {
+                            return customState.OnInterpolationEnd();
+                        }
+                        return false;
+                    }
+            }
+        }
+
+
+        //Sleep State
+        //This state interpolates objects to a position and then attempts to put their rigidbody to sleep
+        //If the rigidbody can't sleep, like if it's floating in mid-air or something, then the just holds the position and rotation.
+        //If the rigidbody does fall asleep in the right position and rotation, then the state disables the update loop for optimization
+        public void sleep_OnInterpolationStart()
+        {
+            interpolationEnded = false;
+            startPos = transform.position;
+            startRot = transform.rotation;
+            startVel = rigid.velocity;
+            startSpin = rigid.angularVelocity;
+        }
+        public void sleep_Interpolate(float interpolation)
+        {
+            if (interpolationEnded || IsLocalOwner())
+            {
+                return;
+            }
+            transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
+            transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
+
+            //because of weird floating point precision errors, it makes sense to note down what the "real" ending transform is
+            endPos = transform.position;
+            endRot = transform.rotation;
+            rigid.velocity = Vector3.zero;
+            rigid.angularVelocity = Vector3.zero;
+        }
+
+        public bool sleep_OnInterpolationEnd()
+        {
+            interpolationEnded = true;
+            if (IsLocalOwner() || rigid == null || rigid.isKinematic || rigid.IsSleeping())
+            {
+                _print("successfully slept");
+                return false;
+            }
+
+            //only update positions if we're not already where we should be
+            //if there's a frame where we don't set the position, there's a possibility of the rigidbody falling asleep which we want
+            if (sleep_ObjectMoved())
+            {
+                transform.position = pos;
+                transform.rotation = rot;
+                endPos = transform.position;
+                endRot = transform.rotation;
+                rigid.velocity = Vector3.zero;
+                rigid.angularVelocity = Vector3.zero;
+            }
+            rigid.Sleep();
+            return true;
+        }
+
+        public void sleep_OnSmartObjectSerialize()
+        {
+            pos = transform.position;
+            rot = transform.rotation;
+            vel = Vector3.zero;
+            spin = Vector3.zero;
+        }
+
+        public bool sleep_ObjectMoved()
+        {
+            return endPos != transform.position || endRot != transform.rotation;
+        }
+
+        //Teleport State
+        //This state has no interpolation. It simply places sets the transforms and velocity then disables the update loop, letting physics take over
+        public void teleport_OnInterpolationStart()
+        {
+            if (!IsLocalOwner())
+            {
+                transform.position = pos;
+                transform.rotation = rot;
+                if (rigid && !rigid.isKinematic)
+                {
+                    rigid.velocity = vel;
+                    rigid.angularVelocity = spin;
+                }
+            }
+        }
+        public void teleport_OnSmartObjectSerialize()
+        {
+            pos = transform.position;
+            rot = transform.rotation;
+            if (rigid && !rigid.isKinematic)
+            {
+                vel = rigid.velocity;
+                spin = rigid.angularVelocity;
+            }
+        }
+
+        //Interpolate State
+        //This state interpolates objects into place using Hermite interpolation which makes sure that all changes in velocity are gradual and smooth
+        //At the end of the state we set the velocity and then disable the update loop for optimization and to allow the physics engine to take over
+        public void interpolate_OnInterpolationStart()
+        {
+            startPos = transform.position;
+            startRot = transform.rotation;
+            startVel = rigid.velocity;
+            startSpin = rigid.angularVelocity;
+        }
+        public void interpolate_Interpolate(float interpolation)
+        {
+            if (IsLocalOwner())
+            {
+                if (transform.position.y <= respawn_height)
+                {
+                    Respawn();
+                }
+                return;
+            }
+            transform.position = HermiteInterpolatePosition(startPos, startVel, pos, vel, interpolation);
+            transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, spin, interpolation);
+        }
+
+        public bool interpolate_OnInterpolationEnd()
+        {
+            if (IsLocalOwner())
+            {
+                if (rigid == null || rigid.isKinematic || rigid.IsSleeping() || !sleep_ObjectMoved())
+                {
+                    //wait around for the rigidbody to fall asleep
+                    state = SmartObjectSync.STATE_SLEEPING;
+                }
+                // else if (NonGravitationalAcceleration())
+                // {
+                //     //some force other than gravity is acting upon our object
+                //     if (lastResync + lerpTime < Time.timeSinceLevelLoad)
+                //     {
+                //         RequestSerialization();
+                //     }
+                // }
+                endPos = transform.position;
+                endRot = transform.rotation;
+                //returning true means we extend the interpolation period
+                return true;
+            }
+
+            rigid.velocity = vel;
+            rigid.angularVelocity = spin;
+            //let physics take over by returning false
+            return false;
+        }
+
+        public void interpolate_OnSmartObjectSerialize()
+        {
+            pos = transform.position;
+            rot = transform.rotation;
+            if (rigid && !rigid.isKinematic)
+            {
+                vel = rigid.velocity;
+                spin = rigid.angularVelocity;
+            }
+            else
+            {
+                vel = Vector3.zero;
+                spin = Vector3.zero;
+            }
+        }
+
+        [System.NonSerialized]
+        Vector3 changeInVelocity;
+        public bool NonGravitationalAcceleration()
+        {
+            if (!rigid || rigid.isKinematic)
+            {
+                return false;
+            }
+            //returns true of object's velocity changed along an axis other than gravity's
+            //this will let us know if the object stayed in projectile motion or if another force acted upon it
+            changeInVelocity = rigid.velocity - vel;
+
+            if (changeInVelocity.magnitude < 0.001f)
+            {
+                //too small to care
+                return false;
+            }
+
+            if (!rigid.useGravity)
+            {
+                return true;
+            }
+
+            if (Vector3.Angle(changeInVelocity, Physics.gravity) > 90)
+            {
+                //This means that the object was moving against the force of gravity
+                //there is definitely a non-gravitational velocity change
+                return true;
+            }
+
+            //we know that the object acelerated along the gravity vector,
+            //but if it also acelerated on another axis then another force acted upon it
+            //here we remove the influence of gravity and compare the velocity with the last synced velocity
+            return Vector3.ProjectOnPlane(changeInVelocity, Physics.gravity).magnitude > 0.001f;
+        }
+
+        //Falling State
+        //This state also uses Hermite interpolation, but assumes that the object is in projectile motion and intentionally creates a sudden change in velocity at the end of the interpolation to mimic a bounce.
+        //To mimic projectile motion, we assume that the velocity at the end of the interpolation is the start velocity plus the change in velocity gravity would have caused over the same time period
+        //At the end of the interpolation, we change the velocity to match what was sent by the owner, putting us back in sync with the owner.
+        //Then we disable to update loop for optimization and to allow the physics engine to take over
+        public void falling_OnInterpolationStart()
+        {
+            startPos = transform.position;
+            startRot = transform.rotation;
+            startVel = rigid.velocity;
+            startSpin = rigid.angularVelocity;
+        }
+        public void falling_Interpolate(float interpolation)
+        {
+            if (IsLocalOwner())
+            {
+                if (transform.position.y <= respawn_height)
+                {
+                    Respawn();
+                }
+                return;
+            }
+
+            if (rigid && !rigid.isKinematic && rigid.useGravity)
+            {
+                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, startVel + Physics.gravity * lerpTime, interpolation);
+                transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, startSpin, interpolation);
+            }
+            else
+            {
+                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, startVel, interpolation);
+                transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, startSpin, interpolation);
+            }
+        }
+        public bool falling_OnInterpolationEnd()
+        {
+            if (IsLocalOwner())
+            {
+                if (rigid == null || rigid.isKinematic || rigid.IsSleeping() || !sleep_ObjectMoved())
+                {
+                    //wait around for the rigidbody to fall asleep
+                    state = SmartObjectSync.STATE_SLEEPING;
+                }
+                // else if (NonGravitationalAcceleration())
+                // {
+                //     //some force other than gravity is acting upon our object
+                //     if (lastResync + lerpTime < Time.timeSinceLevelLoad)
+                //     {
+                //         RequestSerialization();
+                //     }
+                // }
+                endPos = transform.position;
+                endRot = transform.rotation;
+                //returning true means we extend the interpolation period
+                return true;
+            }
+            rigid.velocity = vel;
+            rigid.angularVelocity = spin;
+
+            return false;
+        }
+
+        public void falling_OnSmartObjectSerialize()
+        {
+            pos = transform.position;
+            rot = transform.rotation;
+            if (rigid && !rigid.isKinematic)
+            {
+                vel = rigid.velocity;
+                spin = rigid.angularVelocity;
+            }
+            else
+            {
+                vel = Vector3.zero;
+                spin = Vector3.zero;
+            }
+        }
+
+        //Generic Attachment State
+        //We can't actually set the state to this state. This is just a helper that we use in other states when objects need to be attached to things
+        [System.NonSerialized]
+        public Vector3 parentPos;
+        [System.NonSerialized]
+        public Quaternion parentRot;
+
+        //these values are arbitrary, but they work pretty good for most pickups
+        [System.NonSerialized]
+        public float positionResyncThreshold = 0.015f;
+        [System.NonSerialized]
+        public float rotationResyncThreshold = 0.995f;
+        [System.NonSerialized]
+        public float lastResync = -1001f;
+        public void generic_OnInterpolationStart()
+        {
+            // CalcParentTransform();
+            startPos = CalcPos();
+            startRot = CalcRot();
+        }
+        public void generic_Interpolate(float interpolation)
+        {
+            // CalcParentTransform();
+            transform.position = HermiteInterpolatePosition(parentPos + parentRot * startPos, Vector3.zero, parentPos + parentRot * pos, Vector3.zero, interpolation);
+            transform.rotation = HermiteInterpolateRotation(parentRot * startRot, Vector3.zero, parentRot * rot, Vector3.zero, interpolation);
+            rigid.velocity = Vector3.zero;
+            rigid.angularVelocity = Vector3.zero;
+        }
+        public bool generic_OnInterpolationEnd()
+        {
+            if (IsLocalOwner())
+            {
+                if (generic_ObjectMoved())
+                {
+                    if (lastResync + lerpTime < Time.timeSinceLevelLoad)
+                    {
+                        RequestSerialization();
+                    }
+                }
+                else
+                {
+                    lastResync = Time.timeSinceLevelLoad;
+                }
+            }
+            return true;
+        }
+
+        public void generic_OnSmartObjectSerialize()
+        {
+            // CalcParentTransform();
+            pos = CalcPos();
+            rot = CalcRot();
+            vel = CalcVel();
+            spin = CalcSpin();
+            lastResync = Time.timeSinceLevelLoad;
+        }
+
+        public Vector3 CalcPos()
+        {
+            return Quaternion.Inverse(parentRot) * (transform.position - parentPos);
+        }
+        public Quaternion CalcRot()
+        {
+            return Quaternion.Inverse(parentRot) * transform.rotation;
+        }
+        public Vector3 CalcVel()
+        {
+            return Vector3.zero;
+        }
+        public Vector3 CalcSpin()
+        {
+            return Vector3.zero;
+        }
+
+        public bool generic_ObjectMoved()
+        {
+            return Vector3.Distance(CalcPos(), pos) > positionResyncThreshold || Quaternion.Dot(CalcRot(), rot) < rotationResyncThreshold;//arbitrary values to account for pickups wiggling a little in your hand
+        }
+
+        //Left Hand Held State
+        //This state syncs the transforms relative to the left hand of the owner
+        //This state is useful for when someone is holding the object in their left hand
+        //We do not disable the update loop because the left hand is going to move around and we need to continually update the object transforms to match.
+        //Falls back to Playspace Attachment State if no left hand bone is found
+        public void left_OnEnterState()
+        {
+            bone = HumanBodyBones.LeftHand;
+            if (pickup)
+            {
+                if (IsLocalOwner())
+                {
+                    pickup.pickupable = allowTheftFromSelf;
+                } else
+                {
+                    pickup.pickupable = allowTheftFromOthers;
+                }
+            }
+        }
+        public void left_OnExitState()
+        {
+            if (pickup)
+            {
+                pickup.pickupable = true;
+            }
+        }
+        public void left_Interpolate(float interpolation)
+        {
+            //let the VRC_pickup script handle transforms for the local owner
+            //only reposition it for non-owners
+            bone_CalcParentTransform();
+            if (!IsLocalOwner())
+            {
+                generic_Interpolate(interpolation);
+            }
+        }
+
+        //Right Hand Held State
+        //Same as the Left Hand Held State, but for right hands
+        public void right_OnEnterState()
+        {
+            bone = HumanBodyBones.RightHand;
+            if (pickup)
+            {
+                if (IsLocalOwner())
+                {
+                    pickup.pickupable = allowTheftFromSelf;
+                }
+                else
+                {
+                    pickup.pickupable = allowTheftFromOthers;
+                }
+            }
+        }
+        public void right_OnExitState()
+        {
+            if (pickup)
+            {
+                pickup.pickupable = true;
+            }
+        }
+        public void right_Interpolate(float interpolation)
+        {
+            //let the VRC_pickup script handle transforms for the local owner
+            //only reposition it for non-owners
+            //we need to keep the parent transform up to date though
+            bone_CalcParentTransform();
+            if (!IsLocalOwner())
+            {
+                generic_Interpolate(interpolation);
+            }
+        }
+
+        //Bone Attachment State
+        //Same as the left and right hand held states, but can be applied to any bone defined in HumanBodyBones
+        [System.NonSerialized]
+        public bool hasBones = false;
+        [System.NonSerialized]
+        public HumanBodyBones bone;
+
+        public void bone_OnEnterState()
+        {
+            bone = (HumanBodyBones)(-1 - state);
+        }
+        public void bone_OnInterpolationStart()
+        {
+            //if the avatar we're wearing doesn't have the bones required, fallback to attach to playspace
+            bone_CalcParentTransform();
+            if (IsLocalOwner())
+            {
+                if (!hasBones)
+                {
+                    _printErr("Avatar is missing the correct bone. Falling back to playspace attachment.");
+                    state = SmartObjectSync.STATE_ATTACHED_TO_PLAYSPACE;
+                    return;
+                }
+            }
+            generic_OnInterpolationStart();
+        }
+        public void bone_CalcParentTransform()
+        {
+            if (Utilities.IsValid(owner))
+            {
+                parentPos = owner.GetBonePosition(bone);
+                parentRot = owner.GetBoneRotation(bone);
+                hasBones = parentPos != Vector3.zero;
+                parentPos = hasBones ? parentPos : owner.GetPosition();
+                parentRot = hasBones ? parentRot : owner.GetRotation();
+            }
+        }
+
+        //Playspace Attachment State
+        //Same as Bone Attachment state, but uses the player's transform instead of one of their bone's transforms.
+        //Useful as a fallback when the avatar is missing certain bones
+        public void playspace_CalcParentTransform()
+        {
+            if (Utilities.IsValid(owner))
+            {
+                parentPos = owner.GetPosition();
+                parentRot = owner.GetRotation();
+            }
+        }
+
+        //Worldspace Attachment State
+        //Locks an object's transform in world space
+        //Useful as intermediate state when transferring ownership.
+        //For example, if request to transfer ownership of an object comes before the new owner can update the state and transform of that object,
+        //there will be a few frames when the owner is correct, but the state and transforms are wrong.
+        //If the old state was left hand held, but it's meant to be right hand held, then you'll see a few confusing frames where the object teleports between hands.
+        //It's often better in this scenario to just lock the object to world space before transferring ownership so there's no teleporting in these intermediate frames.
+        public void world_OnInterpolationStart()
+        {
+            startPos = transform.position;
+            startRot = transform.rotation;
+        }
+        public void world_Interpolate(float interpolation)
+        {
+            transform.position = HermiteInterpolatePosition(startPos, Vector3.zero, pos, Vector3.zero, interpolation);
+            transform.rotation = HermiteInterpolateRotation(startRot, Vector3.zero, rot, Vector3.zero, interpolation);
+            rigid.velocity = Vector3.zero;
+            rigid.angularVelocity = Vector3.zero;
+        }
+        public bool world_OnInterpolationEnd()
+        {
+            return true;
+        }
+
+        public void world_OnSmartObjectSerialize()
+        {
+            pos = transform.position;
+            rot = transform.rotation;
+            vel = Vector3.zero;
+            spin = Vector3.zero;
         }
     }
 }

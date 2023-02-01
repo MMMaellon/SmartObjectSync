@@ -10,12 +10,18 @@ namespace MMMaellon
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class SmartObjectSyncState : UdonSharpBehaviour
     {
-// #if !COMPILER_UDONSHARP && UNITY_EDITOR
-//         public void Reset()
-//         {
-//             SmartObjectSyncEditor.SetupStates(GetComponent<SmartObjectSync>());
-//         }
-// #endif
+        [HideInInspector]
+        public bool SetupRan = false;
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
+        public virtual void Reset()
+        {
+            if (!SetupRan)
+            {
+                SmartObjectSyncEditor.SetupStates(GetComponent<SmartObjectSync>());
+            }
+            SetupRan = true;
+        }
+#endif
         [HideInInspector]
         public int stateID;
         [HideInInspector]
@@ -23,25 +29,30 @@ namespace MMMaellon
 
         public void EnterState()
         {
-            if (sync && Utilities.IsValid(sync.owner))
+            if (sync)
             {
-                if (!sync.owner.isLocal)
+                if (!sync.IsLocalOwner())
                 {
                     Networking.SetOwner(Networking.LocalPlayer, sync.gameObject);
                 }
-                sync.state = stateID;
+                sync.state = (stateID + SmartObjectSync.STATE_CUSTOM);
             }
         }
         public void ExitState()
         {
-            if (sync && Utilities.IsValid(sync.owner))
+            if (sync)
             {
-                if (!sync.owner.isLocal)
+                if (!sync.IsLocalOwner())
                 {
                     Networking.SetOwner(Networking.LocalPlayer, sync.gameObject);
                 }
                 sync.state = SmartObjectSync.STATE_FALLING;
             }
+        }
+
+        public bool IsActiveState()
+        {
+            return sync.customState == this;
         }
 
         public abstract void OnEnterState();

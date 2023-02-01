@@ -32,21 +32,8 @@ namespace MMMaellon
                 SmartObjectSyncHelper helper = target as SmartObjectSyncHelper;
                 if (helper && (helper.sync == null || helper.sync.helper != helper))
                 {
-                    int deleteCount = 0;
-
-                    foreach (SmartObjectSyncState state in helper.GetComponents<SmartObjectSyncState>())
-                    {
-                        if (state && (state.sync == null || (state.stateID < 0 && state.sync._bone_attached_state != state) || (state.sync.states[state.stateID] != state)))
-                        {
-                            deleteCount++;
-                            Component.DestroyImmediate(state);
-                        }
-                    }
-                    if (deleteCount == 0)
-                    {
-                        Component.DestroyImmediate(helper);
-                        return;//return early to avoid bugs with drawing the gui
-                    }
+                    Component.DestroyImmediate(helper);
+                    return;//return early to avoid bugs with drawing the gui
                 }
             }
 
@@ -65,6 +52,8 @@ namespace MMMaellon
     {
         [HideInInspector]
         public SmartObjectSync sync;
+        // [System.NonSerialized]
+        // public int queuedPhysicsEvent = -1;
         public void Update()
         {
             if (!sync || !Utilities.IsValid(sync.owner))
@@ -84,6 +73,20 @@ namespace MMMaellon
 
             sync.Interpolate();
         }
+
+        // public void FixedUpdate()
+        // {
+        //     if (!sync || !sync.IsLocalOwner())
+        //     {
+        //         queuedPhysicsEvent = -1;
+        //         return;
+        //     }
+        //     if (queuedPhysicsEvent >= 0 && sync._state == queuedPhysicsEvent)
+        //     {
+        //         sync.state = sync.state;
+        //     }
+        //     queuedPhysicsEvent = -1;
+        // }
 
         public void OnEnable()
         {

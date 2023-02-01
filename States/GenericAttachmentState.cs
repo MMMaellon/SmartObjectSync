@@ -6,27 +6,42 @@ using VRC.Udon;
 
 namespace MMMaellon
 {
+    //Helper class
+    //Use this as a base for new states that require the object to be parented to another object
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public abstract class GenericAttachmentState : SmartObjectSyncState
     {
+        [System.NonSerialized]
         public Vector3 startPos;
+        [System.NonSerialized]
         public Quaternion startRot;
+        [System.NonSerialized]
         public Vector3 parentPos;
+        [System.NonSerialized]
         public Quaternion parentRot;
         
         //these values are arbitrary, but they work pretty good for most pickups
         public float positionResyncThreshold = 0.015f;
         public float rotationResyncThreshold = 0.995f;
+        [System.NonSerialized]
         public float lastResync = -1001f;
+        private bool wasKinematic = false;
 
         public override void OnEnterState()
         {
-            
+            if (sync.rigid)
+            {
+                wasKinematic = sync.rigid.isKinematic;
+                sync.rigid.isKinematic = true;
+            }
         }
 
         public override void OnExitState()
         {
-
+            if (sync.rigid)
+            {
+                sync.rigid.isKinematic = wasKinematic;
+            }
         }
 
 

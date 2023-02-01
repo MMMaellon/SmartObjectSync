@@ -19,6 +19,16 @@ public class SetColorBasedOnOwnership : UdonSharpBehaviour
         OnOwnershipTransferred(Networking.GetOwner(gameObject));
     }
 
+#if !COMPILER_UDONSHARP && UNITY_EDITOR
+    void Reset()
+    {
+        if (!meshRenderer)
+        {
+            meshRenderer = GetComponent<MeshRenderer>();
+        }
+    }
+#endif
+
     public override void OnOwnershipTransferred(VRCPlayerApi player)
     {
         if (meshRenderer && Utilities.IsValid(player))
