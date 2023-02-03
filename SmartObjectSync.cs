@@ -54,7 +54,9 @@ namespace MMMaellon
                 SetupStates(sync);
                 if (sync.printDebugMessages)
                     _print(sync, "Auto Setup Complete!\n" + sync.pickup == null ? "No VRC_Pickup component found" : "VRC_Pickup component found\n" + sync.rigid == null ? "No Rigidbody component found" : "Rigidbody component found");
-            } else {
+            }
+            else
+            {
                 Debug.LogWarning("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
             }
         }
@@ -122,7 +124,7 @@ namespace MMMaellon
             int stateSetupCount = 0;
             foreach (SmartObjectSync sync in Selection.GetFiltered<SmartObjectSync>(SelectionMode.Editable))
             {
-                if (sync)
+                if (Utilities.IsValid(sync))
                 {
                     syncCount++;
                     if (sync.pickup != sync.GetComponent<VRC_Pickup>())
@@ -141,12 +143,17 @@ namespace MMMaellon
                     {
                         helperSetupCount++;
                     }
+                    if (!Utilities.IsValid(sync.states))
+                    {
+                        sync.states = new SmartObjectSyncState[0];
+                    }
 
                     SmartObjectSyncState[] stateComponents = sync.GetComponents<SmartObjectSyncState>();
                     if (sync.states.Length != stateComponents.Length)//+ 1 because of bone attachment
                     {
                         stateSetupCount++;
-                    } else
+                    }
+                    else
                     {
                         bool errorFound = false;
                         foreach (SmartObjectSyncState state in sync.states)
@@ -242,7 +249,6 @@ namespace MMMaellon
         public bool printDebugMessages = false;
         public bool takeOwnershipOfOtherObjectsOnCollision = true;
         public bool allowOthersToTakeOwnershipOnCollision = true;
-        public bool allowTheftFromOthers = true;
         public bool allowTheftFromSelf = true;
 
         [HideInInspector]
@@ -256,16 +262,16 @@ namespace MMMaellon
 
         [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
         public Vector3 pos;
-        
+
         [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
         public Quaternion rot;
-        
+
         [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
         public Vector3 vel;
-        
+
         [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
         public Vector3 spin;
-        
+
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(state))]
         public int _state = STATE_TELEPORTING;
         public const int STATE_SLEEPING = 0;
@@ -289,7 +295,8 @@ namespace MMMaellon
         [HideInInspector]
         public SmartObjectSyncState[] states;
 
-        public SmartObjectSyncState customState{
+        public SmartObjectSyncState customState
+        {
             get
             {
                 if (state >= STATE_CUSTOM && state - STATE_CUSTOM < states.Length)
@@ -309,7 +316,8 @@ namespace MMMaellon
                 if (interpolationStartTime <= 0 || lerpTime <= 0 || (Time.timeSinceLevelLoad - interpolationStartTime) >= lerpTime)
                 {
                     return 1.0f;
-                } else
+                }
+                else
                 {
                     return (Time.timeSinceLevelLoad - interpolationStartTime) / lerpTime;
                 }
@@ -353,7 +361,8 @@ namespace MMMaellon
 
         [System.NonSerialized, FieldChangeCallback(nameof(owner))]
         public VRCPlayerApi _owner;
-        public VRCPlayerApi owner{
+        public VRCPlayerApi owner
+        {
             get => _owner;
             set
             {
@@ -367,7 +376,9 @@ namespace MMMaellon
                         {
                             state = STATE_INTERPOLATING;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         if (pickup)
                         {
                             pickup.Drop();
@@ -508,7 +519,7 @@ namespace MMMaellon
             }
             startRan = true;
         }
-        
+
         public void OnEnable()
         {
             owner = Networking.GetOwner(gameObject);
@@ -519,7 +530,8 @@ namespace MMMaellon
                     //force a reset
                     state = state;
                 }
-            } else if (interpolationStartTime > 0)
+            }
+            else if (interpolationStartTime > 0)
             {
                 //only do this after we've received some data from the owner to prevent being sucked into spawn
                 _print("onenable start interpolate");
@@ -565,7 +577,7 @@ namespace MMMaellon
         {
             RecordLastTransform();
             OnInterpolate(interpolation);
-            
+
             if (interpolation < 1.0)
             {
                 return;
@@ -591,7 +603,12 @@ namespace MMMaellon
             {
                 //if the helper is on, then we were recording good transform data and we can calculate the perceived velocity
                 rigid.velocity = (transform.position - lastPos) / Time.deltaTime;
-                rigid.angularVelocity = (Quaternion.Inverse(lastRot) * transform.rotation).eulerAngles / Time.deltaTime;
+
+                //angular velocity is normalized rotation axis * angle in radians: https://answers.unity.com/questions/49082/rotation-quaternion-to-angular-velocity.html
+                float angle;
+                Vector3 axis;
+                (Quaternion.Inverse(lastRot) * transform.rotation).ToAngleAxis(out angle, out axis);
+                rigid.angularVelocity = axis * angle * Mathf.Deg2Rad / Time.deltaTime;
             }
         }
 
@@ -685,7 +702,8 @@ namespace MMMaellon
                     // QueuePhysicsEvent(STATE_INTERPOLATING);
                     state = STATE_INTERPOLATING;
                 }
-            } else if (state == STATE_SLEEPING && interpolationEnded)
+            }
+            else if (state == STATE_SLEEPING && interpolationEnded)
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
                 StartInterpolation();
@@ -756,7 +774,8 @@ namespace MMMaellon
             SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
         }
 
-        public void OnDropDelayed(){
+        public void OnDropDelayed()
+        {
             if (!IsLocalOwner() || (state != STATE_INTERPOLATING))
             {
                 return;
@@ -805,7 +824,8 @@ namespace MMMaellon
         [System.NonSerialized]
         public Quaternion lastRot;
 
-        public void OnEnterState(){
+        public void OnEnterState()
+        {
             switch (state)
             {
                 case (STATE_SLEEPING):
@@ -861,9 +881,10 @@ namespace MMMaellon
                         return;
                     }
             }
-            
+
         }
-        public void OnExitState(){
+        public void OnExitState()
+        {
             switch (state)
             {
                 case (STATE_SLEEPING):
@@ -920,9 +941,10 @@ namespace MMMaellon
                         return;
                     }
             }
-            
+
         }
-        public void OnSmartObjectSerialize(){
+        public void OnSmartObjectSerialize()
+        {
             switch (state)
             {
                 case (STATE_SLEEPING):
@@ -1102,7 +1124,8 @@ namespace MMMaellon
                     }
             }
         }
-        public bool OnInterpolationEnd(){
+        public bool OnInterpolationEnd()
+        {
             switch (state)
             {
                 case (STATE_SLEEPING):
@@ -1142,7 +1165,8 @@ namespace MMMaellon
                         if (state < 0)
                         {
                             return generic_OnInterpolationEnd();
-                        } else if (customState)
+                        }
+                        else if (customState)
                         {
                             return customState.OnInterpolationEnd();
                         }
@@ -1505,6 +1529,7 @@ namespace MMMaellon
             return Vector3.Distance(CalcPos(), pos) > positionResyncThreshold || Quaternion.Dot(CalcRot(), rot) < rotationResyncThreshold;//arbitrary values to account for pickups wiggling a little in your hand
         }
 
+        bool lastPickupable = false;
         //Left Hand Held State
         //This state syncs the transforms relative to the left hand of the owner
         //This state is useful for when someone is holding the object in their left hand
@@ -1515,12 +1540,14 @@ namespace MMMaellon
             bone = HumanBodyBones.LeftHand;
             if (pickup)
             {
+                lastPickupable = pickup.pickupable;
                 if (IsLocalOwner())
                 {
                     pickup.pickupable = allowTheftFromSelf;
-                } else
+                }
+                else
                 {
-                    pickup.pickupable = allowTheftFromOthers;
+                    pickup.pickupable = !pickup.DisallowTheft;
                 }
             }
         }
@@ -1528,7 +1555,7 @@ namespace MMMaellon
         {
             if (pickup)
             {
-                pickup.pickupable = true;
+                pickup.pickupable = lastPickupable;
             }
         }
         public void left_Interpolate(float interpolation)
@@ -1549,13 +1576,14 @@ namespace MMMaellon
             bone = HumanBodyBones.RightHand;
             if (pickup)
             {
+                lastPickupable = pickup.pickupable;
                 if (IsLocalOwner())
                 {
                     pickup.pickupable = allowTheftFromSelf;
                 }
                 else
                 {
-                    pickup.pickupable = allowTheftFromOthers;
+                    pickup.pickupable = !pickup.DisallowTheft;
                 }
             }
         }
@@ -1563,7 +1591,7 @@ namespace MMMaellon
         {
             if (pickup)
             {
-                pickup.pickupable = true;
+                pickup.pickupable = lastPickupable;
             }
         }
         public void right_Interpolate(float interpolation)
