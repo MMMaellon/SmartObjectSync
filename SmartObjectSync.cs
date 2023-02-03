@@ -785,18 +785,29 @@ namespace MMMaellon
         {
             _print("OnDrop");
             //it takes 1 frame for VRChat to give the pickup the correct velocity, so let's wait 1 frame
-            //we use _state here to not trigger any of the events that happen when you set state
-            _state = _state == STATE_LEFT_HAND_HELD || _state == STATE_RIGHT_HAND_HELD ? STATE_INTERPOLATING : _state;
-            SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
+            //many different states will want to change the state and in doing so force us to drop the object
+            //To know if this is a player initiated drop, we check that the state is still one of being held
+            //we need to set the state to interpolating next frame so we also set the lastState variable to
+            //remind us to do that
+            //The reason we need the lastState variable is because switching hands will cause the state to
+            //go from a held state to another held state, and if, one frame from now, we set the state to
+            //interpolating that will make transferring objects from one hand to another impossible
+            //transferring one object from your hand to your same hand is already impossible, so if lastState
+            //is equal to current state we know that it was a genuine drop
+            if (state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD)
+            {
+                lastState = state;
+                SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
+            }
         }
 
         public void OnDropDelayed()
         {
-            if (!IsLocalOwner() || (state != STATE_INTERPOLATING))
+            if (!IsLocalOwner() || lastState != state || (state != STATE_LEFT_HAND_HELD && state != STATE_RIGHT_HAND_HELD))
             {
                 return;
             }
-            state = state;
+            state = STATE_INTERPOLATING;
         }
 
         //Ownership Events
@@ -1311,7 +1322,7 @@ namespace MMMaellon
         {
             if (IsLocalOwner())
             {
-                if (rigid == null || rigid.isKinematic || rigid.IsSleeping() || !sleep_ObjectMoved())
+                if (rigid == null || rigid.isKinematic || rigid.IsSleeping())
                 {
                     //wait around for the rigidbody to fall asleep
                     state = SmartObjectSync.STATE_SLEEPING;
@@ -1324,8 +1335,6 @@ namespace MMMaellon
                 //         RequestSerialization();
                 //     }
                 // }
-                endPos = transform.position;
-                endRot = transform.rotation;
                 //returning true means we extend the interpolation period
                 return true;
             }
@@ -1426,7 +1435,7 @@ namespace MMMaellon
         {
             if (IsLocalOwner())
             {
-                if (rigid == null || rigid.isKinematic || rigid.IsSleeping() || !sleep_ObjectMoved())
+                if (rigid == null || rigid.isKinematic || rigid.IsSleeping())
                 {
                     //wait around for the rigidbody to fall asleep
                     state = SmartObjectSync.STATE_SLEEPING;
@@ -1439,8 +1448,6 @@ namespace MMMaellon
                 //         RequestSerialization();
                 //     }
                 // }
-                endPos = transform.position;
-                endRot = transform.rotation;
                 //returning true means we extend the interpolation period
                 return true;
             }

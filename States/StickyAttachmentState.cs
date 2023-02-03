@@ -168,7 +168,7 @@ namespace MMMaellon
 
         public override void OnExitState()
         {
-            
+            parentTransform = null;
         }
 
         public override void OnSmartObjectSerialize()
