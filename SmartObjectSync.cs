@@ -323,6 +323,8 @@ namespace MMMaellon
                 }
             }
         }
+        public SmartObjectSyncListener[] listeners = new SmartObjectSyncListener[0];
+
         [System.NonSerialized]
         public Vector3 posOnSync;
         [System.NonSerialized]
@@ -331,12 +333,15 @@ namespace MMMaellon
         public Vector3 velOnSync;
         [System.NonSerialized]
         public Vector3 spinOnSync;
+        [System.NonSerialized]
+        public int lastState;
         public int state
         {
             get => _state;
             set
             {
                 OnExitState();
+                lastState = _state;
                 _state = value;
                 OnEnterState();
 
@@ -356,6 +361,14 @@ namespace MMMaellon
                 }
 
                 _print("STATE: " + StateToString(value));
+
+                if (Utilities.IsValid(listeners))
+                {
+                    foreach (SmartObjectSyncListener listener in listeners)
+                    {
+                        listener.OnChangeState(this, lastState, value);
+                    }
+                }
             }
         }
 
