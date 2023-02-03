@@ -366,7 +366,10 @@ namespace MMMaellon
                 {
                     foreach (SmartObjectSyncListener listener in listeners)
                     {
-                        listener.OnChangeState(this, lastState, value);
+                        if (Utilities.IsValid(listener))
+                        {
+                            listener.OnChangeState(this, lastState, value);
+                        }
                     }
                 }
             }
