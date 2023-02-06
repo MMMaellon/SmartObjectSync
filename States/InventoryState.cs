@@ -63,7 +63,7 @@ namespace MMMaellon
         [System.NonSerialized]
         public Vector3 startScale;
         [System.NonSerialized]
-        public bool useLeftHandInventory = false;
+        public bool useLeftHandInventory = true;
 
         [System.NonSerialized]
         public float interpolationStart = -1001f;

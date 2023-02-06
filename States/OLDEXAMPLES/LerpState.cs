@@ -75,7 +75,7 @@ namespace MMMaellon
         {
             if (sync.IsLocalOwner())
             {
-                if (transform.position.y <= sync.respawn_height)
+                if (transform.position.y <= sync.respawnHeight)
                 {
                     sync.Respawn();
                 }

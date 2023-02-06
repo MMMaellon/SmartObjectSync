@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace MMMaellon
 {
-    [CustomEditor(typeof(SmartObjectSync)), CanEditMultipleObjects]
+    [CustomEditor(typeof(SmartObjectSync), true), CanEditMultipleObjects]
 
     public class SmartObjectSyncEditor : Editor
     {
@@ -48,7 +48,7 @@ namespace MMMaellon
                 }
                 if (VRC_SceneDescriptor.Instance)
                 {
-                    serializedSync.FindProperty("respawn_height").floatValue = VRC_SceneDescriptor.Instance.RespawnHeightY;
+                    serializedSync.FindProperty("respawnHeight").floatValue = VRC_SceneDescriptor.Instance.RespawnHeightY;
                 }
                 serializedSync.ApplyModifiedProperties();
                 SetupStates(sync);
@@ -135,7 +135,7 @@ namespace MMMaellon
                     {
                         rigidSetupCount++;
                     }
-                    if (VRC_SceneDescriptor.Instance != null && VRC_SceneDescriptor.Instance.RespawnHeightY != sync.respawn_height)
+                    if (VRC_SceneDescriptor.Instance != null && VRC_SceneDescriptor.Instance.RespawnHeightY != sync.respawnHeight)
                     {
                         respawnYSetupCount++;
                     }
@@ -246,19 +246,27 @@ namespace MMMaellon
     [RequireComponent(typeof(Rigidbody))]
     public partial class SmartObjectSync : UdonSharpBehaviour
     {
-        public bool printDebugMessages = false;
+        
+        [Header("Settings")]
         public bool takeOwnershipOfOtherObjectsOnCollision = true;
         public bool allowOthersToTakeOwnershipOnCollision = true;
         public bool allowTheftFromSelf = true;
+        public float respawnHeight = -1001f;
+        
+        [Header("Advanced Settings")]
+        public bool printDebugMessages = false;
+        [Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
+        public float lerpTime = 0.1f;
+
+        [Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
+        public bool reduceJitterDuringSleep = true;
 
         [HideInInspector]
         public SmartObjectSyncHelper helper;
-        public float respawn_height = -1001f;
         [HideInInspector]
         public VRC_Pickup pickup;
         [HideInInspector]
         public Rigidbody rigid;
-        public float lerpTime = 0.1f;
 
         [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
         public Vector3 pos;
@@ -309,6 +317,10 @@ namespace MMMaellon
 
         [System.NonSerialized]
         public float interpolationStartTime = -1001f;
+        [System.NonSerialized]
+        public float interpolationEndTime = -1001f;
+        [System.NonSerialized]
+        public float fallSpeed = 0f;
         public float interpolation
         {
             get
@@ -357,7 +369,7 @@ namespace MMMaellon
                     //make sure to serialize all variables beforehand
                     OnSmartObjectSerialize();
                     StartInterpolation();
-                    RequestSerialization();
+                    Serialize();
                 }
 
                 _print("STATE: " + StateToString(value));
@@ -411,7 +423,7 @@ namespace MMMaellon
         {
             if (!SetupRan)
             {
-                // SmartObjectSyncEditor.SetupSmartObjectSync(this);
+                SmartObjectSyncEditor.SetupSmartObjectSync(this);
             }
             SetupRan = true;
         }
@@ -512,8 +524,6 @@ namespace MMMaellon
             }
         }
 
-
-
         bool startRan;
         [System.NonSerialized]
         public Vector3 spawnPos;
@@ -533,6 +543,10 @@ namespace MMMaellon
                     spin = rigid.angularVelocity;
                 }
             }
+
+            //speed we gain from gravity in a free fall over the lerp time
+            //used to decide if we simulate a bounce in the falling state
+            fallSpeed = lerpTime <= 0 ? 0 : Physics.gravity.magnitude * lerpTime;
             startRan = true;
         }
 
@@ -584,9 +598,8 @@ namespace MMMaellon
 
         public void StartInterpolation()
         {
-            interpolationStartTime = Time.timeSinceLevelLoad;
             OnInterpolationStart();
-            helper.enabled = true;
+            helper.Enable();
         }
 
         public void Interpolate()
@@ -599,13 +612,11 @@ namespace MMMaellon
                 return;
             }
             //decide if we keep running the helper
-            helper.enabled = OnInterpolationEnd();
+            if (!OnInterpolationEnd())
+            {
+                helper.Disable();
+            }
         }
-        // public void QueuePhysicsEvent(int eventState)
-        // {
-        //     _state = eventState;
-        //     helper.queuedPhysicsEvent = eventState;
-        // }
 
         public void RecordLastTransform()
         {
@@ -615,7 +626,7 @@ namespace MMMaellon
 
         public void SetVelocityFromLastTransform()
         {
-            if (helper.enabled)
+            if (helper.IsEnabled())
             {
                 //if the helper is on, then we were recording good transform data and we can calculate the perceived velocity
                 rigid.velocity = (transform.position - lastPos) / Time.deltaTime;
@@ -630,6 +641,17 @@ namespace MMMaellon
 
 
         //Serialization
+        public void Serialize()
+        {
+            if (Networking.IsClogged)
+            {
+                helper.OnSerializationFailure();
+            } else
+            {
+                RequestSerialization();
+            }
+        }
+
         public override void OnPreSerialization()
         {
             // _print("OnPreSerialization");
@@ -643,54 +665,20 @@ namespace MMMaellon
             StartInterpolation();
         }
 
+        public override void OnPostSerialization(VRC.Udon.Common.SerializationResult result)
+        {
+            if (result.success)
+            {
+                helper.OnSerializationSuccess();
+            }
+            else
+            {
+                //it sets a flag in the helper which will try to synchronize everything once the network gets less congested
+                helper.OnSerializationFailure();
+            }
+        }
 
-        // float resyncDelay = 0f;
-        // float lastSyncFail = -1001f;
 
-        // public override void OnPostSerialization(SerializationResult result)
-        // {
-        //     // _print("OnPostSerialization");
-        //     if (!result.success)
-        //     {
-        //         OnSerializationFailure();
-        //     }
-        //     else
-        //     {
-        //         resyncDelay = 0;
-        //     }
-        // }
-
-        // public void OnSerializationFailure()
-        // {
-        //     //this gets called only when there's a problem with syncing
-        //     //we have to be careful about how we move forward
-        //     _printErr("OnSerializationFailure");
-        //     if (resyncDelay > 0 && lastSyncFail + resyncDelay > Time.timeSinceLevelLoad + 0.1f)
-        //     {
-        //         _printErr("sync failure came too soon after last sync failure");
-        //         return;
-        //     }
-        //     //we double the last delay in an attempt to recreate exponential backoff
-        //     resyncDelay = resyncDelay == 0 ? 0.1f : (resyncDelay * 2);
-        //     lastSyncFail = Time.timeSinceLevelLoad;
-        //     SendCustomEventDelayedSeconds(nameof(LowPrioritySerialize), resyncDelay);
-        // }
-
-        // public void LowPrioritySerialize()
-        // {
-        //     if (!IsLocalOwner())
-        //     {
-        //         return;
-        //     }
-
-        //     if (Networking.IsClogged)
-        //     {
-        //         OnSerializationFailure();
-        //     } else
-        //     {
-        //         RequestSerialization();
-        //     }
-        // }
         public void AttachToBone(HumanBodyBones bone)
         {
             if (!IsLocalOwner())
@@ -719,10 +707,11 @@ namespace MMMaellon
                     state = STATE_INTERPOLATING;
                 }
             }
-            else if (state == STATE_SLEEPING && interpolationEnded)
+            else if (state == STATE_SLEEPING && interpolationEndTime + Time.deltaTime < Time.timeSinceLevelLoad)//we ignore the very first frame after interpolation to give rigidbodies time to settle down
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
                 StartInterpolation();
+                // helper.Enable();
             }
 
 
@@ -735,8 +724,7 @@ namespace MMMaellon
             if (otherSync && !otherSync.IsLocalOwner() && otherSync.allowOthersToTakeOwnershipOnCollision && !otherSync.IsAttachedToPlayer() && otherSync.rigid && (IsAttachedToPlayer() || otherSync.state == STATE_SLEEPING || !otherSync.takeOwnershipOfOtherObjectsOnCollision || otherSync.rigid.velocity.sqrMagnitude < rigid.velocity.sqrMagnitude))
             {
                 otherSync.TakeOwnership(true);
-                otherSync.RequestSerialization();
-                // otherSync.LowPrioritySerialize();
+                otherSync.Serialize();
             }
         }
 
@@ -752,15 +740,16 @@ namespace MMMaellon
                 //check if we're in a state where physics matters
                 if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
                 {
-                    // QueuePhysicsEvent(STATE_FALLING);
                     state = STATE_FALLING;
                 }
             }
-            else if (state == STATE_SLEEPING && interpolationEnded)
+            else if (state == STATE_SLEEPING && interpolationEndTime + Time.deltaTime < Time.timeSinceLevelLoad)
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
                 StartInterpolation();
-                return;
+                // return;
+
+                // helper.Enable();
             }
         }
 
@@ -840,12 +829,6 @@ namespace MMMaellon
         public Vector3 startVel;
         [System.NonSerialized]
         public Vector3 startSpin;
-        [System.NonSerialized]
-        public Vector3 endPos;
-        [System.NonSerialized]
-        public Quaternion endRot;
-        [System.NonSerialized]
-        public bool interpolationEnded = false;
         [System.NonSerialized]
         public Vector3 lastPos;
         [System.NonSerialized]
@@ -1034,6 +1017,7 @@ namespace MMMaellon
         }
         public void OnInterpolationStart()
         {
+            interpolationStartTime = Time.timeSinceLevelLoad;
             switch (state)
             {
                 case (STATE_SLEEPING):
@@ -1153,6 +1137,10 @@ namespace MMMaellon
         }
         public bool OnInterpolationEnd()
         {
+            if (interpolationEndTime <= interpolationStartTime)
+            {
+                interpolationEndTime = Time.timeSinceLevelLoad;
+            }
             switch (state)
             {
                 case (STATE_SLEEPING):
@@ -1207,9 +1195,11 @@ namespace MMMaellon
         //This state interpolates objects to a position and then attempts to put their rigidbody to sleep
         //If the rigidbody can't sleep, like if it's floating in mid-air or something, then the just holds the position and rotation.
         //If the rigidbody does fall asleep in the right position and rotation, then the state disables the update loop for optimization
+        [System.NonSerialized] public Vector3 sleepPos;
+        [System.NonSerialized] public Quaternion sleepRot;
+        [System.NonSerialized] public float lastSleep = -1001f;
         public void sleep_OnInterpolationStart()
         {
-            interpolationEnded = false;
             startPos = transform.position;
             startRot = transform.rotation;
             startVel = rigid.velocity;
@@ -1217,41 +1207,35 @@ namespace MMMaellon
         }
         public void sleep_Interpolate(float interpolation)
         {
-            if (interpolationEnded || IsLocalOwner())
+            if (IsLocalOwner())
             {
                 return;
             }
-            transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
-            transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
-
-            //because of weird floating point precision errors, it makes sense to note down what the "real" ending transform is
-            endPos = transform.position;
-            endRot = transform.rotation;
-            rigid.velocity = Vector3.zero;
-            rigid.angularVelocity = Vector3.zero;
+            if (interpolation < 1.0f)
+            {
+                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
+                transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
+                rigid.velocity = Vector3.zero;
+                rigid.angularVelocity = Vector3.zero;
+            }
+            else if (!reduceJitterDuringSleep || ObjectMovedDuringSleep())
+            {
+                transform.position = pos;
+                transform.rotation = rot;
+                rigid.velocity = Vector3.zero;
+                rigid.angularVelocity = Vector3.zero;
+                rigid.Sleep();
+                lastSleep = Time.timeSinceLevelLoad;
+            }
         }
 
         public bool sleep_OnInterpolationEnd()
         {
-            interpolationEnded = true;
-            if (IsLocalOwner() || rigid == null || rigid.isKinematic || rigid.IsSleeping())
+            if (IsLocalOwner() || rigid == null || rigid.isKinematic || (rigid.IsSleeping() && (!reduceJitterDuringSleep || lastSleep != Time.timeSinceLevelLoad)))
             {
                 _print("successfully slept");
                 return false;
             }
-
-            //only update positions if we're not already where we should be
-            //if there's a frame where we don't set the position, there's a possibility of the rigidbody falling asleep which we want
-            if (sleep_ObjectMoved())
-            {
-                transform.position = pos;
-                transform.rotation = rot;
-                endPos = transform.position;
-                endRot = transform.rotation;
-                rigid.velocity = Vector3.zero;
-                rigid.angularVelocity = Vector3.zero;
-            }
-            rigid.Sleep();
             return true;
         }
 
@@ -1263,9 +1247,9 @@ namespace MMMaellon
             spin = Vector3.zero;
         }
 
-        public bool sleep_ObjectMoved()
+        public bool ObjectMovedDuringSleep()
         {
-            return endPos != transform.position || endRot != transform.rotation;
+            return transform.position != pos || transform.rotation != rot;
         }
 
         //Teleport State
@@ -1308,7 +1292,7 @@ namespace MMMaellon
         {
             if (IsLocalOwner())
             {
-                if (transform.position.y <= respawn_height)
+                if (transform.position.y <= respawnHeight)
                 {
                     Respawn();
                 }
@@ -1332,7 +1316,7 @@ namespace MMMaellon
                 //     //some force other than gravity is acting upon our object
                 //     if (lastResync + lerpTime < Time.timeSinceLevelLoad)
                 //     {
-                //         RequestSerialization();
+                //         Synchronize();
                 //     }
                 // }
                 //returning true means we extend the interpolation period
@@ -1402,18 +1386,27 @@ namespace MMMaellon
         //To mimic projectile motion, we assume that the velocity at the end of the interpolation is the start velocity plus the change in velocity gravity would have caused over the same time period
         //At the end of the interpolation, we change the velocity to match what was sent by the owner, putting us back in sync with the owner.
         //Then we disable to update loop for optimization and to allow the physics engine to take over
+        bool simulateBounce = false;
         public void falling_OnInterpolationStart()
         {
             startPos = transform.position;
             startRot = transform.rotation;
             startVel = rigid.velocity;
             startSpin = rigid.angularVelocity;
+            simulateBounce = Vector3.Distance(startVel, vel) > fallSpeed;
         }
         public void falling_Interpolate(float interpolation)
         {
+            if (!simulateBounce)
+            {
+                //change in velocity wasn't great enough to be a bounce, so we just interpolate normally instead
+                interpolate_Interpolate(interpolation);
+                return;
+            }
+            
             if (IsLocalOwner())
             {
-                if (transform.position.y <= respawn_height)
+                if (transform.position.y <= respawnHeight)
                 {
                     Respawn();
                 }
@@ -1445,7 +1438,7 @@ namespace MMMaellon
                 //     //some force other than gravity is acting upon our object
                 //     if (lastResync + lerpTime < Time.timeSinceLevelLoad)
                 //     {
-                //         RequestSerialization();
+                //         Synchronize();
                 //     }
                 // }
                 //returning true means we extend the interpolation period
@@ -1509,7 +1502,7 @@ namespace MMMaellon
                 {
                     if (lastResync + lerpTime < Time.timeSinceLevelLoad)
                     {
-                        RequestSerialization();
+                        Serialize();
                     }
                 }
                 else

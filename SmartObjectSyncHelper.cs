@@ -58,48 +58,74 @@ namespace MMMaellon
         {
             if (!sync || !Utilities.IsValid(sync.owner))
             {
-                Debug.LogWarning(name + " is missing sync or sync owner");
+                // Debug.LogWarning(name + " is missing sync or sync owner");
                 enabled = false;
                 return;
             }
 
             if (sync.interpolationStartTime < 0)
             {
-                sync._printErr("waiting for first sync" + sync.interpolationStartTime);
+                // sync._printErr("waiting for first sync" + sync.interpolationStartTime);
                 //if we haven't received data yet, do nothing. Otherwise this will move the object to the origin
                 enabled = false;
                 return;
             }
 
-            sync.Interpolate();
+            if (!disableRequested)
+            {
+                sync.Interpolate();
+            }
+            if (serializeRequested && !Networking.IsClogged && Random.Range(0, 10) == 0)//randomize it, so we stagger the synchronizations
+            {
+                sync.RequestSerialization();
+            }
         }
 
-        // public void FixedUpdate()
+        // public void OnEnable()
         // {
-        //     if (!sync || !sync.IsLocalOwner())
-        //     {
-        //         queuedPhysicsEvent = -1;
-        //         return;
-        //     }
-        //     if (queuedPhysicsEvent >= 0 && sync._state == queuedPhysicsEvent)
-        //     {
-        //         sync.state = sync.state;
-        //     }
-        //     queuedPhysicsEvent = -1;
+        //     sync._print("Helper OnEnable");
         // }
 
-        public void OnEnable()
+        // public void OnDisable()
+        // {
+        //     sync._print("Helper OnDisable");
+        // }
+
+        [System.NonSerialized]
+        public bool disableRequested = false;
+        public void Enable()
         {
-            if(sync){
-                sync._print("Helper OnEnable");
+            disableRequested = false;
+            enabled = true;
+        }
+
+        public void Disable()
+        {
+            if (serializeRequested)
+            {
+                disableRequested = true;
+            } else
+            {
+                enabled = false;
             }
         }
 
-        public void OnDisable()
+        public bool IsEnabled()
         {
-            if(sync){
-                sync._print("Helper OnDisable");
-            }
+            return enabled && !disableRequested;
+        }
+
+        [System.NonSerialized]
+        public bool serializeRequested = false;
+        public void OnSerializationFailure()
+        {
+            sync._printErr("OnSerializationFailure");
+            serializeRequested = true;
+            enabled = true;//we're just going to wait around for the network to allow us to synchronize again
+        }
+        public void OnSerializationSuccess()
+        {
+            serializeRequested = false;
         }
     }
 }
