@@ -365,10 +365,13 @@ namespace MMMaellon
                 }
                 if (IsLocalOwner())
                 {
-                    //we start interpolation here to make it snappier for the local owner
-                    //make sure to serialize all variables beforehand
+                    //we call OnPreSerialization here to make it snappier for the local owner
+                    //if any transforms and stuff happen in OnInterpolationStart, they happen here
+                    // OnPreSerialization();
+                    //we don't actually call onpreserialization so that serializationnotification works properly
                     OnSmartObjectSerialize();
                     StartInterpolation();
+                    //we put in the request for actual serialization
                     Serialize();
                 }
 
@@ -586,25 +589,21 @@ namespace MMMaellon
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
-            transform.position = newPos;
-            transform.rotation = newRot;
-            rigid.velocity = newVel;
-            rigid.angularVelocity = newSpin;
-            //remember to set state last as it triggers interpolation
+            pos = newPos;
+            rot = newRot;
+            vel = newVel;
+            spin = newSpin;
             state = STATE_TELEPORTING;
-            //this doesn't actually do anything except turn off the helper for the teleport state
-            Interpolate();
         }
 
         public void StartInterpolation()
         {
-            OnInterpolationStart();
             helper.Enable();
+            OnInterpolationStart();
         }
 
         public void Interpolate()
         {
-            RecordLastTransform();
             OnInterpolate(interpolation);
 
             if (interpolation < 1.0)
@@ -618,15 +617,17 @@ namespace MMMaellon
             }
         }
 
+        bool transformRecorded = false;
         public void RecordLastTransform()
         {
             lastPos = transform.position;
             lastRot = transform.rotation;
+            transformRecorded = true;
         }
 
         public void SetVelocityFromLastTransform()
         {
-            if (helper.IsEnabled())
+            if (transformRecorded)
             {
                 //if the helper is on, then we were recording good transform data and we can calculate the perceived velocity
                 rigid.velocity = (transform.position - lastPos) / Time.deltaTime;
@@ -706,25 +707,21 @@ namespace MMMaellon
                     // QueuePhysicsEvent(STATE_INTERPOLATING);
                     state = STATE_INTERPOLATING;
                 }
+                //decide if we need to take ownership of the object we collided with
+                if (takeOwnershipOfOtherObjectsOnCollision && Utilities.IsValid(other) && Utilities.IsValid(other.collider))
+                {
+                    otherSync = other.collider.GetComponent<SmartObjectSync>();
+                    if (otherSync && !otherSync.IsLocalOwner() && otherSync.allowOthersToTakeOwnershipOnCollision && !otherSync.IsAttachedToPlayer() && (IsAttachedToPlayer() || otherSync.state == STATE_SLEEPING || !otherSync.takeOwnershipOfOtherObjectsOnCollision || otherSync.rigid.velocity.sqrMagnitude < rigid.velocity.sqrMagnitude))
+                    {
+                        otherSync.TakeOwnership(true);
+                        otherSync.Serialize();
+                    }
+                }
             }
             else if (state == STATE_SLEEPING && interpolationEndTime + Time.deltaTime < Time.timeSinceLevelLoad)//we ignore the very first frame after interpolation to give rigidbodies time to settle down
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
                 StartInterpolation();
-                // helper.Enable();
-            }
-
-
-            //decide if we need to take ownership of the object we collided with
-            if (!IsLocalOwner() || !takeOwnershipOfOtherObjectsOnCollision || other == null || other.collider == null)
-            {
-                return;
-            }
-            otherSync = other.collider.GetComponent<SmartObjectSync>();
-            if (otherSync && !otherSync.IsLocalOwner() && otherSync.allowOthersToTakeOwnershipOnCollision && !otherSync.IsAttachedToPlayer() && otherSync.rigid && (IsAttachedToPlayer() || otherSync.state == STATE_SLEEPING || !otherSync.takeOwnershipOfOtherObjectsOnCollision || otherSync.rigid.velocity.sqrMagnitude < rigid.velocity.sqrMagnitude))
-            {
-                otherSync.TakeOwnership(true);
-                otherSync.Serialize();
             }
         }
 
@@ -747,9 +744,6 @@ namespace MMMaellon
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
                 StartInterpolation();
-                // return;
-
-                // helper.Enable();
             }
         }
 
@@ -845,7 +839,7 @@ namespace MMMaellon
                     }
                 case (STATE_TELEPORTING):
                     {
-                        //do nothing
+                        teleport_OnEnterState();
                         return;
                     }
                 case (STATE_INTERPOLATING):
@@ -939,10 +933,9 @@ namespace MMMaellon
                     }
                 default:
                     {
-                        SetVelocityFromLastTransform();
                         if (state < 0)
                         {
-                            //do nothing
+                            SetVelocityFromLastTransform();
                         }
                         else if (customState)
                         {
@@ -1077,6 +1070,7 @@ namespace MMMaellon
         }
         public void OnInterpolate(float interpolation)
         {
+            transformRecorded = false;
             switch (state)
             {
                 case (STATE_SLEEPING):
@@ -1254,6 +1248,21 @@ namespace MMMaellon
 
         //Teleport State
         //This state has no interpolation. It simply places sets the transforms and velocity then disables the update loop, letting physics take over
+        //For the owner this has to happen when we enter the state before we serialize everything for the first time
+        //non-owners see this happen in OnInterpolationStart like normal
+        public void teleport_OnEnterState()
+        {
+            if (IsLocalOwner())
+            {
+                transform.position = pos;
+                transform.rotation = rot;
+                if (rigid && !rigid.isKinematic)
+                {
+                    rigid.velocity = vel;
+                    rigid.angularVelocity = spin;
+                }
+            }
+        }
         public void teleport_OnInterpolationStart()
         {
             if (!IsLocalOwner())
@@ -1266,6 +1275,7 @@ namespace MMMaellon
                     rigid.angularVelocity = spin;
                 }
             }
+            helper.Disable();//turn off immediately for max optimization
         }
         public void teleport_OnSmartObjectSerialize()
         {
@@ -1488,7 +1498,7 @@ namespace MMMaellon
         }
         public void generic_Interpolate(float interpolation)
         {
-            // CalcParentTransform();
+            RecordLastTransform();
             transform.position = HermiteInterpolatePosition(parentPos + parentRot * startPos, Vector3.zero, parentPos + parentRot * pos, Vector3.zero, interpolation);
             transform.rotation = HermiteInterpolateRotation(parentRot * startRot, Vector3.zero, parentRot * rot, Vector3.zero, interpolation);
             rigid.velocity = Vector3.zero;

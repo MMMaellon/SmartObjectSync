@@ -109,12 +109,8 @@ namespace MMMaellon
                 //returning true means we extend the interpolation period
                 return true;
             }
-
-            if (sync.rigid)
-            {
-                sync.rigid.velocity = sync.vel;
-                sync.rigid.angularVelocity = sync.spin;
-            }
+            sync.rigid.velocity = sync.vel;
+            sync.rigid.angularVelocity = sync.spin;
 
             return false;
         }

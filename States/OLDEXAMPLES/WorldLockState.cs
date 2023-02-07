@@ -66,11 +66,8 @@ namespace MMMaellon
         {
             transform.position = sync.HermiteInterpolatePosition(startPos, Vector3.zero, sync.pos, Vector3.zero, interpolation);
             transform.rotation = sync.HermiteInterpolateRotation(startRot, Vector3.zero, sync.rot, Vector3.zero, interpolation);
-            if (sync.rigid)
-            {
-                sync.rigid.velocity = Vector3.zero;
-                sync.rigid.angularVelocity = Vector3.zero;
-            }
+            sync.rigid.velocity = Vector3.zero;
+            sync.rigid.angularVelocity = Vector3.zero;
         }
         public override bool OnInterpolationEnd()
         {

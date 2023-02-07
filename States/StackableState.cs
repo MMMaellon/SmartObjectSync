@@ -76,7 +76,7 @@ namespace MMMaellon
 
         public override void Interpolate(float interpolation)
         {
-            if (!Utilities.IsValid(rootParent) || !Utilities.IsValid(sync.rigid))
+            if (!Utilities.IsValid(rootParent))
             {
                 if (sync.IsLocalOwner())
                 {
@@ -113,7 +113,7 @@ namespace MMMaellon
         Rigidbody lastCollided;
         public void OnCollisionEnter(Collision other)
         {
-            if (!Utilities.IsValid(sync.rigid) || !Utilities.IsValid(other) || !Utilities.IsValid(other.collider) || !Utilities.IsValid(other.rigidbody))
+            if (!Utilities.IsValid(other) || !Utilities.IsValid(other.collider) || !Utilities.IsValid(other.rigidbody))
             {
                 return;
             }

@@ -110,10 +110,7 @@ namespace MMMaellon
                     manager.AddToRightInventory(this);
                 }
             }
-            if (sync.rigid)
-            {
-                sync.rigid.detectCollisions = false;
-            }
+            sync.rigid.detectCollisions = false;
         }
 
         public override void OnExitState()
@@ -123,10 +120,7 @@ namespace MMMaellon
                 manager.RemoveFromInventory(inventoryIndex);
             }
             transform.localScale = startScale;
-            if (sync.rigid)
-            {
-                sync.rigid.detectCollisions = true;
-            }
+            sync.rigid.detectCollisions = true;
         }
 
         public override void OnInterpolationStart()

@@ -29,19 +29,13 @@ namespace MMMaellon
 
         public override void OnEnterState()
         {
-            if (sync.rigid)
-            {
-                wasKinematic = sync.rigid.isKinematic;
-                sync.rigid.isKinematic = true;
-            }
+            wasKinematic = sync.rigid.isKinematic;
+            sync.rigid.isKinematic = true;
         }
 
         public override void OnExitState()
         {
-            if (sync.rigid)
-            {
-                sync.rigid.isKinematic = wasKinematic;
-            }
+            sync.rigid.isKinematic = wasKinematic;
         }
 
 
@@ -56,11 +50,8 @@ namespace MMMaellon
             CalcParentTransform();
             transform.position = sync.HermiteInterpolatePosition(parentPos + parentRot * startPos, Vector3.zero, parentPos + parentRot * sync.pos, Vector3.zero, interpolation);
             transform.rotation = sync.HermiteInterpolateRotation(parentRot * startRot, Vector3.zero, parentRot * sync.rot, Vector3.zero, interpolation);
-            if (sync.rigid)
-            {
-                sync.rigid.velocity = Vector3.zero;
-                sync.rigid.angularVelocity = Vector3.zero;
-            }
+            sync.rigid.velocity = Vector3.zero;
+            sync.rigid.angularVelocity = Vector3.zero;
         }
         public override bool OnInterpolationEnd()
         {

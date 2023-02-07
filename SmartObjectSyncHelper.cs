@@ -54,6 +54,13 @@ namespace MMMaellon
         public SmartObjectSync sync;
         // [System.NonSerialized]
         // public int queuedPhysicsEvent = -1;
+
+        int randomSeed = 0;
+        int randomCount = 0;
+        public void Start()
+        {
+            randomSeed = Random.Range(0, 10);
+        }
         public void Update()
         {
             if (!sync || !Utilities.IsValid(sync.owner))
@@ -75,9 +82,21 @@ namespace MMMaellon
             {
                 sync.Interpolate();
             }
-            if (serializeRequested && !Networking.IsClogged && Random.Range(0, 10) == 0)//randomize it, so we stagger the synchronizations
+            if (serializeRequested && !Networking.IsClogged)
             {
-                sync.RequestSerialization();
+                if (sync.state == SmartObjectSync.STATE_SLEEPING)
+                {
+                    //prioritize sleep serialization because it will settle our world faster
+                    sync.RequestSerialization();
+                } else
+                {
+                    //randomize it, so we stagger the synchronizations
+                    randomCount = (randomCount + 1) % 10;
+                    if (randomCount == randomSeed)
+                    {
+                        sync.RequestSerialization();
+                    }
+                }
             }
         }
 
