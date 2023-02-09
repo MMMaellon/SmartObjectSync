@@ -1,0 +1,20 @@
+{
+  "name": "com.mmmaellon.smartobjectsync.editor",
+  "references": [
+    "VRC.SDK3",
+    "VRC.SDK3.Editor",
+    "VRC.SDKBase",
+    "VRC.SDKBase.Editor",
+    "UdonSharp.Editor",
+    "UdonSharp.Runtime",
+    "com.mmmaellon.smartobjectsync"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "defineConstraints": [],
+  "optionalUnityReferences": []
+}

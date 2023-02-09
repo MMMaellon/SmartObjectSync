@@ -1,0 +1,19 @@
+{
+  "name": "com.mmmaellon.smartobjectsync",
+  "references": [
+    "VRC.SDK3",
+    "VRC.SDKBase",
+    "VRC.Udon",
+    "UdonSharp.Runtime",
+    "UdonSharp.Editor",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "autoReferenced": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "defineConstraints": [],
+  "optionalUnityReferences": []
+}

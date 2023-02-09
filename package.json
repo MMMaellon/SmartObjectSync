@@ -1,0 +1,31 @@
+{
+    "name": "com.mmmaellon.smartobjectsync",
+    "displayName": "SmartObjectSync",
+    "version": "2.4.0",
+    "description": "A drop-in replacement for VRC_ObjectSync that allows for better syncing of objects in VRChat",
+    "dependencies": {},
+    "gitDependencies": {},
+    "vpmDependencies": {
+        "com.vrchat.udonsharp": "1.1.X"
+    },
+    "legacyFolders": {
+        "Assets\\MMMaellon\\SmartObjectSync": ""
+    },
+    "samples": [
+        {
+            "displayName": "SmartObjectSync Example Scene",
+            "description": "An example scene showing off the capabilities of SmartObjectSync.",
+            "path": "Samples~/Example"
+        },
+        {
+            "displayName": "SmartObjectSync Stress Test Scene",
+            "description": "A Scene that compares the performance of 1024 VRC_ObjectSync objects to 1024 SmartObjectSyncs",
+            "path": "Samples~/StressTest"
+        },
+        {
+            "displayName": "SmartObjectSync Built-in States Example Code",
+            "description": "An example scene showing the built-in states written as separate SmartObjectSyncState scripts. In the actual prefab, they are compiled into the main SmartObjectSync.cs script for performance reasons. This example is just for learning how SmartObjectSyncStates work.",
+            "path": "Samples~/BuiltinStates"
+        }
+    ]
+}
