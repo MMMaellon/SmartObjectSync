@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: LeftHandHeldState
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 3ec275b4730980145adfa0d8f5c81cab,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 07ad0a33ef074d04abc987ad11d63ec2,
     type: 2}
   udonAssembly: 
   assemblyError: 

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: SetColorBasedOnOwnership
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 7e179f899ac145743a0300d4d41ce476,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: ae93b637efff6ca40959e5095557e657,
     type: 2}
   udonAssembly: 
   assemblyError: 

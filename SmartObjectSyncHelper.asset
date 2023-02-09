@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: SmartObjectSyncHelper
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 1c0a9b82d2e854542a1ad53525580284,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 9a1fa9ce2af36bd448d7b3046c194b62,
     type: 2}
   udonAssembly: 
   assemblyError: 

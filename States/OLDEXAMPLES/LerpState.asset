@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: LerpState
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b6794631d466b444283f41be4bd7ccc5,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 0bfa8791d4269d540857af8ab6d75436,
     type: 2}
   udonAssembly: 
   assemblyError: 

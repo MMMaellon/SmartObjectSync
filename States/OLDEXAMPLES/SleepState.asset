@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: SleepState
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 810f799a8fdec8e45a658addc0140acb,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 90cbe2670251add4987febf94e298966,
     type: 2}
   udonAssembly: 
   assemblyError: 

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: Spin
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 63204b4d285e96d44b18b89dc4bdfe0d,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: c3fc33f4c38adad4f9157460cc6d7092,
     type: 2}
   udonAssembly: 
   assemblyError: 

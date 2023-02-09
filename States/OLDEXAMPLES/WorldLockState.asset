@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: WorldLockState
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 961b1b0d5499bb14ca9315d61b7b0284,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: b73ab89c35b159242817c9e7efad28c5,
     type: 2}
   udonAssembly: 
   assemblyError: 

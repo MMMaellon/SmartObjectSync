@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: BoneAttachmentStateSetter
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 355759035af59ee459f40d7669724257,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 6a62e69868610684298483d16a1b6e4d,
     type: 2}
   udonAssembly: 
   assemblyError: 

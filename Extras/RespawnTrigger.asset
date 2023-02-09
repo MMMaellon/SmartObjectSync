@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: RespawnTrigger
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: ba8ae63a8eca848439fb26a3e049b5f3,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 55b1489278ad0684ebdcd1417ac6fc3d,
     type: 2}
   udonAssembly: 
   assemblyError: 

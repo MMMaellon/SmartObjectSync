@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: ObjectPickupTool
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: f5bb4769cc006ca44a285fa7bd16f7c6,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: cee2f738bb465da48b948f000ba2d4de,
     type: 2}
   udonAssembly: 
   assemblyError: 

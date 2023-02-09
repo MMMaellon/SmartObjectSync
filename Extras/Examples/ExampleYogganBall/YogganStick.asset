@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: YogganStick
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 60d5a0f804558054e8234bb0be2583cd,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: df3e0acff81ab3246960b27a56c3f0ac,
     type: 2}
   udonAssembly: 
   assemblyError: 
