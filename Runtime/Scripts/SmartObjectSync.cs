@@ -1369,7 +1369,7 @@ namespace MMMaellon
                 if (rigid == null || rigid.isKinematic || rigid.IsSleeping())
                 {
                     //wait around for the rigidbody to fall asleep
-                    state = SmartObjectSync.STATE_SLEEPING;
+                    state = STATE_SLEEPING;
                 }
                 // else if (NonGravitationalAcceleration())
                 // {
@@ -1491,7 +1491,7 @@ namespace MMMaellon
                 if (rigid == null || rigid.isKinematic || rigid.IsSleeping())
                 {
                     //wait around for the rigidbody to fall asleep
-                    state = SmartObjectSync.STATE_SLEEPING;
+                    state = STATE_SLEEPING;
                 }
                 // else if (NonGravitationalAcceleration())
                 // {
