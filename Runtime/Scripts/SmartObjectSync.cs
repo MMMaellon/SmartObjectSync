@@ -296,9 +296,10 @@ namespace MMMaellon
         //hopefully, suddenly changing the velocity makes it look like a bounce.
         public const int STATE_LEFT_HAND_HELD = 4;
         public const int STATE_RIGHT_HAND_HELD = 5;
-        public const int STATE_ATTACHED_TO_PLAYSPACE = 6;
-        public const int STATE_WORLD_LOCK = 7;
-        public const int STATE_CUSTOM = 8;
+        public const int STATE_NO_HAND_HELD = 6;//when an avatar has no hands and the position needs to follow their head instead
+        public const int STATE_ATTACHED_TO_PLAYSPACE = 7;
+        public const int STATE_WORLD_LOCK = 8;
+        public const int STATE_CUSTOM = 9;
 
         [HideInInspector]
         public SmartObjectSyncState[] states;
@@ -358,7 +359,7 @@ namespace MMMaellon
                 OnEnterState();
 
 
-                if (pickup && pickup.IsHeld && value != STATE_LEFT_HAND_HELD && value != STATE_RIGHT_HAND_HELD)
+                if (pickup && pickup.IsHeld && value != STATE_LEFT_HAND_HELD && value != STATE_RIGHT_HAND_HELD && value != STATE_NO_HAND_HELD)
                 {
                     //no ownership check because there's another pickup.Drop() when ownership is transferred
                     pickup.Drop();
@@ -472,7 +473,7 @@ namespace MMMaellon
         }
         public bool IsAttachedToPlayer()
         {
-            return state < 0 || state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_ATTACHED_TO_PLAYSPACE;
+            return state < 0 || state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_NO_HAND_HELD || state == STATE_ATTACHED_TO_PLAYSPACE;
         }
 
         public string StateToString(int value)
@@ -502,6 +503,10 @@ namespace MMMaellon
                 case (STATE_RIGHT_HAND_HELD):
                     {
                         return "STATE_RIGHT_HAND_HELD";
+                    }
+                case (STATE_NO_HAND_HELD):
+                    {
+                        return "STATE_HEAD_HELD";
                     }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
@@ -756,11 +761,26 @@ namespace MMMaellon
             {
                 if (pickup.currentHand == VRC_Pickup.PickupHand.Left)
                 {
-                    state = STATE_LEFT_HAND_HELD;
+                    Vector3 leftHandPos = Networking.LocalPlayer.GetBonePosition(HumanBodyBones.LeftHand);
+                    if (leftHandPos != Vector3.zero)
+                    {
+                        state = STATE_LEFT_HAND_HELD;
+                    } else //couldn't find left hand bone
+                    {
+                        state = STATE_NO_HAND_HELD;
+                    }
                 }
                 else if (pickup.currentHand == VRC_Pickup.PickupHand.Right)
                 {
-                    state = STATE_RIGHT_HAND_HELD;
+                    Vector3 rightHandPos = Networking.LocalPlayer.GetBonePosition(HumanBodyBones.RightHand);
+                    if (rightHandPos != Vector3.zero)
+                    {
+                        state = STATE_RIGHT_HAND_HELD;
+                    }
+                    else //couldn't find right hand bone
+                    {
+                        state = STATE_NO_HAND_HELD;
+                    }
                 }
             }
         }
@@ -777,7 +797,7 @@ namespace MMMaellon
             //interpolating that will make transferring objects from one hand to another impossible
             //transferring one object from your hand to your same hand is already impossible, so if lastState
             //is equal to current state we know that it was a genuine drop
-            if (state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_ATTACHED_TO_PLAYSPACE)
+            if (state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_NO_HAND_HELD)
             {
                 lastState = state;
                 SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
@@ -786,7 +806,7 @@ namespace MMMaellon
 
         public void OnDropDelayed()
         {
-            if (!IsLocalOwner() || lastState != state || (state != STATE_LEFT_HAND_HELD && state != STATE_RIGHT_HAND_HELD))
+            if (!IsLocalOwner() || lastState != state || (state != STATE_LEFT_HAND_HELD && state != STATE_RIGHT_HAND_HELD && state != STATE_NO_HAND_HELD))
             {
                 return;
             }
@@ -862,6 +882,11 @@ namespace MMMaellon
                         right_OnEnterState();
                         return;
                     }
+                case (STATE_NO_HAND_HELD):
+                    {
+                        noHand_OnEnterState();
+                        return;
+                    }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
                         //do nothing
@@ -913,12 +938,17 @@ namespace MMMaellon
                     }
                 case (STATE_LEFT_HAND_HELD):
                     {
-                        left_OnExitState();
+                        noHand_OnExitState();
                         return;
                     }
                 case (STATE_RIGHT_HAND_HELD):
                     {
-                        right_OnExitState();
+                        noHand_OnExitState();
+                        return;
+                    }
+                case (STATE_NO_HAND_HELD):
+                    {
+                        noHand_OnExitState();
                         return;
                     }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
@@ -979,6 +1009,12 @@ namespace MMMaellon
                 case (STATE_RIGHT_HAND_HELD):
                     {
                         bone_CalcParentTransform();
+                        generic_OnSmartObjectSerialize();
+                        return;
+                    }
+                case (STATE_NO_HAND_HELD):
+                    {
+                        noHand_CalcParentTransform();
                         generic_OnSmartObjectSerialize();
                         return;
                     }
@@ -1043,6 +1079,11 @@ namespace MMMaellon
                         bone_OnInterpolationStart();
                         return;
                     }
+                case (STATE_NO_HAND_HELD):
+                    {
+                        noHand_OnInterpolationStart();
+                        return;
+                    }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
                         playspace_CalcParentTransform();
@@ -1103,6 +1144,11 @@ namespace MMMaellon
                         right_Interpolate(interpolation);
                         return;
                     }
+                case (STATE_NO_HAND_HELD):
+                    {
+                        noHand_Interpolate(interpolation);
+                        return;
+                    }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
                         playspace_CalcParentTransform();
@@ -1158,6 +1204,10 @@ namespace MMMaellon
                         return generic_OnInterpolationEnd();
                     }
                 case (STATE_RIGHT_HAND_HELD):
+                    {
+                        return generic_OnInterpolationEnd();
+                    }
+                case (STATE_NO_HAND_HELD):
                     {
                         return generic_OnInterpolationEnd();
                     }
@@ -1498,6 +1548,7 @@ namespace MMMaellon
         }
         public void generic_Interpolate(float interpolation)
         {
+            _print("ASDFASDFASDFASDF");
             RecordLastTransform();
             transform.position = HermiteInterpolatePosition(parentPos + parentRot * startPos, Vector3.zero, parentPos + parentRot * pos, Vector3.zero, interpolation);
             transform.rotation = HermiteInterpolateRotation(parentRot * startRot, Vector3.zero, parentRot * rot, Vector3.zero, interpolation);
@@ -1564,25 +1615,7 @@ namespace MMMaellon
         public void left_OnEnterState()
         {
             bone = HumanBodyBones.LeftHand;
-            if (pickup)
-            {
-                lastPickupable = pickup.pickupable;
-                if (IsLocalOwner())
-                {
-                    pickup.pickupable = allowTheftFromSelf;
-                }
-                else
-                {
-                    pickup.pickupable = !pickup.DisallowTheft;
-                }
-            }
-        }
-        public void left_OnExitState()
-        {
-            if (pickup)
-            {
-                pickup.pickupable = lastPickupable;
-            }
+            noHand_OnEnterState();
         }
         public void left_Interpolate(float interpolation)
         {
@@ -1600,6 +1633,23 @@ namespace MMMaellon
         public void right_OnEnterState()
         {
             bone = HumanBodyBones.RightHand;
+            noHand_OnEnterState();
+        }
+        public void right_Interpolate(float interpolation)
+        {
+            //let the VRC_pickup script handle transforms for the local owner
+            //only reposition it for non-owners
+            //we need to keep the parent transform up to date though
+            bone_CalcParentTransform();
+            if (!IsLocalOwner())
+            {
+                generic_Interpolate(interpolation);
+            }
+        }
+        //Right Hand Held State
+        //Same as the Left Hand Held State, but for right hands
+        public void noHand_OnEnterState()
+        {
             if (pickup)
             {
                 lastPickupable = pickup.pickupable;
@@ -1613,22 +1663,36 @@ namespace MMMaellon
                 }
             }
         }
-        public void right_OnExitState()
+        public void noHand_OnExitState()
         {
             if (pickup)
             {
                 pickup.pickupable = lastPickupable;
             }
         }
-        public void right_Interpolate(float interpolation)
+        public void noHand_OnInterpolationStart()
+        {
+            //if the avatar we're wearing doesn't have the bones required, fallback to attach to playspace
+            noHand_CalcParentTransform();
+            generic_OnInterpolationStart();
+        }
+        public void noHand_Interpolate(float interpolation)
         {
             //let the VRC_pickup script handle transforms for the local owner
             //only reposition it for non-owners
             //we need to keep the parent transform up to date though
-            bone_CalcParentTransform();
+            noHand_CalcParentTransform();
             if (!IsLocalOwner())
             {
                 generic_Interpolate(interpolation);
+            }
+        }
+        public void noHand_CalcParentTransform()
+        {
+            if (Utilities.IsValid(owner))
+            {
+                parentPos = owner.GetPosition();
+                parentRot = owner.GetRotation();
             }
         }
 
@@ -1652,7 +1716,7 @@ namespace MMMaellon
                 if (!hasBones)
                 {
                     _printErr("Avatar is missing the correct bone. Falling back to playspace attachment.");
-                    state = SmartObjectSync.STATE_ATTACHED_TO_PLAYSPACE;
+                    state = STATE_ATTACHED_TO_PLAYSPACE;
                     return;
                 }
             }
