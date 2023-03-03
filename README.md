@@ -4,7 +4,7 @@
 
 A drop-in replacement for VRC_ObjectSync that allows for better syncing of objects in VRChat
 
-Just add SmartObjectSync to your object and hit the setup button.
+Just add SmartObjectSync to your object and hit the setup button if you see one. Setup button only appears if the auto-setup fails or if you change other components that would affect how SmartObjectSync works.
 
 ## Install
 
