@@ -777,7 +777,7 @@ namespace MMMaellon
             //interpolating that will make transferring objects from one hand to another impossible
             //transferring one object from your hand to your same hand is already impossible, so if lastState
             //is equal to current state we know that it was a genuine drop
-            if (state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD)
+            if (state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_ATTACHED_TO_PLAYSPACE)
             {
                 lastState = state;
                 SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
