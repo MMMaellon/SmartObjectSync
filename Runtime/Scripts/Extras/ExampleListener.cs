@@ -79,7 +79,7 @@ namespace MMMaellon
                         audioSource.PlayOneShot(teleportSound);
                     }
                 }
-                else if (newState == SmartObjectSync.STATE_LEFT_HAND_HELD || newState == SmartObjectSync.STATE_RIGHT_HAND_HELD)
+                else if (newState == SmartObjectSync.STATE_LEFT_HAND_HELD || newState == SmartObjectSync.STATE_RIGHT_HAND_HELD || oldState == SmartObjectSync.STATE_NO_HAND_HELD)
                 {
                     //just got grabbed
                     if (audioSource)
@@ -89,7 +89,7 @@ namespace MMMaellon
                 }
                 else
                 {
-                    if (oldState == SmartObjectSync.STATE_LEFT_HAND_HELD || oldState == SmartObjectSync.STATE_RIGHT_HAND_HELD || oldState < 0 || oldState > SmartObjectSync.STATE_CUSTOM)
+                    if (oldState == SmartObjectSync.STATE_LEFT_HAND_HELD || oldState == SmartObjectSync.STATE_RIGHT_HAND_HELD || oldState == SmartObjectSync.STATE_NO_HAND_HELD || oldState < 0 || oldState > SmartObjectSync.STATE_CUSTOM)
                     {
                         //We were just yeeted
                         if (audioSource)

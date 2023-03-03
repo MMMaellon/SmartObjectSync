@@ -93,10 +93,16 @@ namespace MMMaellon
             if (sync.state == SmartObjectSync.STATE_LEFT_HAND_HELD)
             {
                 newObj.AttachToBone(HumanBodyBones.LeftHand);
-            } else if (sync.state == SmartObjectSync.STATE_RIGHT_HAND_HELD)
+            }
+            else if (sync.state == SmartObjectSync.STATE_RIGHT_HAND_HELD)
             {
                 newObj.AttachToBone(HumanBodyBones.RightHand);
-            } else
+            }
+            else if (sync.state == SmartObjectSync.STATE_NO_HAND_HELD)
+            {
+                newObj.AttachToBone(HumanBodyBones.Head);
+            }
+            else
             {
                 //chopsticks aren't being held
                 return;
