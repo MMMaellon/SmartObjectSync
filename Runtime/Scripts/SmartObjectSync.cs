@@ -820,6 +820,17 @@ namespace MMMaellon
             owner = player;
         }
 
+        //bug fix found by BoatFloater
+        //bug canny here: https://vrchat.canny.io/udon-networking-update/p/1258-onownershiptransferred-does-not-fire-at-onplayerleft-if-last-owner-is-passi
+        public override void OnPlayerLeft(VRCPlayerApi player)
+        {
+            _print("OnPlayerLeft");
+            if (player == owner)
+            {
+                owner = Networking.GetOwner(gameObject);
+            }
+        }
+
         public void TakeOwnership(bool checkIfClogged)
         {
             if ((checkIfClogged && Networking.IsClogged) || IsLocalOwner())
