@@ -400,6 +400,13 @@ namespace MMMaellon
             {
                 if (_owner != value)
                 {
+                    foreach (SmartObjectSyncListener listener in listeners)
+                    {
+                        if (Utilities.IsValid(listener))
+                        {
+                            listener.OnChangeOwner(this, _owner, value);
+                        }
+                    }
                     _owner = value;
                     if (IsLocalOwner())
                     {
