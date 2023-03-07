@@ -109,5 +109,10 @@ namespace MMMaellon
                 }
             }
         }
+
+        public override void OnChangeOwner(SmartObjectSync sync, VRCPlayerApi oldOwner, VRCPlayerApi newOwner)
+        {
+            //do nothing
+        }
     }
 }
