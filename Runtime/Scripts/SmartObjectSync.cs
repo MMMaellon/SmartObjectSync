@@ -1795,5 +1795,48 @@ namespace MMMaellon
             vel = Vector3.zero;
             spin = Vector3.zero;
         }
+        public void AddListener(SmartObjectSyncListener newListener)
+        {
+            foreach (SmartObjectSyncListener l in listeners)
+            {
+                if (l == newListener)
+                {
+                    //it's already in there, don't do anything
+                    return;
+                }
+            }
+
+            SmartObjectSyncListener[] newListeners = new SmartObjectSyncListener[listeners.Length + 1];
+            listeners.CopyTo(newListeners, 0);
+            newListeners[newListeners.Length - 1] = newListener;
+            listeners = newListeners;
+        }
+        public void RemoveListener(SmartObjectSyncListener oldListener)
+        {
+            if (listeners.Length <= 0)
+            {
+                //no listeners
+                return;
+            }
+            SmartObjectSyncListener[] newListeners = new SmartObjectSyncListener[listeners.Length - 1];
+
+            int i = 0;
+            foreach (SmartObjectSyncListener l in listeners)
+            {
+                if (l == oldListener)
+                {
+                    //this is the listener we're removing
+                    break;
+                }
+                if (i >= newListeners.Length)
+                {
+                    //only happens when no match is found
+                    return;
+                }
+                newListeners[i] = l;
+                i++;
+            }
+            listeners = newListeners;
+        }
     }
 }
