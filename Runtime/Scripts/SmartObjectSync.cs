@@ -359,7 +359,7 @@ namespace MMMaellon
                 OnEnterState();
 
 
-                if (pickup && pickup.IsHeld && value != STATE_LEFT_HAND_HELD && value != STATE_RIGHT_HAND_HELD && value != STATE_NO_HAND_HELD)
+                if (pickup && pickup.IsHeld && !IsHeld())
                 {
                     //no ownership check because there's another pickup.Drop() when ownership is transferred
                     pickup.Drop();
@@ -478,9 +478,13 @@ namespace MMMaellon
         {
             return Utilities.IsValid(owner) && owner.isLocal;
         }
+        public bool IsHeld()
+        {
+            return state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_NO_HAND_HELD;
+        }
         public bool IsAttachedToPlayer()
         {
-            return state < 0 || state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_NO_HAND_HELD || state == STATE_ATTACHED_TO_PLAYSPACE;
+            return state < 0 || state == STATE_ATTACHED_TO_PLAYSPACE || IsHeld();
         }
 
         public string StateToString(int value)
@@ -804,7 +808,7 @@ namespace MMMaellon
             //interpolating that will make transferring objects from one hand to another impossible
             //transferring one object from your hand to your same hand is already impossible, so if lastState
             //is equal to current state we know that it was a genuine drop
-            if (state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_NO_HAND_HELD)
+            if (IsHeld())
             {
                 lastState = state;
                 SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
@@ -813,7 +817,7 @@ namespace MMMaellon
 
         public void OnDropDelayed()
         {
-            if (!IsLocalOwner() || lastState != state || (state != STATE_LEFT_HAND_HELD && state != STATE_RIGHT_HAND_HELD && state != STATE_NO_HAND_HELD))
+            if (!IsLocalOwner() || lastState != state || !IsHeld())
             {
                 return;
             }
