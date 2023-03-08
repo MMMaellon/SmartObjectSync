@@ -1566,7 +1566,6 @@ namespace MMMaellon
         }
         public void generic_Interpolate(float interpolation)
         {
-            _print("ASDFASDFASDFASDF");
             RecordLastTransform();
             transform.position = HermiteInterpolatePosition(parentPos + parentRot * startPos, Vector3.zero, parentPos + parentRot * pos, Vector3.zero, interpolation);
             transform.rotation = HermiteInterpolateRotation(parentRot * startRot, Vector3.zero, parentRot * rot, Vector3.zero, interpolation);
