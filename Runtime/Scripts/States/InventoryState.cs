@@ -7,7 +7,6 @@ using VRC.Udon;
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
 using VRC.SDKBase.Editor.BuildPipeline;
 using UnityEditor;
-using UnityEngine;
 using UdonSharpEditor;
 using System.Collections.Generic;
 

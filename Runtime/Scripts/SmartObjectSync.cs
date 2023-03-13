@@ -533,7 +533,7 @@ namespace MMMaellon
                         {
                             return ((HumanBodyBones)(-1 - value)).ToString();
                         }
-                        else if (customState)
+                        else if (value >= STATE_CUSTOM && (value - STATE_CUSTOM) < states.Length)
                         {
                             return "Custom State " + (value - STATE_CUSTOM).ToString() + " " + (value - STATE_CUSTOM >= 0 && value - STATE_CUSTOM < states.Length && states[value - STATE_CUSTOM] != null ? states[value - STATE_CUSTOM].GetType().ToString() : "NULL");
                         }
@@ -719,8 +719,6 @@ namespace MMMaellon
                 //check if we're in a state where physics matters
                 if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
                 {
-                    //It takes a frame for physics events to register, so we just wait it out
-                    // QueuePhysicsEvent(STATE_INTERPOLATING);
                     state = STATE_INTERPOLATING;
                 }
                 //decide if we need to take ownership of the object we collided with
@@ -760,6 +758,22 @@ namespace MMMaellon
             {
                 //we may have been knocked out of sync, restart interpolation to get us back in line
                 StartInterpolation();
+            }
+        }
+
+        public void OnParticleCollision(GameObject other)
+        {
+            if (!Utilities.IsValid(other) || rigid == null || rigid.isKinematic)
+            {
+                return;
+            }
+            if (IsLocalOwner())
+            {
+                //check if we're in a state where physics matters
+                if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
+                {
+                    state = STATE_INTERPOLATING;
+                }
             }
         }
 
