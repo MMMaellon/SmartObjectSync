@@ -8,10 +8,13 @@ namespace MMMaellon
 {
     public class ChildAttachmentState : SmartObjectSyncState
     {
+        public bool disableCollisions = true;   
+        [Tooltip("Time to wait after detaching before we turn on collisions again")]
+        public float collisionCooldown = 0.1f;
         public bool returnToStartingParentOnExit = true;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
 
-        [System.NonSerialized]
+        [System.NonSerialized, FieldChangeCallback(nameof(parentTransform))]
         public Transform _parentTransform = null;
         public Transform parentTransform
         {
@@ -19,6 +22,7 @@ namespace MMMaellon
             set
             {
                 _parentTransform = value;
+                transform.SetParent(_parentTransform, true);
             }
         }
         public string parentTransformName
@@ -26,7 +30,7 @@ namespace MMMaellon
             get => _parentTransformName;
             set
             {
-                if (!Utilities.IsValid(value) || value == "" || value == null)
+                if (!Utilities.IsValid(value) || value == "")
                 {
                     _parentTransformName = "";
                     parentTransform = null;
@@ -37,7 +41,6 @@ namespace MMMaellon
                 {
                     _parentTransformName = value;
                     parentTransform = parentObj.transform;
-                    transform.SetParent(parentObj.transform, true);
                     if (Utilities.IsValid(transform.parent))
                     {
                         if (sync.IsLocalOwner())
@@ -61,14 +64,16 @@ namespace MMMaellon
         Transform startingParent;
         void Start()
         {
-            if (sync.IsLocalOwner())
-            {
-                startingParent = transform.parent;
-                parentTransformName = GetFullPath(startingParent);
-            }
+            startingParent = transform.parent;
+            parentTransformName = GetFullPath(startingParent);
         }
         public override void OnEnterState()
         {
+            if (disableCollisions)
+            {
+                sync.rigid.detectCollisions = false;
+            }
+            sync.rigid.isKinematic = true;
             if (!Utilities.IsValid(parentTransform))
             {
                 if (sync.IsLocalOwner())
@@ -81,10 +86,20 @@ namespace MMMaellon
 
         public override void OnExitState()
         {
+            if (disableCollisions)
+            {
+                SendCustomEventDelayedSeconds(nameof(EnableCollisions), collisionCooldown);
+            }
+            sync.rigid.isKinematic = false;
             if (returnToStartingParentOnExit)
             {
                 parentTransformName = GetFullPath(startingParent);
             }
+        }
+
+        public void EnableCollisions()
+        {
+            sync.rigid.detectCollisions = true;
         }
 
         public override void OnSmartObjectSerialize()
@@ -110,7 +125,7 @@ namespace MMMaellon
 
         public override void OnDrop()
         {
-            if (sync.IsLocalOwner() && sync.rigid.isKinematic)
+            if (sync.IsLocalOwner())
             {
                 EnterState();
             }

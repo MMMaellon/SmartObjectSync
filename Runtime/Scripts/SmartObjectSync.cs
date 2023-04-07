@@ -18,7 +18,23 @@ namespace MMMaellon
 
     public class SmartObjectSyncEditor : Editor
     {
-
+        public static bool foldoutOpen = false;
+        
+        //Advanced settings
+        SerializedProperty m_printDebugMessages;
+        SerializedProperty m_lerpTime;
+        SerializedProperty m_kinematicWhileHeld;
+        SerializedProperty m_nonKinematicPickupJitterPreventionTime;
+        SerializedProperty m_reduceJitterDuringSleep;
+        
+        void OnEnable(){
+            m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
+            m_lerpTime = serializedObject.FindProperty("lerpTime");
+            m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
+            m_nonKinematicPickupJitterPreventionTime = serializedObject.FindProperty("nonKinematicPickupJitterPreventionTime");
+            m_reduceJitterDuringSleep = serializedObject.FindProperty("reduceJitterDuringSleep");
+        }
+        
         public static void _print(SmartObjectSync sync, string message)
         {
             if (sync && sync.printDebugMessages)
@@ -135,7 +151,7 @@ namespace MMMaellon
                     {
                         rigidSetupCount++;
                     }
-                    if (VRC_SceneDescriptor.Instance != null && VRC_SceneDescriptor.Instance.RespawnHeightY != sync.respawnHeight)
+                    if (Utilities.IsValid(VRC_SceneDescriptor.Instance) && !Mathf.Approximately(VRC_SceneDescriptor.Instance.RespawnHeightY, sync.respawnHeight))
                     {
                         respawnYSetupCount++;
                     }
@@ -230,10 +246,28 @@ namespace MMMaellon
                     SetupSelectedSmartObjectSyncs();
                 }
             }
-            EditorGUILayout.Space();
             if (target && UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+            
             EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            
             base.OnInspectorGUI();
+            
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            
+            foldoutOpen = EditorGUILayout.BeginFoldoutHeaderGroup(foldoutOpen, "Advanced Settings");
+            if(foldoutOpen){
+                EditorGUILayout.PropertyField(m_printDebugMessages);
+                EditorGUILayout.PropertyField(m_lerpTime);
+                EditorGUILayout.PropertyField(m_kinematicWhileHeld);
+                EditorGUILayout.PropertyField(m_nonKinematicPickupJitterPreventionTime);
+                EditorGUILayout.PropertyField(m_reduceJitterDuringSleep);
+                serializedObject.ApplyModifiedProperties();
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
         }
     }
 }
@@ -246,19 +280,23 @@ namespace MMMaellon
     [RequireComponent(typeof(Rigidbody))]
     public partial class SmartObjectSync : UdonSharpBehaviour
     {
-        
-        [Header("Settings")]
         public bool takeOwnershipOfOtherObjectsOnCollision = true;
         public bool allowOthersToTakeOwnershipOnCollision = true;
         public bool allowTheftFromSelf = true;
+        public bool syncParticleCollisions = false;
         public float respawnHeight = -1001f;
-        
-        [Header("Advanced Settings")]
-        public bool printDebugMessages = false;
-        [Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
-        public float lerpTime = 0.1f;
 
-        [Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
+        [HideInInspector]
+        public bool printDebugMessages = false;
+        [HideInInspector, Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
+        public float lerpTime = 0.1f;
+        [HideInInspector, Tooltip("Turns the object kinematic when held. Will result in dampened collisions because that's just how Unity is.")]
+        public bool kinematicWhileHeld = false;
+
+        [HideInInspector, Tooltip("Forces the local pickup object into the right position after a certain amount of time. Disabled if set to 0 or negative. You should only enable this if you need the collisions to be accurate, otherwise reduce jitter by enabling kinematic while held instead.")]
+        public float nonKinematicPickupJitterPreventionTime = 0;
+        
+        [HideInInspector, Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
         public bool reduceJitterDuringSleep = true;
 
         [HideInInspector]
@@ -763,7 +801,7 @@ namespace MMMaellon
 
         public void OnParticleCollision(GameObject other)
         {
-            if (!Utilities.IsValid(other) || rigid == null || rigid.isKinematic)
+            if (!syncParticleCollisions || !Utilities.IsValid(other) || rigid == null || rigid.isKinematic)
             {
                 return;
             }
@@ -779,8 +817,10 @@ namespace MMMaellon
 
 
         //Pickup Events
+        [System.NonSerialized] public float lastPickup;
         public override void OnPickup()
         {
+            lastPickup = Time.timeSinceLevelLoad;
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
             if (pickup)
             {
@@ -920,7 +960,7 @@ namespace MMMaellon
                     }
                 case (STATE_NO_HAND_HELD):
                     {
-                        noHand_OnEnterState();
+                        genericHand_OnEnterState();
                         return;
                     }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
@@ -974,17 +1014,17 @@ namespace MMMaellon
                     }
                 case (STATE_LEFT_HAND_HELD):
                     {
-                        noHand_OnExitState();
+                        genericHand_OnExitState();
                         return;
                     }
                 case (STATE_RIGHT_HAND_HELD):
                     {
-                        noHand_OnExitState();
+                        genericHand_OnExitState();
                         return;
                     }
                 case (STATE_NO_HAND_HELD):
                     {
-                        noHand_OnExitState();
+                        genericHand_OnExitState();
                         return;
                     }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
@@ -1642,6 +1682,12 @@ namespace MMMaellon
         }
 
         bool lastPickupable = false;
+        bool lastKinematic = false;
+        public void preventPickupJitter()
+        {
+            transform.position = parentPos + parentRot * pos;
+            transform.rotation = parentRot * rot;
+        }
         //Left Hand Held State
         //This state syncs the transforms relative to the left hand of the owner
         //This state is useful for when someone is holding the object in their left hand
@@ -1650,7 +1696,7 @@ namespace MMMaellon
         public void left_OnEnterState()
         {
             bone = HumanBodyBones.LeftHand;
-            noHand_OnEnterState();
+            genericHand_OnEnterState();
         }
         public void left_Interpolate(float interpolation)
         {
@@ -1661,6 +1707,10 @@ namespace MMMaellon
             {
                 generic_Interpolate(interpolation);
             }
+            else if (nonKinematicPickupJitterPreventionTime > 0 && lastState == state && Time.timeSinceLevelLoad - lastPickup > nonKinematicPickupJitterPreventionTime)
+            {
+                preventPickupJitter();
+            }
         }
 
         //Right Hand Held State
@@ -1668,7 +1718,7 @@ namespace MMMaellon
         public void right_OnEnterState()
         {
             bone = HumanBodyBones.RightHand;
-            noHand_OnEnterState();
+            genericHand_OnEnterState();
         }
         public void right_Interpolate(float interpolation)
         {
@@ -1680,10 +1730,14 @@ namespace MMMaellon
             {
                 generic_Interpolate(interpolation);
             }
+            else if (nonKinematicPickupJitterPreventionTime > 0 && lastState == state && Time.timeSinceLevelLoad - lastPickup > nonKinematicPickupJitterPreventionTime)
+            {
+                preventPickupJitter();
+            }
         }
         //Right Hand Held State
         //Same as the Left Hand Held State, but for right hands
-        public void noHand_OnEnterState()
+        public void genericHand_OnEnterState()
         {
             if (pickup)
             {
@@ -1697,12 +1751,22 @@ namespace MMMaellon
                     pickup.pickupable = !pickup.DisallowTheft;
                 }
             }
+
+            if (kinematicWhileHeld)
+            {
+                lastKinematic = rigid.isKinematic;
+                rigid.isKinematic = true;
+            }
         }
-        public void noHand_OnExitState()
+        public void genericHand_OnExitState()
         {
             if (pickup)
             {
                 pickup.pickupable = lastPickupable;
+            }
+            if (kinematicWhileHeld)
+            {
+                rigid.isKinematic = lastKinematic;
             }
         }
         public void noHand_OnInterpolationStart()
@@ -1720,6 +1784,10 @@ namespace MMMaellon
             if (!IsLocalOwner())
             {
                 generic_Interpolate(interpolation);
+            }
+            else if (nonKinematicPickupJitterPreventionTime > 0 && lastState == state && Time.timeSinceLevelLoad - lastPickup > nonKinematicPickupJitterPreventionTime)
+            {
+                preventPickupJitter();
             }
         }
         public void noHand_CalcParentTransform()
