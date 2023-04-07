@@ -865,6 +865,10 @@ namespace MMMaellon
             if (IsHeld())
             {
                 lastState = state;
+                if (kinematicWhileHeld && rigid.isKinematic)
+                {
+                    rigid.isKinematic = lastKinematic;
+                }
                 SendCustomEventDelayedFrames(nameof(OnDropDelayed), 1);
             }
         }
@@ -1764,7 +1768,7 @@ namespace MMMaellon
             {
                 pickup.pickupable = lastPickupable;
             }
-            if (kinematicWhileHeld)
+            if (kinematicWhileHeld && rigid.isKinematic)
             {
                 rigid.isKinematic = lastKinematic;
             }
