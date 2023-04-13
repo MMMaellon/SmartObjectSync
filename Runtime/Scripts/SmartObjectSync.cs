@@ -19,9 +19,10 @@ namespace MMMaellon
     public class SmartObjectSyncEditor : Editor
     {
         public static bool foldoutOpen = false;
-        
+
         //Advanced settings
         SerializedProperty m_printDebugMessages;
+        SerializedProperty m_preventPickupSnapping;
         SerializedProperty m_lerpTime;
         SerializedProperty m_kinematicWhileHeld;
         SerializedProperty m_nonKinematicPickupJitterPreventionTime;
@@ -29,6 +30,7 @@ namespace MMMaellon
         
         void OnEnable(){
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
+            m_preventPickupSnapping = serializedObject.FindProperty("preventPickupSnapping");
             m_lerpTime = serializedObject.FindProperty("lerpTime");
             m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
             m_nonKinematicPickupJitterPreventionTime = serializedObject.FindProperty("nonKinematicPickupJitterPreventionTime");
@@ -261,6 +263,7 @@ namespace MMMaellon
             foldoutOpen = EditorGUILayout.BeginFoldoutHeaderGroup(foldoutOpen, "Advanced Settings");
             if(foldoutOpen){
                 EditorGUILayout.PropertyField(m_printDebugMessages);
+                EditorGUILayout.PropertyField(m_preventPickupSnapping);
                 EditorGUILayout.PropertyField(m_lerpTime);
                 EditorGUILayout.PropertyField(m_kinematicWhileHeld);
                 EditorGUILayout.PropertyField(m_nonKinematicPickupJitterPreventionTime);
@@ -288,6 +291,8 @@ namespace MMMaellon
 
         [HideInInspector]
         public bool printDebugMessages = false;
+        [HideInInspector, Tooltip("When picked up, this object will maintain its offset instead of snapping to your hand.")]
+        public bool preventPickupSnapping = false;
         [HideInInspector, Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
         public float lerpTime = 0.1f;
         [HideInInspector, Tooltip("Turns the object kinematic when held. Will result in dampened collisions because that's just how Unity is.")]
@@ -1281,15 +1286,15 @@ namespace MMMaellon
                     }
                 case (STATE_LEFT_HAND_HELD):
                     {
-                        return generic_OnInterpolationEnd();
+                        return genericHand_onInterpolationEnd();
                     }
                 case (STATE_RIGHT_HAND_HELD):
                     {
-                        return generic_OnInterpolationEnd();
+                        return genericHand_onInterpolationEnd();
                     }
                 case (STATE_NO_HAND_HELD):
                     {
-                        return generic_OnInterpolationEnd();
+                        return genericHand_onInterpolationEnd();
                     }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
@@ -1707,7 +1712,7 @@ namespace MMMaellon
             //let the VRC_pickup script handle transforms for the local owner
             //only reposition it for non-owners
             bone_CalcParentTransform();
-            if (!IsLocalOwner())
+            if (!IsLocalOwner() || preventPickupSnapping)
             {
                 generic_Interpolate(interpolation);
             }
@@ -1730,7 +1735,7 @@ namespace MMMaellon
             //only reposition it for non-owners
             //we need to keep the parent transform up to date though
             bone_CalcParentTransform();
-            if (!IsLocalOwner())
+            if (!IsLocalOwner() || preventPickupSnapping)
             {
                 generic_Interpolate(interpolation);
             }
@@ -1762,6 +1767,28 @@ namespace MMMaellon
                 rigid.isKinematic = true;
             }
         }
+
+        public bool genericHand_onInterpolationEnd()
+        {
+            if (IsLocalOwner() && !pickup.allowManipulationWhenEquipped && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0))
+            {
+                if (generic_ObjectMoved())
+                {
+                    if (lastResync + lerpTime < Time.timeSinceLevelLoad)
+                    {
+                        Serialize();
+                    }
+                }
+                else
+                {
+                    lastResync = Time.timeSinceLevelLoad;
+                    return false;
+                }
+                return true;
+            }
+            return generic_OnInterpolationEnd();
+        }
+        
         public void genericHand_OnExitState()
         {
             if (pickup)
@@ -1785,7 +1812,7 @@ namespace MMMaellon
             //only reposition it for non-owners
             //we need to keep the parent transform up to date though
             noHand_CalcParentTransform();
-            if (!IsLocalOwner())
+            if (!IsLocalOwner() || preventPickupSnapping)
             {
                 generic_Interpolate(interpolation);
             }

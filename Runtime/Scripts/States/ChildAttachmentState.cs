@@ -8,9 +8,11 @@ namespace MMMaellon
 {
     public class ChildAttachmentState : SmartObjectSyncState
     {
-        public bool disableCollisions = true;   
+        public bool disableCollisions = true;
         [Tooltip("Time to wait after detaching before we turn on collisions again")]
         public float collisionCooldown = 0.1f;
+        [Tooltip("How the child should move when attaching itself to the parent, local to the parent's transform. If this is all zeros then the child just lerps smoothly in place. If this is is (0,0,1), then the child will lerp smoothly to (0,0,1) and then slide along the z axis into place")]
+        public Vector3 attachmentVector = Vector3.zero;
         public bool returnToStartingParentOnExit = true;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
 
@@ -62,6 +64,7 @@ namespace MMMaellon
             }
         }
         Transform startingParent;
+        bool firstInterpolation = true;
         void Start()
         {
             startingParent = transform.parent;
@@ -69,6 +72,7 @@ namespace MMMaellon
         }
         public override void OnEnterState()
         {
+            firstInterpolation = true;
             if (disableCollisions)
             {
                 sync.rigid.detectCollisions = false;
@@ -109,26 +113,31 @@ namespace MMMaellon
 
         public override void OnInterpolationStart()
         {
-
+            sync.startPos = transform.localPosition;
+            sync.startRot = transform.localRotation;
         }
 
         public override void Interpolate(float interpolation)
         {
-            transform.localPosition = sync.HermiteInterpolatePosition(sync.startPos, Vector3.zero, sync.pos, Vector3.zero, interpolation);
-            transform.localRotation = sync.HermiteInterpolateRotation(sync.startRot, Vector3.zero, sync.rot, Vector3.zero, interpolation);
+            if (attachmentVector == Vector3.zero || !firstInterpolation)
+            {
+                transform.localPosition = sync.HermiteInterpolatePosition(sync.startPos, Vector3.zero, sync.pos, Vector3.zero, interpolation);
+                transform.localRotation = sync.HermiteInterpolateRotation(sync.startRot, Vector3.zero, sync.rot, Vector3.zero, interpolation);
+            } else if (interpolation < 0.5)
+            {
+                    transform.localPosition = sync.HermiteInterpolatePosition(sync.startPos, Vector3.zero, sync.pos + attachmentVector, Vector3.zero, interpolation * 2);
+                    transform.localRotation = sync.HermiteInterpolateRotation(sync.startRot, Vector3.zero, sync.rot, Vector3.zero, interpolation * 2);
+            } else
+            {
+                transform.localPosition = sync.HermiteInterpolatePosition(sync.pos + attachmentVector, Vector3.zero, sync.pos, Vector3.zero, (interpolation - 0.5f) * 2f);
+                transform.localRotation = sync.rot;
+            }
         }
 
         public override bool OnInterpolationEnd()
         {
+            firstInterpolation = false;
             return transform.localPosition != sync.pos || transform.localRotation != sync.rot;
-        }
-
-        public override void OnDrop()
-        {
-            if (sync.IsLocalOwner())
-            {
-                EnterState();
-            }
         }
 
         public void Attach(Transform t)
