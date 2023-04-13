@@ -291,6 +291,8 @@ namespace MMMaellon
 
         [HideInInspector]
         public bool printDebugMessages = false;
+        [HideInInspector, Tooltip("By default, calling respawn will make the object reset it's local object space transforms.")]
+        public bool worldSpaceRespawn = false;
         [HideInInspector, Tooltip("When picked up, this object will maintain its offset instead of snapping to your hand.")]
         public bool preventPickupSnapping = false;
         [HideInInspector, Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
@@ -636,14 +638,29 @@ namespace MMMaellon
 
         public void SetSpawn()
         {
-            spawnPos = transform.position;
-            spawnRot = transform.rotation;
+            if (worldSpaceRespawn)
+            {
+                spawnPos = transform.position;
+                spawnRot = transform.rotation;
+            } else
+            {
+                spawnPos = transform.localPosition;
+                spawnRot = transform.localRotation;
+            }
         }
         public void Respawn()
         {
             _print("Respawn");
             TakeOwnership(false);
-            TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
+            if (worldSpaceRespawn)
+            {
+                TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
+            } else
+            {
+                transform.localPosition = spawnPos;
+                transform.localRotation = spawnRot;
+                TeleportTo(transform.position, transform.rotation, Vector3.zero, Vector3.zero);
+            }
         }
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
