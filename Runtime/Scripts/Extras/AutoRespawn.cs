@@ -40,7 +40,7 @@ namespace MMMaellon
 
         public void Respawn()
         {
-            if (lastSleepTime - 0.01f < Time.realtimeSinceStartup)//0.01f for safety against floating point errors
+            if (lastSleepTime > 0 && lastSleepTime - 0.01f < Time.realtimeSinceStartup)//0.01f for safety against floating point errors
             {
                 sync.Respawn();
             }
