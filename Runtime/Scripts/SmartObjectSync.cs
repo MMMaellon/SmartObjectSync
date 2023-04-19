@@ -616,6 +616,7 @@ namespace MMMaellon
 
         public void OnEnable()
         {
+            _print("OnEnable");
             owner = Networking.GetOwner(gameObject);
             if (IsLocalOwner())
             {
@@ -627,7 +628,6 @@ namespace MMMaellon
             }
             else
             {
-                //stagger requests randomly to prevent network clogging
                 if (interpolationStartTime > 0)
                 {
                     //only do this after we've received some data from the owner to prevent being sucked into spawn
@@ -636,6 +636,9 @@ namespace MMMaellon
                     //force no interpolation
                     interpolationStartTime = -1001f;
                     Interpolate();
+                } else
+                {
+                    RequestResync();
                 }
             }
         }
@@ -643,7 +646,8 @@ namespace MMMaellon
         public void RequestResync()
         {
             lastResyncRequest = Time.timeSinceLevelLoad;
-            SendCustomEventDelayedSeconds(nameof(RequestResync), (2 * lerpTime) + Random.Range(0.0f, 1.0f));
+            //stagger requests randomly to prevent network clogging
+            SendCustomEventDelayedSeconds(nameof(RequestResyncCallback), (2 * lerpTime) + Random.Range(0.0f, 1.0f));
         }
         public void RequestResyncCallback()
         {
@@ -763,7 +767,7 @@ namespace MMMaellon
         float lastSuccessfulNetworkSync = -1001f;
         public override void OnDeserialization()
         {
-            // _print("OnDeserialization");
+            _print("OnDeserialization");
             StartInterpolation();
             lastSuccessfulNetworkSync = Time.timeSinceLevelLoad;
         }

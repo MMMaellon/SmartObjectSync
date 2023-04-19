@@ -29,6 +29,10 @@ namespace MMMaellon
             }
             if (newState >= SmartObjectSync.STATE_CUSTOM)
             {
+                if (!Utilities.IsValid(sync.customState))
+                {
+                    return;
+                }
                 if (sync.customState == sync.GetComponent<InventoryState>())
                 {
                     textBox.text = "CUSTOM STATE: Stored in inventory";
@@ -39,7 +43,7 @@ namespace MMMaellon
                 }
                 else if (sync.customState == sync.GetComponent<StickyAttachmentState>())
                 {
-                    StickyAttachmentState sticky = sync.customState as StickyAttachmentState;
+                    StickyAttachmentState sticky = sync.GetComponent<StickyAttachmentState>();
                     if (Utilities.IsValid(sticky))
                     {
                         textBox.text = "CUSTOM STATE: Stick to " + sticky.parentTransformName;
@@ -51,7 +55,7 @@ namespace MMMaellon
                 }
                 else if (sync.customState == sync.GetComponent<StackableState>())
                 {
-                    StackableState stack = sync.customState as StackableState;
+                    StackableState stack = sync.GetComponent<StackableState>();
                     if (Utilities.IsValid(stack))
                     {
                         textBox.text = "CUSTOM STATE: Stacked on " + stack.rootParentName;
