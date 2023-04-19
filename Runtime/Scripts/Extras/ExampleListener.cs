@@ -23,10 +23,11 @@ namespace MMMaellon
         public override void OnChangeState(SmartObjectSync sync, int oldState, int newState)
         {
             transform.position = sync.transform.position;
-            if (cooldown > 0 && lastStateChange + cooldown > Time.timeSinceLevelLoad)
+            if (cooldown > 0f && lastStateChange + cooldown > Time.timeSinceLevelLoad)
             {
                 return;
             }
+            lastStateChange = Time.timeSinceLevelLoad;
             if (newState >= SmartObjectSync.STATE_CUSTOM)
             {
                 if (!Utilities.IsValid(sync.customState))
@@ -35,7 +36,10 @@ namespace MMMaellon
                 }
                 if (sync.customState == sync.GetComponent<InventoryState>())
                 {
-                    textBox.text = "CUSTOM STATE: Stored in inventory";
+                    if (Utilities.IsValid(textBox))
+                    {
+                        textBox.text = "CUSTOM STATE: Stored in inventory";
+                    }
                     if (audioSource)
                     {
                         audioSource.PlayOneShot(inventorySound);
@@ -46,7 +50,10 @@ namespace MMMaellon
                     StickyAttachmentState sticky = sync.GetComponent<StickyAttachmentState>();
                     if (Utilities.IsValid(sticky))
                     {
-                        textBox.text = "CUSTOM STATE: Stick to " + sticky.parentTransformName;
+                        if (Utilities.IsValid(textBox))
+                        {
+                            textBox.text = "CUSTOM STATE: Stick to " + sticky.parentTransformName;
+                        }
                         if (audioSource)
                         {
                             audioSource.PlayOneShot(stickSound);
@@ -58,7 +65,10 @@ namespace MMMaellon
                     StackableState stack = sync.GetComponent<StackableState>();
                     if (Utilities.IsValid(stack))
                     {
-                        textBox.text = "CUSTOM STATE: Stacked on " + stack.rootParentName;
+                        if (Utilities.IsValid(textBox))
+                        {
+                            textBox.text = "CUSTOM STATE: Stacked on " + stack.rootParentName;
+                        }
                         if (audioSource)
                         {
                             audioSource.PlayOneShot(stickSound);
@@ -67,12 +77,18 @@ namespace MMMaellon
                 }
                 else
                 {
-                    textBox.text = "CUSTOM STATE: unknown";
+                    if (Utilities.IsValid(textBox))
+                    {
+                        textBox.text = "CUSTOM STATE: unknown";
+                    }
                 }
             }
             else if (newState < 0)
             {
-                textBox.text = "Attached to " + sync.StateToString(newState);
+                if (Utilities.IsValid(textBox))
+                {
+                    textBox.text = "Attached to " + sync.StateToString(newState);
+                }
                 if (audioSource)
                 {
                     audioSource.PlayOneShot(attachSound);
@@ -80,7 +96,10 @@ namespace MMMaellon
             }
             else
             {
-                textBox.text = sync.StateToString(newState);
+                if (Utilities.IsValid(textBox))
+                {
+                    textBox.text = sync.StateToString(newState);
+                }
                 if (newState == SmartObjectSync.STATE_TELEPORTING)
                 {
                     //just got respawned or teleported
@@ -89,7 +108,7 @@ namespace MMMaellon
                         audioSource.PlayOneShot(teleportSound);
                     }
                 }
-                else if (newState == SmartObjectSync.STATE_LEFT_HAND_HELD || newState == SmartObjectSync.STATE_RIGHT_HAND_HELD || oldState == SmartObjectSync.STATE_NO_HAND_HELD)
+                else if (sync.IsHeld())
                 {
                     //just got grabbed
                     if (audioSource)
@@ -107,7 +126,7 @@ namespace MMMaellon
                             audioSource.PlayOneShot(yeetSound);
                         }
                     }
-                    else if (newState == SmartObjectSync.STATE_INTERPOLATING && (oldState == SmartObjectSync.STATE_INTERPOLATING || oldState == SmartObjectSync.STATE_FALLING))
+                    else if ((newState == SmartObjectSync.STATE_INTERPOLATING && (oldState == SmartObjectSync.STATE_INTERPOLATING || oldState == SmartObjectSync.STATE_FALLING))|| (oldState == SmartObjectSync.STATE_FALLING && newState == SmartObjectSync.STATE_FALLING))
                     {
                         Debug.LogWarning("oldState: " + sync.StateToString(oldState));
                         //we just collided with something

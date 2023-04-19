@@ -22,6 +22,7 @@ namespace MMMaellon
 
         //Advanced settings
         SerializedProperty m_printDebugMessages;
+        SerializedProperty m_forceContinuousSpeculative;
         SerializedProperty m_preventPickupSnapping;
         SerializedProperty m_lerpTime;
         SerializedProperty m_kinematicWhileHeld;
@@ -30,6 +31,7 @@ namespace MMMaellon
         
         void OnEnable(){
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
+            m_forceContinuousSpeculative = serializedObject.FindProperty("forceContinuousSpeculative");
             m_preventPickupSnapping = serializedObject.FindProperty("preventPickupSnapping");
             m_lerpTime = serializedObject.FindProperty("lerpTime");
             m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
@@ -263,6 +265,7 @@ namespace MMMaellon
             foldoutOpen = EditorGUILayout.BeginFoldoutHeaderGroup(foldoutOpen, "Advanced Settings");
             if(foldoutOpen){
                 EditorGUILayout.PropertyField(m_printDebugMessages);
+                EditorGUILayout.PropertyField(m_forceContinuousSpeculative);
                 EditorGUILayout.PropertyField(m_preventPickupSnapping);
                 EditorGUILayout.PropertyField(m_lerpTime);
                 EditorGUILayout.PropertyField(m_kinematicWhileHeld);
@@ -293,6 +296,8 @@ namespace MMMaellon
         public bool printDebugMessages = false;
         [HideInInspector, Tooltip("By default, calling respawn will make the object reset it's local object space transforms.")]
         public bool worldSpaceRespawn = false;
+        [HideInInspector, Tooltip("VRCObjectSync will set rigidbodies' collision detection mode to ContinuousSpeculative. This recreates that feature.")]
+        public bool forceContinuousSpeculative = true;
         [HideInInspector, Tooltip("When picked up, this object will maintain its offset instead of snapping to your hand.")]
         public bool preventPickupSnapping = false;
         [HideInInspector, Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
@@ -302,7 +307,7 @@ namespace MMMaellon
 
         [HideInInspector, Tooltip("Forces the local pickup object into the right position after a certain amount of time. Disabled if set to 0 or negative. You should only enable this if you need the collisions to be accurate, otherwise reduce jitter by enabling kinematic while held instead.")]
         public float nonKinematicPickupJitterPreventionTime = 0;
-        
+
         [HideInInspector, Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
         public bool reduceJitterDuringSleep = false;
 
@@ -325,8 +330,13 @@ namespace MMMaellon
         [System.NonSerialized, UdonSynced(UdonSyncMode.None)]
         public Vector3 spin;
 
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(state))]
+        [System.NonSerialized, FieldChangeCallback(nameof(state))]
         public int _state = STATE_TELEPORTING;
+
+        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(stateData))]
+        public int _stateData;
+        [System.NonSerialized]
+        public int _stateChangeCounter = 0;
         public const int STATE_SLEEPING = 0;
         //slowly lerp to final synced transform and velocity and then put rigidbody to sleep
         public const int STATE_TELEPORTING = 1;
@@ -393,6 +403,8 @@ namespace MMMaellon
         public Vector3 spinOnSync;
         [System.NonSerialized]
         public int lastState;
+        [System.NonSerialized]
+        public int stateChangeCounter = 0;//counts how many times we change state
         public int state
         {
             get => _state;
@@ -402,7 +414,7 @@ namespace MMMaellon
                 lastState = _state;
                 _state = value;
                 OnEnterState();
-
+                stateChangeCounter++;
 
                 if (pickup && pickup.IsHeld && !IsHeld())
                 {
@@ -411,6 +423,7 @@ namespace MMMaellon
                 }
                 if (IsLocalOwner())
                 {
+                    stateChangeCounter++;
                     //we call OnPreSerialization here to make it snappier for the local owner
                     //if any transforms and stuff happen in OnInterpolationStart, they happen here
                     // OnPreSerialization();
@@ -433,6 +446,19 @@ namespace MMMaellon
                         }
                     }
                 }
+            }
+        }
+        
+        public int stateData{
+            get => (_state * 10) + (stateChangeCounter % 10);
+            set {
+                _stateData = value;
+                if (!IsLocalOwner())
+                {
+                    state = value / 10;
+                    stateChangeCounter = (Mathf.Abs(value) % 10);
+                }
+                _print("stateData received " + value);
             }
         }
 
@@ -595,13 +621,17 @@ namespace MMMaellon
         public Quaternion spawnRot;
         public void Start()
         {
+            if (forceContinuousSpeculative)
+            {
+                rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            }
             SetSpawn();
             if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
             {
                 //set starting synced values
                 pos = transform.position;
                 rot = transform.rotation;
-                if (rigid && !rigid.isKinematic)
+                if (!rigid.isKinematic)
                 {
                     vel = rigid.velocity;
                     spin = rigid.angularVelocity;
@@ -762,12 +792,13 @@ namespace MMMaellon
             // _print("OnPreSerialization");
             OnSmartObjectSerialize();
             StartInterpolation();
+            stateData = stateData;
         }
 
         float lastSuccessfulNetworkSync = -1001f;
         public override void OnDeserialization()
         {
-            _print("OnDeserialization");
+            // _print("OnDeserialization");
             StartInterpolation();
             lastSuccessfulNetworkSync = Time.timeSinceLevelLoad;
         }
@@ -800,7 +831,7 @@ namespace MMMaellon
         SmartObjectSync otherSync;
         public void OnCollisionEnter(Collision other)
         {
-            if (rigid == null || rigid.isKinematic)
+            if (rigid.isKinematic)
             {
                 return;
             }
@@ -832,7 +863,7 @@ namespace MMMaellon
 
         public void OnCollisionExit(Collision other)
         {
-            if (rigid == null || rigid.isKinematic)
+            if (rigid.isKinematic)
             {
                 return;
             }
@@ -854,7 +885,7 @@ namespace MMMaellon
 
         public void OnParticleCollision(GameObject other)
         {
-            if (!syncParticleCollisions || !Utilities.IsValid(other) || rigid == null || rigid.isKinematic)
+            if (!syncParticleCollisions || !Utilities.IsValid(other) || rigid.isKinematic)
             {
                 return;
             }
@@ -1408,7 +1439,7 @@ namespace MMMaellon
 
         public bool sleep_OnInterpolationEnd()
         {
-            if (IsLocalOwner() || rigid == null || rigid.isKinematic || (rigid.IsSleeping() && (!reduceJitterDuringSleep || lastSleep != Time.timeSinceLevelLoad)))
+            if (IsLocalOwner() || rigid.isKinematic || (rigid.IsSleeping() && (!reduceJitterDuringSleep || lastSleep != Time.timeSinceLevelLoad)))
             {
                 _print("successfully slept");
                 return false;
@@ -1499,7 +1530,7 @@ namespace MMMaellon
         {
             if (IsLocalOwner())
             {
-                if (rigid == null || rigid.isKinematic || rigid.IsSleeping())
+                if (rigid.isKinematic || rigid.IsSleeping())
                 {
                     //wait around for the rigidbody to fall asleep
                     state = STATE_SLEEPING;
@@ -1526,7 +1557,7 @@ namespace MMMaellon
         {
             pos = transform.position;
             rot = transform.rotation;
-            if (rigid && !rigid.isKinematic)
+            if (!rigid.isKinematic)
             {
                 vel = rigid.velocity;
                 spin = rigid.angularVelocity;
@@ -1542,7 +1573,7 @@ namespace MMMaellon
         Vector3 changeInVelocity;
         public bool NonGravitationalAcceleration()
         {
-            if (!rigid || rigid.isKinematic)
+            if (rigid.isKinematic)
             {
                 return false;
             }
@@ -1606,7 +1637,7 @@ namespace MMMaellon
                 return;
             }
 
-            if (rigid && !rigid.isKinematic && rigid.useGravity)
+            if (!rigid.isKinematic && rigid.useGravity)
             {
                 transform.position = HermiteInterpolatePosition(startPos, startVel, pos, startVel + Physics.gravity * lerpTime, interpolation);
                 transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, startSpin, interpolation);
@@ -1621,7 +1652,7 @@ namespace MMMaellon
         {
             if (IsLocalOwner())
             {
-                if (rigid == null || rigid.isKinematic || rigid.IsSleeping())
+                if (rigid.isKinematic || rigid.IsSleeping())
                 {
                     //wait around for the rigidbody to fall asleep
                     state = STATE_SLEEPING;
@@ -1647,7 +1678,7 @@ namespace MMMaellon
         {
             pos = transform.position;
             rot = transform.rotation;
-            if (rigid && !rigid.isKinematic)
+            if (!rigid.isKinematic)
             {
                 vel = rigid.velocity;
                 spin = rigid.angularVelocity;

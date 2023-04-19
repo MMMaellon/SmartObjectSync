@@ -147,14 +147,11 @@ namespace MMMaellon
                     transform.localScale = Vector3.Lerp(transform.localScale, new Vector3(0.000001f, 0.000001f, 0.000001f), slowerInterpolation);
                 }
             }
-            if (sync.rigid)
+            sync.rigid.velocity = Vector3.zero;
+            sync.rigid.angularVelocity = Vector3.zero;
+            if (sync.IsLocalOwner())
             {
-                sync.rigid.velocity = Vector3.zero;
-                sync.rigid.angularVelocity = Vector3.zero;
-                if (sync.IsLocalOwner())
-                {
-                    sync.rigid.detectCollisions = sync.owner.IsUserInVR() && ((inventoryIndex < 0 && manager.leftInventoryOpen >= 1.0f) || (inventoryIndex >= 0 && manager.rightInventoryOpen >= 1.0f));
-                }
+                sync.rigid.detectCollisions = sync.owner.IsUserInVR() && ((inventoryIndex < 0 && manager.leftInventoryOpen >= 1.0f) || (inventoryIndex >= 0 && manager.rightInventoryOpen >= 1.0f));
             }
         }
 
