@@ -298,13 +298,13 @@ namespace MMMaellon
         [HideInInspector, Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
         public float lerpTime = 0.1f;
         [HideInInspector, Tooltip("Turns the object kinematic when held. Will result in dampened collisions because that's just how Unity is.")]
-        public bool kinematicWhileHeld = false;
+        public bool kinematicWhileHeld = true;
 
         [HideInInspector, Tooltip("Forces the local pickup object into the right position after a certain amount of time. Disabled if set to 0 or negative. You should only enable this if you need the collisions to be accurate, otherwise reduce jitter by enabling kinematic while held instead.")]
         public float nonKinematicPickupJitterPreventionTime = 0;
         
         [HideInInspector, Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
-        public bool reduceJitterDuringSleep = true;
+        public bool reduceJitterDuringSleep = false;
 
         [HideInInspector]
         public SmartObjectSyncHelper helper;
