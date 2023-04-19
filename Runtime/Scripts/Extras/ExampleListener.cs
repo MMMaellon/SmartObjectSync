@@ -18,9 +18,15 @@ namespace MMMaellon
         public AudioClip inventorySound;
         public AudioClip collisionSound;
 
+        public float cooldown = 0f;
+        float lastStateChange = -1001f;
         public override void OnChangeState(SmartObjectSync sync, int oldState, int newState)
         {
             transform.position = sync.transform.position;
+            if (cooldown > 0 && lastStateChange + cooldown > Time.timeSinceLevelLoad)
+            {
+                return;
+            }
             if (newState >= SmartObjectSync.STATE_CUSTOM)
             {
                 if (sync.customState == sync.GetComponent<InventoryState>())
@@ -33,7 +39,7 @@ namespace MMMaellon
                 }
                 else if (sync.customState == sync.GetComponent<StickyAttachmentState>())
                 {
-                    StickyAttachmentState sticky = sync.GetComponent<StickyAttachmentState>();
+                    StickyAttachmentState sticky = sync.customState as StickyAttachmentState;
                     if (Utilities.IsValid(sticky))
                     {
                         textBox.text = "CUSTOM STATE: Stick to " + sticky.parentTransformName;
@@ -45,7 +51,7 @@ namespace MMMaellon
                 }
                 else if (sync.customState == sync.GetComponent<StackableState>())
                 {
-                    StackableState stack = sync.GetComponent<StackableState>();
+                    StackableState stack = sync.customState as StackableState;
                     if (Utilities.IsValid(stack))
                     {
                         textBox.text = "CUSTOM STATE: Stacked on " + stack.rootParentName;

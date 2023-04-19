@@ -625,15 +625,39 @@ namespace MMMaellon
                     state = state;
                 }
             }
-            else if (interpolationStartTime > 0)
+            else
             {
-                //only do this after we've received some data from the owner to prevent being sucked into spawn
-                _print("onenable start interpolate");
-                StartInterpolation();
-                //force no interpolation
-                interpolationStartTime = -1001f;
-                Interpolate();
+                //stagger requests randomly to prevent network clogging
+                if (interpolationStartTime > 0)
+                {
+                    //only do this after we've received some data from the owner to prevent being sucked into spawn
+                    _print("onenable start interpolate");
+                    StartInterpolation();
+                    //force no interpolation
+                    interpolationStartTime = -1001f;
+                    Interpolate();
+                }
             }
+        }
+        float lastResyncRequest = -1001f;
+        public void RequestResync()
+        {
+            lastResyncRequest = Time.timeSinceLevelLoad;
+            SendCustomEventDelayedSeconds(nameof(RequestResync), (2 * lerpTime) + Random.Range(0.0f, 1.0f));
+        }
+        public void RequestResyncCallback()
+        {
+            if (IsLocalOwner() || lastSuccessfulNetworkSync > lastResyncRequest || lastResyncRequest < 0)
+            {
+                return;
+            }
+            if (Networking.IsClogged)
+            {
+                //just wait it out;
+                RequestResync();
+                return;
+            }
+            SendCustomNetworkEvent(VRC.Udon.Common.Interfaces.NetworkEventTarget.Owner, nameof(Serialize));
         }
 
         public void SetSpawn()
@@ -736,10 +760,12 @@ namespace MMMaellon
             StartInterpolation();
         }
 
+        float lastSuccessfulNetworkSync = -1001f;
         public override void OnDeserialization()
         {
             // _print("OnDeserialization");
             StartInterpolation();
+            lastSuccessfulNetworkSync = Time.timeSinceLevelLoad;
         }
 
         public override void OnPostSerialization(VRC.Udon.Common.SerializationResult result)
@@ -747,6 +773,7 @@ namespace MMMaellon
             if (result.success)
             {
                 helper.OnSerializationSuccess();
+                lastSuccessfulNetworkSync = Time.timeSinceLevelLoad;
             }
             else
             {
@@ -1707,8 +1734,8 @@ namespace MMMaellon
             return Vector3.Distance(CalcPos(), pos) > positionResyncThreshold || Quaternion.Dot(CalcRot(), rot) < rotationResyncThreshold;//arbitrary values to account for pickups wiggling a little in your hand
         }
 
-        bool lastPickupable = false;
-        bool lastKinematic = false;
+        [System.NonSerialized] public bool lastPickupable = false;
+        [System.NonSerialized] public bool lastKinematic = false;
         public void preventPickupJitter()
         {
             transform.position = parentPos + parentRot * pos;

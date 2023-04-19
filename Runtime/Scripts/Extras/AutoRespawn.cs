@@ -18,7 +18,7 @@ namespace MMMaellon
         public bool ignorePhysicsEvents = true;
         public float respawnCooldown = 30f;
         [System.NonSerialized]
-        private float lastSleepTime = -1001f;
+        private float lastSleepTime = 0f;
         public override void OnChangeState(SmartObjectSync s, int oldState, int newState)
         {
             if (s != sync || !sync.IsLocalOwner())
