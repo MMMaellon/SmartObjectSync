@@ -27,7 +27,7 @@ namespace MMMaellon
                     } else
                     {
                         //Slow down
-                        puck.helper.enabled = false;
+                        // puck.helper.enabled = false;
                         puck.rigid.velocity = Vector3.zero;
                     }
                 }

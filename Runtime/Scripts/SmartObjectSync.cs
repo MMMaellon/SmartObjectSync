@@ -55,17 +55,6 @@ namespace MMMaellon
                 SerializedObject serializedSync = new SerializedObject(sync);
                 serializedSync.FindProperty("pickup").objectReferenceValue = sync.GetComponent<VRC_Pickup>();
                 serializedSync.FindProperty("rigid").objectReferenceValue = sync.GetComponent<Rigidbody>();
-
-                if (!sync.helper || sync.helper.sync != sync)
-                {
-                    _print(sync, "adding helper");
-                    //we need to create the helper
-                    sync.helper = UdonSharpComponentExtensions.AddUdonSharpComponent<SmartObjectSyncHelper>(sync.gameObject);
-                    SerializedObject serializedHelper = new SerializedObject(sync.helper);
-                    serializedHelper.FindProperty("sync").objectReferenceValue = sync;
-                    serializedHelper.ApplyModifiedProperties();
-                    serializedSync.FindProperty("helper").objectReferenceValue = sync.helper;
-                }
                 if (VRC_SceneDescriptor.Instance)
                 {
                     serializedSync.FindProperty("respawnHeight").floatValue = VRC_SceneDescriptor.Instance.RespawnHeightY;
@@ -140,7 +129,6 @@ namespace MMMaellon
             int pickupSetupCount = 0;
             int rigidSetupCount = 0;
             int respawnYSetupCount = 0;
-            int helperSetupCount = 0;
             int stateSetupCount = 0;
             foreach (SmartObjectSync sync in Selection.GetFiltered<SmartObjectSync>(SelectionMode.Editable))
             {
@@ -158,10 +146,6 @@ namespace MMMaellon
                     if (Utilities.IsValid(VRC_SceneDescriptor.Instance) && !Mathf.Approximately(VRC_SceneDescriptor.Instance.RespawnHeightY, sync.respawnHeight))
                     {
                         respawnYSetupCount++;
-                    }
-                    if (sync.helper == null)
-                    {
-                        helperSetupCount++;
                     }
                     if (!Utilities.IsValid(sync.states))
                     {
@@ -202,7 +186,7 @@ namespace MMMaellon
                     }
                 }
             }
-            if ((pickupSetupCount > 0 || rigidSetupCount > 0 || respawnYSetupCount > 0 || helperSetupCount > 0 || stateSetupCount > 0))
+            if ((pickupSetupCount > 0 || rigidSetupCount > 0 || respawnYSetupCount > 0 || stateSetupCount > 0))
             {
                 if (pickupSetupCount == 1)
                 {
@@ -227,14 +211,6 @@ namespace MMMaellon
                 else if (respawnYSetupCount > 1)
                 {
                     EditorGUILayout.HelpBox(respawnYSetupCount.ToString() + @" Objects have a Respawn Height that is different from the scene's", MessageType.Info);
-                }
-                if (helperSetupCount == 1)
-                {
-                    EditorGUILayout.HelpBox(@"Helper not set up", MessageType.Warning);
-                }
-                else if (helperSetupCount > 1)
-                {
-                    EditorGUILayout.HelpBox(helperSetupCount.ToString() + @" Helpers not set up", MessageType.Warning);
                 }
 
                 if (stateSetupCount == 1)
@@ -310,9 +286,6 @@ namespace MMMaellon
 
         [HideInInspector, Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
         public bool reduceJitterDuringSleep = false;
-
-        [HideInInspector]
-        public SmartObjectSyncHelper helper;
         [HideInInspector]
         public VRC_Pickup pickup;
         [HideInInspector]
@@ -489,6 +462,7 @@ namespace MMMaellon
                     }
                     else
                     {
+                        serializeRequested = false;
                         if (pickup)
                         {
                             pickup.Drop();
@@ -619,8 +593,11 @@ namespace MMMaellon
         public Vector3 spawnPos;
         [System.NonSerialized]
         public Quaternion spawnRot;
+        int randomSeed = 0;
+        int randomCount = 0;
         public void Start()
         {
+            randomSeed = Random.Range(0, 10);
             if (forceContinuousSpeculative)
             {
                 rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
@@ -642,6 +619,87 @@ namespace MMMaellon
             //used to decide if we simulate a bounce in the falling state
             fallSpeed = lerpTime <= 0 ? 0 : Physics.gravity.magnitude * lerpTime;
             startRan = true;
+        }
+        [System.NonSerialized]
+        public bool _loop = false;
+        public bool loop {
+            get => _loop;
+            set {
+                if (value)
+                {
+                    disableRequested = false;
+                    if (!_loop)
+                    {
+                        _loop = true;
+                        SendCustomEventDelayedFrames(nameof(UpdateLoop), 0);
+                    }
+                } else if (serializeRequested)
+                {
+                    disableRequested = true;
+                } else
+                {
+                    _loop = false;
+                }
+            }
+        }
+        [System.NonSerialized]
+        public bool disableRequested = false;
+        [System.NonSerialized]
+        public bool serializeRequested = false;
+        public void UpdateLoop()
+        {
+            if (!_loop)
+            {
+                return;
+            }
+            if (!Utilities.IsValid(owner))
+            {
+                //we use underscore here
+                _loop = false;
+                return;
+            }
+
+            if (interpolationStartTime < 0)
+            {
+                //if we haven't received data yet, do nothing. Otherwise this will move the object to the origin
+                //we use underscore here
+                _loop = false;
+                return;
+            }
+
+            if (!disableRequested)
+            {
+                Interpolate();
+            }
+            if (serializeRequested && !Networking.IsClogged)
+            {
+                if (state == STATE_SLEEPING)
+                {
+                    //prioritize sleep serialization because it will settle our world faster
+                    RequestSerialization();
+                }
+                else
+                {
+                    //randomize it, so we stagger the synchronizations
+                    randomCount = (randomCount + 1) % 10;
+                    if (randomCount == randomSeed)
+                    {
+                        RequestSerialization();
+                    }
+                }
+            }
+            SendCustomEventDelayedFrames(nameof(UpdateLoop), 0);
+        }
+
+        public void OnSerializationFailure()
+        {
+            _printErr("OnSerializationFailure");
+            serializeRequested = true;
+            loop = true;//we're just going to wait around for the network to allow us to synchronize again
+        }
+        public void OnSerializationSuccess()
+        {
+            serializeRequested = false;
         }
 
         public void OnEnable()
@@ -732,7 +790,7 @@ namespace MMMaellon
 
         public void StartInterpolation()
         {
-            helper.Enable();
+            loop = true;
             OnInterpolationStart();
         }
 
@@ -747,7 +805,7 @@ namespace MMMaellon
             //decide if we keep running the helper
             if (!OnInterpolationEnd())
             {
-                helper.Disable();
+                loop = false;
             }
         }
 
@@ -780,7 +838,7 @@ namespace MMMaellon
         {
             if (Networking.IsClogged)
             {
-                helper.OnSerializationFailure();
+                OnSerializationFailure();
             } else
             {
                 RequestSerialization();
@@ -807,13 +865,13 @@ namespace MMMaellon
         {
             if (result.success)
             {
-                helper.OnSerializationSuccess();
+                OnSerializationSuccess();
                 lastSuccessfulNetworkSync = Time.timeSinceLevelLoad;
             }
             else
             {
                 //it sets a flag in the helper which will try to synchronize everything once the network gets less congested
-                helper.OnSerializationFailure();
+                OnSerializationFailure();
             }
         }
 
@@ -1489,7 +1547,7 @@ namespace MMMaellon
                     rigid.angularVelocity = spin;
                 }
             }
-            helper.Disable();//turn off immediately for max optimization
+            loop = false;//turn off immediately for max optimization
         }
         public void teleport_OnSmartObjectSerialize()
         {
