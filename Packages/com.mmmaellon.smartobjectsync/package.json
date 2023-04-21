@@ -6,6 +6,11 @@
     "url": "https://github.com/MMMaellon/SmartObjectSync.git",
     "dependencies": {},
     "gitDependencies": {},
+    "author": {
+        "name": "MMMaellon",
+        "email": "mmmaellon@gmail.com",
+        "url": "https://twitter.com/MMMaellon"
+    },
     "vpmDependencies": {
         "com.vrchat.udonsharp": "1.1.X"
     },
