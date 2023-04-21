@@ -13,6 +13,7 @@ sysinfo.txt
 # Visual Studio generated files and folders
 /[Ee]xported[Oo]bj/
 .vs/
+.vscode/
 /*.userprefs
 /*.csproj
 /*.unityproj
