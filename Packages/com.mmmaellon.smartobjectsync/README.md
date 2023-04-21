@@ -20,6 +20,6 @@ You have to download the entire git repo if you want to access the example proje
 
 Then open the Example Scenes by following these steps:
 
-1) Window > Package Manager
-2) Set the drop-down in the top left to "In Project" and select SmartObjectSync under the "custom" category
-3) Import one of the example scenes
+1. Window > Package Manager
+2. Set the drop-down in the top left to "In Project" and select SmartObjectSync under the "custom" category
+3. Import one of the example scenes
