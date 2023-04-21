@@ -1,0 +1,187 @@
+GridBackground#bg {
+	--line-color:rgba(0,0,0,0.2);
+	--spacing: 25;
+	--grid-background-color: rgba(20,20,20,1.0);
+}
+
+.UdonNode #node-border {
+	margin-top:0;
+	margin-right:0;
+	margin-bottom:0;
+	margin-left:0;
+	padding-top:0;
+	padding-right:0;
+	padding-bottom:0;
+	padding-left:0;
+	border-radius: 10px;
+	border-color:rgba(150,150,150,1);
+	border-left-width:2px;
+	border-right-width:2px;
+	border-top-width:2px;
+	border-bottom-width:2px;
+}
+
+.UdonNode #subtitle {
+	color:rgb(10,10,10);
+	font-size:12px;
+}
+
+UdonNode.GameObject #title-label, UdonNode.GameObject #subtitle {
+	color:#BC00BC;
+}
+
+UdonNode.Transform #title-label {
+	color:rgba(255,255,255,1);
+}
+
+UdonNode.Transform > #node-border {
+	border-color:rgba(50,50,50,1);
+}
+
+.UdonNode > #node-border > #contents > #top > #input {
+	background-color: rgba(50,50,50,0.98);
+}
+
+.UdonNode > #node-border > #contents > #top > #output {
+	background-color: rgba(30,30,30,0.98);
+}
+
+.UdonNode #title {
+	background-color: rgba(200,200,190,1);
+}
+
+.UdonNode Label#title-label {
+	color: black;
+	font-size: 18px;
+	-unity-font-style: bold;
+}
+
+.UdonNode #divider.horizontal {
+	border-color: rgba(0,0,0,1);
+}
+
+
+.UdonNode #help-button {
+	background-color: rgba(0,0,0,0);
+}
+
+.UdonNode:hover #help-button > #icon {
+	background-color: black;
+}
+
+.UdonNode:hover #collapse-button > #icon {
+	background-color: black;
+}
+
+Edge.edge {
+	--edge-width:6;
+	--edge-color:rgba(0,0,0,1);
+	--selected-edge-color:rgba(255,255,255,0.5);
+	--ghost-edge-color:rgba(255,0,0,1);
+}
+
+.int #title {
+	background-color:rgba(203,230,91,1);
+}
+
+.int #node-border{
+	border-color:rgba(203,230,91,1);
+}
+
+.Get #title {
+	background-color:rgba(254,64,185,1);
+}
+
+.Get #node-border {
+	border-color:rgba(254,64,185,1);
+}
+
+.Set #title {
+	background-color:rgba(244,50,74,1);
+}
+
+.Set #node-border {
+	border-color:rgba(244,50,74,1);
+}
+
+.String #title {
+	background-color:rgba(177,121,219,1);
+}
+
+.String #node-border {
+	border-color:rgba(177,121,219,1);
+}
+
+.Random #title {
+	background-color:rgba(251,156,90,1);
+}
+
+.Random #node-border {
+	border-color:rgba(251,156,90,1);
+}
+
+.Mathf #title {
+	background-color:rgba(252,199,85,1);
+}
+
+.Mathf #node-border {
+	border-color:rgba(252,199,85,1);
+}
+
+.Color #title {
+	background-color:rgba(130,0,129,1);
+}
+
+.Color #node-border {
+	border-color:rgba(130,0,129,1);
+}
+
+.Branch #title {
+	background-color:rgba(254,89,194,1);
+}
+
+.Branch #node-border {
+	border-color:rgba(254,89,194,1);
+}
+
+.Null #title {
+	background-color:rgba(57,0,57,1);
+}
+
+.Null #node-border {
+	border-color:rgba(57,0,57,1);
+}
+
+.op #title {
+	background-color:rgba(170,230,217,1);
+}
+
+.op #node-border {
+	border-color:rgba(170,230,217,1);
+}
+
+.Networking #title {
+	background-color:rgba(248,194,99,1);
+}
+
+.Networking #node-border {
+	border-color:rgba(248,194,99,1);
+}
+
+.LateUpdate #title {
+	background-color:rgba(25,175,255,1);
+}
+
+.LateUpdate #node-border {
+	border-color:rgba(25,75,255,1);
+}
+
+#UdonMap {
+	background-color:rgba(0,0,0,0.25);
+	border-color:rgba(10,10,10, 0);
+}
+
+#UdonMap Label {
+	visibility: hidden;
+	color: rgba(0,180,255,1);
+}

@@ -1,0 +1,32 @@
+{
+    "name": "VRC.SDK3.Editor",
+    "references": [
+        "VRC.SDK3",
+        "VRC.SDKBase.Editor",
+        "VRC.Udon"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UDON"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.vrchat.base",
+            "expression": "3.0.0",
+            "define": "VRC_SDK_VRCSDK3"
+        },
+        {
+            "name": "com.vrchat.base",
+            "expression": "3.0.0",
+            "define": "VRCUPM"
+        }
+    ],
+    "noEngineReferences": false
+}

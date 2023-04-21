@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<engine:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:engine="UnityEngine.Experimental.UIElements"
+    xsi:noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd"
+    xsi:schemaLocation="UnityEngine.Experimental.UIElements ../UIElementsSchema/UnityEngine.Experimental.UIElements.xsd">
+
+    <engine:ScrollView stretch-content-width="true">
+        <engine:VisualElement name="section">
+          <engine:Label text="New Hotkeys" name="header" />
+            <engine:TextElement text="Press and hold one of the following keys, then click anywhere on the graph to create the corresponding node:" />
+            <engine:TextElement text="      1 : float" />
+            <engine:TextElement text="      2 : Vector2" />
+            <engine:TextElement text="      3 : Vector3" />
+            <engine:TextElement text="      4 : Vector4" />
+            <engine:TextElement text="      b : Branch" />
+            <engine:TextElement text="      + : float addition" />
+            <engine:TextElement text="      - : float subtraction" />
+            <engine:TextElement text="      = : float equality comparision" />
+            <engine:TextElement text="      shift+b : Block" />
+            <engine:TextElement text="      " />
+            <engine:TextElement text="Press and hold 'C', then click on a constant to convert it into a variable." />
+            <engine:TextElement text="Press and hold 'Shift+F', then click on a node that outputs an array type, to generate a foreach loop automatically." />
+            <engine:TextElement text="The constant to variable and foreach loop features are also available in the right click menus for their respective nodes." />
+        </engine:VisualElement>
+    </engine:ScrollView>
+</engine:UXML>

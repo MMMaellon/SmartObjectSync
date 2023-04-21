@@ -1,0 +1,188 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
+  m_Name: PickupAndUse
+  m_EditorClassIdentifier: 
+  serializedUdonProgramAsset: {fileID: 11400000, guid: ca01a457f355c86498fc572d133e7ad2,
+    type: 2}
+  udonAssembly: ".data_start\r\n\r\n    \r\n    __instance_0: %UnityEngineMaterial,
+    null\r\n    __value_0: %UnityEngineColor, null\r\n    __instance_1: %UnityEngineMaterial,
+    null\r\n    __value_1: %UnityEngineColor, null\r\n    __instance_2: %UnityEngineMeshRenderer,
+    null\r\n    __instance_3: %UnityEngineGameObject, this\r\n    __type_0: %SystemType,
+    null\r\n    __Type_0: %SystemType, null\r\n    targetMaterial: %UnityEngineMaterial,
+    null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n    .export _onPickupUseDown\r\n   
+    \r\n    _onPickupUseDown:\r\n    \r\n        PUSH, targetMaterial\r\n       
+    PUSH, __instance_0\r\n        COPY\r\n        PUSH, __instance_0\r\n        PUSH,
+    __value_0\r\n        EXTERN, \"UnityEngineMaterial.__set_color__UnityEngineColor__SystemVoid\"\r\n       
+    JUMP, 0xFFFFFFFC\r\n    \r\n    .export _onPickupUseUp\r\n    \r\n    _onPickupUseUp:\r\n   
+    \r\n        PUSH, targetMaterial\r\n        PUSH, __instance_1\r\n        COPY\r\n       
+    PUSH, __instance_1\r\n        PUSH, __value_1\r\n        EXTERN, \"UnityEngineMaterial.__set_color__UnityEngineColor__SystemVoid\"\r\n       
+    JUMP, 0xFFFFFFFC\r\n    \r\n    .export _start\r\n    \r\n    _start:\r\n   
+    \r\n        PUSH, __Type_0\r\n        PUSH, __type_0\r\n        COPY\r\n       
+    PUSH, __instance_3\r\n        PUSH, __type_0\r\n        PUSH, __instance_2\r\n       
+    EXTERN, \"UnityEngineGameObject.__GetComponent__SystemType__UnityEngineComponent\"\r\n       
+    PUSH, __instance_2\r\n        PUSH, targetMaterial\r\n        EXTERN, \"UnityEngineMeshRenderer.__get_material__UnityEngineMaterial\"\r\n       
+    JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+  assemblyError: 
+  graphData:
+    name: 
+    description: 
+    nodes:
+    - fullName: Event_OnPickupUseDown
+      uid: e62030ae-1e98-421a-8d15-4ab14134fe22
+      position: {x: -280, y: -30}
+      nodeUIDs: []
+      flowUIDs:
+      - 7b540459-4ba4-43b6-8b40-19820f012c57
+      nodeValues: []
+    - fullName: Event_OnPickupUseUp
+      uid: 340494dc-14f7-43e5-95f7-56dadfb4c1d4
+      position: {x: -280, y: 190}
+      nodeUIDs: []
+      flowUIDs:
+      - 00c99866-4e32-4730-b6c2-158bbb8700ff
+      nodeValues: []
+    - fullName: UnityEngineGameObject.__GetComponent__SystemType__UnityEngineComponent
+      uid: ca0aaf1d-7bbf-4642-b9e7-6263a5b1a4f5
+      position: {x: -310, y: -270}
+      nodeUIDs:
+      - 
+      - f41b88f5-90a8-4267-bea1-e70003a206a5|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: Type_UnityEngineMeshRenderer
+      uid: f41b88f5-90a8-4267-bea1-e70003a206a5
+      position: {x: -560, y: -270}
+      nodeUIDs: []
+      flowUIDs: []
+      nodeValues: []
+    - fullName: UnityEngineMeshRenderer.__get_material__UnityEngineMaterial
+      uid: 22a5bc58-c202-4b10-a0b7-f0eb94b2df4e
+      position: {x: 10, y: -310}
+      nodeUIDs:
+      - ca0aaf1d-7bbf-4642-b9e7-6263a5b1a4f5|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: UnityEngineMaterial.__set_color__UnityEngineColor__SystemVoid
+      uid: 7b540459-4ba4-43b6-8b40-19820f012c57
+      position: {x: -20, y: 0}
+      nodeUIDs:
+      - 72c8f3b2-4db4-4a55-a441-59032ce12f35|0
+      - 
+      flowUIDs:
+      - 
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null|{"r":0.31633853912353518,"g":1.0,"b":0.0,"a":1.0}
+    - fullName: UnityEngineMaterial.__set_color__UnityEngineColor__SystemVoid
+      uid: 00c99866-4e32-4730-b6c2-158bbb8700ff
+      position: {x: -20, y: 150}
+      nodeUIDs:
+      - 72c8f3b2-4db4-4a55-a441-59032ce12f35|0
+      - 
+      flowUIDs:
+      - 
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null|{"r":0.6698113083839417,"g":0.6698113083839417,"b":0.6698113083839417,"a":1.0}
+    - fullName: Event_Start
+      uid: 9a743b31-5819-463b-a89a-a431146a3da0
+      position: {x: 180, y: -420}
+      nodeUIDs: []
+      flowUIDs:
+      - 668bf596-ab4d-4802-9dfa-8499474a6d16
+      nodeValues: []
+    - fullName: Set_Variable
+      uid: 668bf596-ab4d-4802-9dfa-8499474a6d16
+      position: {x: 330, y: -380}
+      nodeUIDs:
+      - 
+      - 22a5bc58-c202-4b10-a0b7-f0eb94b2df4e|0
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|f75153ec-462f-41df-835e-046a120001cf
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|False
+    - fullName: Variable_UnityEngineMaterial
+      uid: f75153ec-462f-41df-835e-046a120001cf
+      position: {x: -696, y: -552}
+      nodeUIDs:
+      - 
+      - 
+      - 
+      - 
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|targetMaterial
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|False
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|False
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|none
+    - fullName: Get_Variable
+      uid: 72c8f3b2-4db4-4a55-a441-59032ce12f35
+      position: {x: -280, y: 80}
+      nodeUIDs:
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|f75153ec-462f-41df-835e-046a120001cf
+    updateOrder: 0
+  graphElementData:
+  - type: 2
+    uid: bde18abd-8bb5-4c57-9434-cd97abb451b9
+    jsonData: '{"uid":"bde18abd-8bb5-4c57-9434-cd97abb451b9","layout":{"serializedVersion":"2","x":-584.67919921875,"y":-488.7227783203125,"width":1134.0,"height":366.0},"containedElements":["668bf596-ab4d-4802-9dfa-8499474a6d16","f41b88f5-90a8-4267-bea1-e70003a206a5","ca0aaf1d-7bbf-4642-b9e7-6263a5b1a4f5","9a743b31-5819-463b-a89a-a431146a3da0","22a5bc58-c202-4b10-a0b7-f0eb94b2df4e"],"title":"Get
+      the material just once for better performance","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
+  - type: 2
+    uid: e48bfbbe-9c6a-4146-ba89-5dcb675de8ed
+    jsonData: '{"uid":"e48bfbbe-9c6a-4146-ba89-5dcb675de8ed","layout":{"serializedVersion":"2","x":-309.2767639160156,"y":-90.8224868774414,"width":560.0,"height":392.0},"containedElements":["340494dc-14f7-43e5-95f7-56dadfb4c1d4","e62030ae-1e98-421a-8d15-4ab14134fe22","00c99866-4e32-4730-b6c2-158bbb8700ff","7b540459-4ba4-43b6-8b40-19820f012c57","72c8f3b2-4db4-4a55-a441-59032ce12f35"],"title":"Change
+      color when ''Use'' is pressed and released","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
+  - type: 3
+    uid: 00c6e26b-a0a5-42b1-895a-56ab720eefab
+    jsonData: '{"uid":"00c6e26b-a0a5-42b1-895a-56ab720eefab","layout":{"serializedVersion":"2","x":-666.9842529296875,"y":86.7950210571289,"width":339.6000671386719,"height":71.739990234375},"title":"targetMaterial
+      is a public variable so you can change it in the Inspector","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
+  - type: 5
+    uid: cddf633d-d48d-4bda-954f-1d0dd8f691c2
+    jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":13.0,"y":29.0,"width":244.0,"height":100.0}}'
+  - type: 4
+    uid: 46d8d053-df09-42aa-b83b-0d8d8bbabc43
+    jsonData: '{"visible":false,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
+  viewTransform:
+    position: {x: 542, y: 502}
+    scale: 0.76714456
+  version: 1.0.0
+  showAssembly: 0

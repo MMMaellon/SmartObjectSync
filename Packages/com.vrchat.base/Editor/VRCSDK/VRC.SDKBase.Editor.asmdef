@@ -1,0 +1,29 @@
+{
+    "name": "VRC.SDKBase.Editor",
+    "references": [
+        "VRC.SDKBase",
+        "VRC.Enums.Validation.Performance"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.vrchat.base",
+            "expression": "3.0.0",
+            "define": "VRC_SDK_VRCSDK3"
+        },
+        {
+            "name": "com.vrchat.base",
+            "expression": "3.0.0",
+            "define": "VRCUPM"
+        }
+    ],
+    "noEngineReferences": false
+}

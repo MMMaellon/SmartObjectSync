@@ -1,0 +1,22 @@
+{
+    "name": "VRC.SDKBase",
+    "references": [
+        "Unity.Timeline",
+        "VRC.Enums.Validation.Performance"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.vrchat.base",
+            "expression": "3.0.0",
+            "define": "VRC_SDK_VRCSDK3"
+        }
+    ],
+    "noEngineReferences": false
+}

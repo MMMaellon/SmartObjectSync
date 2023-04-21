@@ -1,0 +1,254 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
+  m_Name: DownloadString
+  m_EditorClassIdentifier: 
+  serializedUdonProgramAsset: {fileID: 11400000, guid: e7c2ba5d67832be459d76016771e871b,
+    type: 2}
+  udonAssembly: ".data_start\r\n\r\n    .export Url\r\n    .export TextField\r\n   
+    \r\n    __url_0: %VRCSDKBaseVRCUrl, null\r\n    __udonBehaviour_0: %VRCUdonUdonBehaviour,
+    this\r\n    __instance_0: %UnityEngineUIText, null\r\n    __value_0: %SystemString,
+    null\r\n    __instance_1: %VRCSDK3StringLoadingIVRCStringDownload, null\r\n   
+    onStringLoadSuccessIVRCStringDownload: %VRCSDK3StringLoadingIVRCStringDownload,
+    null\r\n    __message_0: %SystemObject, null\r\n    __String_0: %SystemString,
+    null\r\n    __String_1: %SystemString, null\r\n    __String_2: %SystemString,
+    null\r\n    __String_3: %SystemString, null\r\n    __instance_2: %VRCSDK3StringLoadingIVRCStringDownload,
+    null\r\n    onStringLoadErrorIVRCStringDownload: %VRCSDK3StringLoadingIVRCStringDownload,
+    null\r\n    __value_1: %SystemInt32, null\r\n    __instance_3: %VRCSDK3StringLoadingIVRCStringDownload,
+    null\r\n    Url: %VRCSDKBaseVRCUrl, null\r\n    TextField: %UnityEngineUIText,
+    null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n    .export _start\r\n    \r\n   
+    _start:\r\n    \r\n        PUSH, Url\r\n        PUSH, __url_0\r\n        COPY\r\n       
+    PUSH, __url_0\r\n        PUSH, __udonBehaviour_0\r\n        EXTERN, \"VRCSDK3StringLoadingVRCStringDownloader.__LoadUrl__VRCSDKBaseVRCUrl_VRCUdonCommonInterfacesIUdonEventReceiver__SystemVoid\"\r\n       
+    JUMP, 0xFFFFFFFC\r\n    \r\n    .export _onStringLoadSuccess\r\n    \r\n    _onStringLoadSuccess:\r\n   
+    \r\n        PUSH, TextField\r\n        PUSH, __instance_0\r\n        COPY\r\n       
+    PUSH, onStringLoadSuccessIVRCStringDownload\r\n        PUSH, __instance_1\r\n       
+    COPY\r\n        PUSH, __instance_1\r\n        PUSH, __value_0\r\n        EXTERN,
+    \"VRCSDK3StringLoadingIVRCStringDownload.__get_Result__SystemString\"\r\n       
+    PUSH, __instance_0\r\n        PUSH, __value_0\r\n        EXTERN, \"UnityEngineUIText.__set_text__SystemString__SystemVoid\"\r\n       
+    JUMP, 0xFFFFFFFC\r\n    \r\n    .export _onStringLoadError\r\n    \r\n    _onStringLoadError:\r\n   
+    \r\n        PUSH, onStringLoadErrorIVRCStringDownload\r\n        PUSH, __instance_2\r\n       
+    COPY\r\n        PUSH, __instance_2\r\n        PUSH, __String_2\r\n        EXTERN,
+    \"VRCSDK3StringLoadingIVRCStringDownload.__get_Error__SystemString\"\r\n       
+    PUSH, __String_2\r\n        PUSH, __String_3\r\n        PUSH, __String_0\r\n       
+    EXTERN, \"SystemString.__op_Addition__SystemString_SystemString__SystemString\"\r\n       
+    PUSH, onStringLoadErrorIVRCStringDownload\r\n        PUSH, __instance_3\r\n       
+    COPY\r\n        PUSH, __instance_3\r\n        PUSH, __value_1\r\n        EXTERN,
+    \"VRCSDK3StringLoadingIVRCStringDownload.__get_ErrorCode__SystemInt32\"\r\n       
+    PUSH, __value_1\r\n        PUSH, __String_1\r\n        EXTERN, \"SystemConvert.__ToString__SystemInt32__SystemString\"\r\n       
+    PUSH, __String_0\r\n        PUSH, __String_1\r\n        PUSH, __message_0\r\n       
+    EXTERN, \"SystemString.__op_Addition__SystemString_SystemString__SystemString\"\r\n       
+    PUSH, __message_0\r\n        EXTERN, \"UnityEngineDebug.__Log__SystemObject__SystemVoid\"\r\n       
+    JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+  assemblyError: 
+  graphData:
+    name: 
+    description: 
+    nodes:
+    - fullName: Event_Start
+      uid: 129615f8-b60a-4111-a3bd-da77761f5f5b
+      position: {x: 465, y: 255}
+      nodeUIDs: []
+      flowUIDs:
+      - c7a500b3-7af6-494b-9b0b-c931b0141ee3
+      nodeValues: []
+    - fullName: Variable_VRCSDKBaseVRCUrl
+      uid: cd9a4d4e-8b39-4f8a-970b-0b8bad2db1f9
+      position: {x: 0, y: 0}
+      nodeUIDs:
+      - 
+      - 
+      - 
+      - 
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|Url
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|True
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|False
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|none
+    - fullName: Variable_UnityEngineUIText
+      uid: 2d46a3fe-6742-4df2-ab35-51d64e48a0b5
+      position: {x: 0, y: 0}
+      nodeUIDs:
+      - 
+      - 
+      - 
+      - 
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|TextField
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|True
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|False
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|none
+    - fullName: Get_Variable
+      uid: 33a08bfc-8515-4b37-8feb-8e998e64ef75
+      position: {x: 470, y: 360}
+      nodeUIDs:
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|cd9a4d4e-8b39-4f8a-970b-0b8bad2db1f9
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: VRCSDK3StringLoadingVRCStringDownloader.__LoadUrl__VRCSDKBaseVRCUrl_VRCUdonCommonInterfacesIUdonEventReceiver__SystemVoid
+      uid: c7a500b3-7af6-494b-9b0b-c931b0141ee3
+      position: {x: 715, y: 255}
+      nodeUIDs:
+      - 33a08bfc-8515-4b37-8feb-8e998e64ef75|0
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: Event_OnStringLoadSuccess
+      uid: 2bbdf38a-b403-4b1c-a05b-30e115638613
+      position: {x: 440, y: 605}
+      nodeUIDs: []
+      flowUIDs:
+      - f2ed802c-fd47-4aae-b9da-efae03caa0d7
+      nodeValues: []
+    - fullName: Event_OnStringLoadError
+      uid: a3557df1-055b-40de-9c99-3faa14705564
+      position: {x: 435, y: 905}
+      nodeUIDs: []
+      flowUIDs:
+      - 86b8a678-f1d4-418e-bdee-274fbdc3658d
+      nodeValues: []
+    - fullName: UnityEngineDebug.__Log__SystemObject__SystemVoid
+      uid: 86b8a678-f1d4-418e-bdee-274fbdc3658d
+      position: {x: 1465, y: 890}
+      nodeUIDs:
+      - bb5eb81d-8429-41b4-a325-b4038bcf2ffd|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: VRCSDK3StringLoadingIVRCStringDownload.__get_Error__SystemString
+      uid: 0b9d9c06-7efb-415a-8e0c-a5384feaf08a
+      position: {x: 785, y: 1010}
+      nodeUIDs:
+      - a3557df1-055b-40de-9c99-3faa14705564|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: SystemString.__op_Addition__SystemString_SystemString__SystemString
+      uid: 29f1b0bd-7201-4376-8186-4ae28d1a3d90
+      position: {x: 1035, y: 1010}
+      nodeUIDs:
+      - 0b9d9c06-7efb-415a-8e0c-a5384feaf08a|0
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
+          PublicKeyToken=b77a5c561934e089|, error code :'
+    - fullName: SystemString.__op_Addition__SystemString_SystemString__SystemString
+      uid: bb5eb81d-8429-41b4-a325-b4038bcf2ffd
+      position: {x: 1300, y: 1065}
+      nodeUIDs:
+      - 29f1b0bd-7201-4376-8186-4ae28d1a3d90|0
+      - ce74fa64-a935-4434-adbf-9aa4cd4f8648|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|
+    - fullName: VRCSDK3StringLoadingIVRCStringDownload.__get_ErrorCode__SystemInt32
+      uid: 11e67d24-5b6f-4d72-8798-0967d11bda96
+      position: {x: 780, y: 1170}
+      nodeUIDs:
+      - a3557df1-055b-40de-9c99-3faa14705564|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: SystemConvert.__ToString__SystemInt32__SystemString
+      uid: ce74fa64-a935-4434-adbf-9aa4cd4f8648
+      position: {x: 1125, y: 1150}
+      nodeUIDs:
+      - 11e67d24-5b6f-4d72-8798-0967d11bda96|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|0
+    - fullName: Get_Variable
+      uid: 515ac250-dae3-459d-915d-8f65586c8fcd
+      position: {x: 890, y: 560}
+      nodeUIDs:
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|2d46a3fe-6742-4df2-ab35-51d64e48a0b5
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: UnityEngineUIText.__set_text__SystemString__SystemVoid
+      uid: f2ed802c-fd47-4aae-b9da-efae03caa0d7
+      position: {x: 1185, y: 605}
+      nodeUIDs:
+      - 515ac250-dae3-459d-915d-8f65586c8fcd|0
+      - 1d3a50fa-3e99-4f29-8be2-d7d56efa4f05|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: VRCSDK3StringLoadingIVRCStringDownload.__get_Result__SystemString
+      uid: 1d3a50fa-3e99-4f29-8be2-d7d56efa4f05
+      position: {x: 880, y: 705}
+      nodeUIDs:
+      - 2bbdf38a-b403-4b1c-a05b-30e115638613|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    updateOrder: 0
+  graphElementData:
+  - type: 2
+    uid: 62876a01-2a44-4b4c-9b47-86f82b5a8469
+    jsonData: '{"uid":"62876a01-2a44-4b4c-9b47-86f82b5a8469","layout":{"serializedVersion":"2","x":440.0,"y":195.0,"width":465.0,"height":272.0},"containedElements":["33a08bfc-8515-4b37-8feb-8e998e64ef75","c7a500b3-7af6-494b-9b0b-c931b0141ee3","129615f8-b60a-4111-a3bd-da77761f5f5b"],"title":"load
+      string on start","layer":-1,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":1.0}}'
+  - type: 2
+    uid: a1eaa8cb-de98-4f46-8ab4-442e953e9bb5
+    jsonData: '{"uid":"a1eaa8cb-de98-4f46-8ab4-442e953e9bb5","layout":{"serializedVersion":"2","x":410.0,"y":830.0,"width":1211.0,"height":447.0},"containedElements":["ce74fa64-a935-4434-adbf-9aa4cd4f8648","11e67d24-5b6f-4d72-8798-0967d11bda96","bb5eb81d-8429-41b4-a325-b4038bcf2ffd","29f1b0bd-7201-4376-8186-4ae28d1a3d90","0b9d9c06-7efb-415a-8e0c-a5384feaf08a","86b8a678-f1d4-418e-bdee-274fbdc3658d","a3557df1-055b-40de-9c99-3faa14705564"],"title":"Error
+      handeling","layer":-1,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":1.0}}'
+  - type: 2
+    uid: dd20057c-6ba1-4238-811d-a93fd99db675
+    jsonData: '{"uid":"dd20057c-6ba1-4238-811d-a93fd99db675","layout":{"serializedVersion":"2","x":415.0,"y":500.0,"width":942.0,"height":312.0},"containedElements":["1d3a50fa-3e99-4f29-8be2-d7d56efa4f05","515ac250-dae3-459d-915d-8f65586c8fcd","f2ed802c-fd47-4aae-b9da-efae03caa0d7","2bbdf38a-b403-4b1c-a05b-30e115638613"],"title":"Set
+      string to text field","layer":-1,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":1.0}}'
+  version: 1.0.0
+  showAssembly: 0

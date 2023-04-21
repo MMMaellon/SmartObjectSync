@@ -1,0 +1,55 @@
+UdonGraphToolbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 28px;
+    top: 20px;
+    width: 100%;
+    padding: 0 0 0 238px;
+    background-color: #383838;
+    border-bottom-color: #1F1F1F;
+    border-bottom-width: 3px;
+    position: absolute;
+}
+
+UdonGraphToolbar > VisualElement {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 100%;
+}
+
+UdonGraphToolbar .updateOrderField {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 0 4px 0;
+}
+
+UdonGraphToolbar .updateOrderField > IntegerField {
+    min-width: 50px;
+}
+
+UdonGraphToolbar Button {
+    background-image: none;
+    background-color: rgba(255,255,255,0);
+    border-left-width: 1px;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-radius: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-color: #1F1F1F;
+    margin: 0;
+    height: 100%;
+}
+
+UdonGraphToolbar Button.selected {
+    background-color: rgba(255,255,255,0.1);
+}
+
+UdonGraphToolbar Button:hover {
+    background-color: rgba(255,255,255,0.15);
+}

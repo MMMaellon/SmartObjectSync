@@ -1,0 +1,153 @@
+UdonSidebar.graphElement {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    width: 234px;
+    height: 100%;
+    background-color: #383838;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 20px;
+    border-radius: 0;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-bottom-width: 0;
+}
+
+UdonSidebar.graphElement .draggableBorder {
+    position: absolute;
+    cursor: resize-horizontal;
+    right: -1px;
+    width: 5px;
+    height: 100%;
+    background-color: #1f1f1f;
+}
+
+UdonSidebar.graphElement > .scrollerPlaceholder {
+    position: absolute;
+    right: 4px;
+    width: 12px;
+    height: 100%;
+    background-color: #353535;
+    border-left-color: #2a2a2a;
+    border-left-width: 1px;
+}
+
+UdonSidebar.graphElement .udonGraphSearch {
+    display: flex;
+    width: 217px;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px;
+    background-color: #393939;
+    justify-content: space-between;
+}
+
+UdonSidebar.graphElement .udonGraphSearch .udonGraphSearchInput {
+    flex: 1;
+}
+
+UdonSidebar.graphElement .udonGraphSearch .udonGraphSearchInput .udonGraphSearchPlaceholder {
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+}
+
+UdonSidebar.graphElement .udonGraphSearch .udonGraphSearchInput .udonGraphSearchPlaceholder.hidden {
+    display: none;
+}
+
+UdonSidebar.graphElement > ScrollView {
+    height: 100%;
+    width: 230px;
+}
+
+UdonSidebar.graphElement > ScrollView > #unity-content-viewport > #unity-content-container {
+}
+UdonSidebar.graphElement .baseBlock {
+    width: 217px;
+    height: auto;
+    background-color: #2B2B2B;
+    border-top-width: 1px;
+    border-top-color: #212121;
+}
+
+UdonSidebar.graphElement .baseBlock .header {
+    background-color: #393939;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+UdonSidebar.graphElement .baseBlock .header > VisualElement {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+UdonSidebar.graphElement .baseBlock .header .collapseIcon {
+    background-image: resource("graphview/nodes/nodechevrondown.png");
+    width: 14px;
+    height: 14px;
+    margin-right: 5px;
+}
+
+UdonSidebar.graphElement .baseBlock.collapsed .header .collapseIcon {
+    background-image: resource("graphview/nodes/nodechevronright.png");
+}
+
+UdonSidebar.graphElement .baseBlock.collapsed .content,
+UdonSidebar.graphElement .baseBlock.collapsed .list {
+    overflow: hidden;
+    height: 0;
+    padding: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: #212121;
+}
+
+UdonSidebar.graphElement .baseBlock .content,
+UdonSidebar.graphElement .baseBlock .list {
+    padding: 6px 5px;
+}
+
+UdonSidebar.graphElement .baseBlock .list {
+    display: flex;
+    flex-direction: column;
+}
+
+UdonGraphEvents .udonEvent {
+    -unity-text-align: middle-left;
+    border-left-width: 2px;
+    border-left-color: #87FF4D;
+}
+
+UdonGraphEvents .udonEvent.customEvent {
+    border-left-color: #93B3F8;
+}
+
+UdonGraphEvents .udonEvent.variableChange {
+    border-left-color: #c27287;
+}
+
+UdonSidebar.graphElement .baseBlock .placeholder {
+    -unity-text-align: upper-left;
+    display: flex;
+    width: 100%;
+    flex-basis: 100%;
+    font-size: 11px;
+    white-space: normal;
+}
+
+UdonGraphGroups .udonGroup {
+    -unity-text-align: middle-left;
+    border-left-width: 2px;
+    border-left-color: #FFC107;
+}
+
+UdonGraphStatus {
+    height: 100%;
+}

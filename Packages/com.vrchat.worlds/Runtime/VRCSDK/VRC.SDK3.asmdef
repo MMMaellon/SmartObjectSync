@@ -1,0 +1,16 @@
+{
+    "name": "VRC.SDK3",
+    "references": [
+        "VRC.Udon",
+        "Unity.TextMeshPro",
+        "Cinemachine"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
