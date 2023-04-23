@@ -622,15 +622,17 @@ namespace MMMaellon
         }
         [System.NonSerialized]
         public bool _loop = false;
+        bool loopRequested = false;
         public bool loop {
             get => _loop;
             set {
                 if (value)
                 {
                     disableRequested = false;
-                    if (!_loop)
+                    _loop = true;
+                    if (!loopRequested)
                     {
-                        _loop = true;
+                        loopRequested = true;
                         SendCustomEventDelayedFrames(nameof(UpdateLoop), 0);
                     }
                 } else if (serializeRequested)
@@ -648,6 +650,7 @@ namespace MMMaellon
         public bool serializeRequested = false;
         public void UpdateLoop()
         {
+            loopRequested = false;
             if (!_loop)
             {
                 return;
@@ -666,6 +669,8 @@ namespace MMMaellon
                 _loop = false;
                 return;
             }
+            loopRequested = true;
+            SendCustomEventDelayedFrames(nameof(UpdateLoop), 0);
 
             if (!disableRequested)
             {
@@ -688,7 +693,6 @@ namespace MMMaellon
                     }
                 }
             }
-            SendCustomEventDelayedFrames(nameof(UpdateLoop), 0);
         }
 
         public void OnSerializationFailure()
