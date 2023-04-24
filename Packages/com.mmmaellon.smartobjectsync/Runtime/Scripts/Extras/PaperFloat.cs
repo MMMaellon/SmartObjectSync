@@ -71,7 +71,7 @@ namespace MMMaellon
                 sync.rigid.velocity = withVelocity + againstVelocity;
             }
 
-            sync.rigid.AddTorque(Quaternion.FromToRotation(transformNormal, sync.rigid.velocity).eulerAngles * Vector3.Dot(transformNormal.normalized, sync.rigid.velocity.normalized) * airResistance * Time.deltaTime);
+            sync.rigid.AddTorque(Quaternion.FromToRotation(transformNormal, sync.rigid.velocity).eulerAngles * Vector3.Dot(transformNormal.normalized, sync.rigid.velocity) * airResistance * Time.deltaTime);
         }
 
         public override void OnChangeOwner(SmartObjectSync sync, VRCPlayerApi oldOwner, VRCPlayerApi newOwner)
