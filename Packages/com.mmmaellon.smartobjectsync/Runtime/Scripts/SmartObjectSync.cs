@@ -1911,7 +1911,7 @@ namespace MMMaellon
 
         public bool genericHand_onInterpolationEnd()
         {
-            if (IsLocalOwner() && !pickup.allowManipulationWhenEquipped && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0))
+            if (IsLocalOwner() && (pickup.orientation != VRC_Pickup.PickupOrientation.Any || owner.IsUserInVR()) && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0))
             {
                 if (generic_ObjectMoved())
                 {
