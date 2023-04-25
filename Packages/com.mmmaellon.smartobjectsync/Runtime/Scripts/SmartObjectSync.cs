@@ -423,7 +423,7 @@ namespace MMMaellon
         }
         
         public int stateData{
-            get => (_state * 10) + (stateChangeCounter % 10);
+            get => _state >= 0 ? (_state * 10) + (stateChangeCounter % 10) : (_state * 10) - (stateChangeCounter % 10);
             set {
                 _stateData = value;
                 if (!IsLocalOwner())
