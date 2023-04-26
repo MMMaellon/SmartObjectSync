@@ -16,7 +16,8 @@ namespace MMMaellon
         public AudioClip[] grabSounds;
         public AudioClip[] throwSounds;
         public float respawnVol = 1.0f;
-        public float collisionVol = 1.0f;
+        public float collisionMinVol = 0.1f;
+        public float collisionMaxVol = 1.0f;
         public float grabVol = 1.0f;
         public float throwVol = 1.0f;
         public float minVolumeCollisionVelocity = 0.0f;
@@ -56,7 +57,7 @@ namespace MMMaellon
         string typeName;
         public override void OnChangeState(SmartObjectSync s, int oldState, int newState)
         {
-            if (lastSound + cooldown > Time.timeSinceLevelLoad)
+            if (lastSound + cooldown > Time.timeSinceLevelLoad || newState == SmartObjectSync.STATE_SLEEPING)
             {
                 return;
             }
@@ -71,34 +72,11 @@ namespace MMMaellon
             {
                 nextClip = RandomClip(grabSounds);
                 volumeScale = grabVol;
-            }
-            else if (oldState == SmartObjectSync.STATE_LEFT_HAND_HELD || oldState == SmartObjectSync.STATE_RIGHT_HAND_HELD || oldState == SmartObjectSync.STATE_NO_HAND_HELD)
-            {
-                nextClip = RandomClip(throwSounds);
-                volumeScale = throwVol;
-            }
-            else if((newState == SmartObjectSync.STATE_FALLING || newState == SmartObjectSync.STATE_INTERPOLATING)) {
-                nextClip = RandomClip(collisionSounds);
-                if (nextClip)
-                {
-                    if (sync.rigid.velocity.magnitude < minVolumeCollisionVelocity)
-                    {
-                        nextClip = null;//don't play anything
-                    } else if (sync.rigid.velocity.magnitude >= maxVolumeCollisionVelocity)
-                    {
-                        volumeScale = collisionVol;
-                    } else
-                    {
-                        volumeScale = collisionVol * ((sync.rigid.velocity.magnitude - minVolumeCollisionVelocity) / (maxVolumeCollisionVelocity - minVolumeCollisionVelocity));
-                    }
-                }
-            } else if (newState < 0 || newState == SmartObjectSync.STATE_WORLD_LOCK || newState == SmartObjectSync.STATE_ATTACHED_TO_PLAYSPACE)
-            {
-
-            } else if(Utilities.IsValid(sync.customState))
+            } else if (Utilities.IsValid(sync.customState))
             {
                 typeName = sync.customState.GetUdonTypeName();
-                if (typeName == customState1){
+                if (typeName == customState1)
+                {
                     nextClip = RandomClip(customState1Sounds);
                     volumeScale = custom1Vol;
                 }
@@ -106,12 +84,40 @@ namespace MMMaellon
                 {
                     nextClip = RandomClip(customState2Sounds);
                     volumeScale = custom2Vol;
-                } else if (typeName == customState3)
+                }
+                else if (typeName == customState3)
                 {
                     nextClip = RandomClip(customState3Sounds);
                     volumeScale = custom3Vol;
                 }
+            } else if (oldState == SmartObjectSync.STATE_LEFT_HAND_HELD || oldState == SmartObjectSync.STATE_RIGHT_HAND_HELD || oldState == SmartObjectSync.STATE_NO_HAND_HELD)
+            {
+                nextClip = RandomClip(throwSounds);
+                volumeScale = throwVol;
+            } else if((newState == SmartObjectSync.STATE_FALLING || newState == SmartObjectSync.STATE_INTERPOLATING)) {
+                nextClip = RandomClip(collisionSounds);
+                if (nextClip)
+                {
+                    if (sync.rigid.velocity.magnitude < minVolumeCollisionVelocity)
+                    {
+                        volumeScale = collisionMinVol;
+                    } else if (sync.rigid.velocity.magnitude >= maxVolumeCollisionVelocity)
+                    {
+                        volumeScale = collisionMaxVol;
+                    } else
+                    {
+                        volumeScale = collisionMinVol + ((collisionMaxVol - collisionMinVol) * ((sync.rigid.velocity.magnitude - minVolumeCollisionVelocity) / (maxVolumeCollisionVelocity - minVolumeCollisionVelocity)));
+                    }
+                }
+            } else if (newState < 0 || newState == SmartObjectSync.STATE_WORLD_LOCK || newState == SmartObjectSync.STATE_ATTACHED_TO_PLAYSPACE)
+            {
+                nextClip = RandomClip(attachToPlayerSounds);
+                volumeScale = attachToPlayerVol;
+            } else
+            {
+                return;
             }
+
             if (nextClip)
             {
                 audioSource.PlayOneShot(nextClip, volumeScale);
