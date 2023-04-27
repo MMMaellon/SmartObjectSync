@@ -11,31 +11,49 @@ namespace MMMaellon
         public AudioSource[] audioSources;
 
         [Header("Default State Sounds")]
-        public AudioClip[] respawnSounds;
-        public AudioClip[] collisionSounds;
-        public AudioClip[] grabSounds;
-        public AudioClip[] throwSounds;
+        [Range(0.0f, 1.0f)]
         public float respawnVol = 1.0f;
-        public float collisionMinVol = 0.1f;
-        public float collisionMaxVol = 1.0f;
+        public AudioClip[] respawnSounds;
+        [Space]
+        [Range(0.0f, 1.0f)]
         public float grabVol = 1.0f;
+        public AudioClip[] grabSounds;
+        [Space]
+        [Range(0.0f, 1.0f)]
         public float throwVol = 1.0f;
+        public AudioClip[] throwSounds;
+        [Space]
+        [Range(0.0f, 1.0f)]
+        public float collisionMinVol = 0.1f;
+        [Range(0.0f, 1.0f)]
+        public float collisionMaxVol = 1.0f;
         public float minVolumeCollisionVelocity = 0.0f;
         public float maxVolumeCollisionVelocity = 5f;
+        public AudioClip[] collisionSounds;
+        [Space]
         public float cooldown = 0.1f;
+        [Space]
+        [Space]
 
         [Header("Custom State Sounds")]
-        public AudioClip[] attachToPlayerSounds;
-        public AudioClip[] customState1Sounds;
-        public AudioClip[] customState2Sounds;
-        public AudioClip[] customState3Sounds;
+        [Range(0.0f, 1.0f)]
         public float attachToPlayerVol = 1.0f;
-        public float custom1Vol = 1.0f;
-        public float custom2Vol = 1.0f;
-        public float custom3Vol = 1.0f;
+        public AudioClip[] attachToPlayerSounds;
+        [Space]
         public string customState1 = "";
+        [Range(0.0f, 1.0f)]
+        public float custom1Vol = 1.0f;
+        public AudioClip[] customState1Sounds;
+        [Space]
         public string customState2 = "";
+        [Range(0.0f, 1.0f)]
+        public float custom2Vol = 1.0f;
+        public AudioClip[] customState2Sounds;
+        [Space]
         public string customState3 = "";
+        [Range(0.0f, 1.0f)]
+        public float custom3Vol = 1.0f;
+        public AudioClip[] customState3Sounds;
         public void Start()
         {
             if (minVolumeCollisionVelocity > maxVolumeCollisionVelocity)
