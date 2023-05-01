@@ -47,6 +47,10 @@ namespace MMMaellon
 #endif
         void Start()
         {
+            if (!sync)
+            {
+                sync = GetComponent<SmartObjectSync>();
+            }
         }
 
         public override void OnDrop()

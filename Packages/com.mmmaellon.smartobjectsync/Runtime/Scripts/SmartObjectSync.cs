@@ -825,14 +825,8 @@ namespace MMMaellon
         {
             if (transformRecorded)
             {
-                //if the helper is on, then we were recording good transform data and we can calculate the perceived velocity
-                rigid.velocity = (transform.position - lastPos) / Time.deltaTime;
-
-                //angular velocity is normalized rotation axis * angle in radians: https://answers.unity.com/questions/49082/rotation-quaternion-to-angular-velocity.html
-                float angle;
-                Vector3 axis;
-                (Quaternion.Inverse(lastRot) * transform.rotation).ToAngleAxis(out angle, out axis);
-                rigid.angularVelocity = axis * angle * Mathf.Deg2Rad / Time.deltaTime;
+                rigid.velocity = CalcVel();
+                rigid.angularVelocity = CalcSpin();
             }
         }
 
@@ -1819,11 +1813,16 @@ namespace MMMaellon
         }
         public Vector3 CalcVel()
         {
-            return Vector3.zero;
+            return (transform.position - lastPos) / Time.deltaTime;
         }
+        
         public Vector3 CalcSpin()
         {
-            return Vector3.zero;
+            //angular velocity is normalized rotation axis * angle in radians: https://answers.unity.com/questions/49082/rotation-quaternion-to-angular-velocity.html
+            float angle;
+            Vector3 axis;
+            (Quaternion.Inverse(lastRot) * transform.rotation).ToAngleAxis(out angle, out axis);
+            return axis * angle * Mathf.Deg2Rad / Time.deltaTime;
         }
 
         public bool generic_ObjectMoved()
