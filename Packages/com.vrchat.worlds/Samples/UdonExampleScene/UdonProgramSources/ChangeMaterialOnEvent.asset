@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: ChangeMaterialOnEvent
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: c5c42b3f267796048ad531b4c496f199,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: a0624956e4429034a9126f439785d5c3,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export materials\r\n    .export meshRenderer\r\n   
     \r\n    __Int32_0: %SystemInt32, null\r\n    __Int32_1: %SystemInt32, null\r\n   
@@ -235,8 +235,5 @@ MonoBehaviour:
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|changeMaterial
     updateOrder: 0
   graphElementData: []
-  viewTransform:
-    position: {x: 0, y: 0}
-    scale: 1
   version: 1.0.0
   showAssembly: 0

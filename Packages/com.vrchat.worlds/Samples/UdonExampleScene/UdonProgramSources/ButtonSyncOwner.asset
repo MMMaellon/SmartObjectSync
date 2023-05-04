@@ -233,8 +233,5 @@ MonoBehaviour:
     uid: 15659b53-abe8-498d-b033-688c2014ebf2
     jsonData: '{"uid":"15659b53-abe8-498d-b033-688c2014ebf2","layout":{"serializedVersion":"2","x":-350.0,"y":40.0,"width":691.0,"height":385.0},"containedElements":["78f29d17-6063-4cf3-a7b5-770dd2725a3f","0aa6e57c-b64b-4ff9-972a-a162d8f60c0b","89f4d63f-92c7-4170-bbb8-b2e6ae9b495c","6db53f3c-a646-4f97-afc4-74fe64186239","4b420ac5-0590-4ed1-b0c0-6c7136ddef8b"],"title":"clickCount
       change will fire whenever the synced var is updated","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
-  viewTransform:
-    position: {x: 1484, y: 666}
-    scale: 1
   version: 1.0.0
   showAssembly: 1

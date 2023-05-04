@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: OnCharacterControllerHitExampleGraph
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 6c5d58ed510bca54b858b46bd8355895,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 58aca6965457d8c4b81c6cfacd66a2c5,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export characterController\r\n    .export
     moveSpeed\r\n    .export hitNameText\r\n    .export characterControllerStartPos\r\n   
@@ -429,8 +429,5 @@ MonoBehaviour:
     uid: 5a4fc292-4859-4679-80f3-f97a796a7d04
     jsonData: '{"uid":"5a4fc292-4859-4679-80f3-f97a796a7d04","layout":{"serializedVersion":"2","x":640.0,"y":712.0,"width":757.0,"height":268.0},"containedElements":["f879f5d1-0287-4509-afb9-224289ce5c1d","f9314cd1-5cfd-4bf0-9fc1-70c8004b174b","2cf09254-8add-435e-bc9c-636f14bcab59","d63d949c-de7a-4eee-ba1d-cb14d703feff"],"title":"Reset
       Character Controller","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
-  viewTransform:
-    position: {x: 359, y: 437}
-    scale: 0.8695652
   version: 1.0.0
   showAssembly: 0

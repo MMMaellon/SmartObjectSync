@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: MiniMap
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 7439577852096b1439a3f9e18716bc23,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 09b62611dc8bee54b85e9e7d354d3ad0,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export captureLayers\r\n    .export miniMapTex\r\n   
     .export maxPlayers\r\n    .export allowToShowOthers\r\n    .export showOthersByDefault\r\n   
@@ -75,30 +75,29 @@ MonoBehaviour:
     null\r\n    __instance_21: %VRCSDKBaseVRCPlayerApiArray, null\r\n    __Int32_4:
     %SystemInt32, null\r\n    __instance_23: %UnityEngineVector4Array, null\r\n   
     __Int32_7: %SystemInt32, null\r\n    __Vector4_0: %UnityEngineVector4, null\r\n   
-    __Single_2: %SystemSingle, null\r\n    __Single_3: %SystemSingle, null\r\n   
-    __Single_4: %SystemSingle, null\r\n    __Single_5: %SystemSingle, null\r\n   
-    __instance_24: %UnityEngineVector3, null\r\n    __instance_27: %UnityEngineVector3,
-    null\r\n    __instance_28: %UnityEngineVector3, null\r\n    __instance_25: %VRCSDKBaseVRCPlayerApi,
-    null\r\n    __instance_26: %VRCSDKBaseVRCPlayerApiArray, null\r\n    __Int32_8:
-    %SystemInt32, null\r\n    __Int32_5: %SystemInt32, null\r\n    __Int32_6: %SystemInt32,
-    null\r\n    __start_0: %SystemInt32, null\r\n    __end_0: %SystemInt32, null\r\n   
-    __step_0: %SystemInt32, null\r\n    __value_F: %SystemInt32, null\r\n    __min_0:
-    %SystemInt32, null\r\n    __max_0: %SystemInt32, null\r\n    __Int32_2: %SystemInt32,
-    null\r\n    __Int32_3: %SystemInt32, null\r\n    __Int32_9: %SystemInt32, null\r\n   
-    __Int32_A: %SystemInt32, null\r\n    __Int32_B: %SystemInt32, null\r\n    __Int32_C:
-    %SystemInt32, null\r\n    __instance_29: %VRCUdonUdonBehaviour, this\r\n    __eventName_B:
-    %SystemString, null\r\n    __delayFrames_0: %SystemInt32, null\r\n    __eventTiming_0:
-    %VRCUdonCommonEnumsEventTiming, null\r\n    __Boolean_14: %SystemBoolean, null\r\n   
-    __instance_2A: %UnityEngineGameObject, this\r\n    __GameObject_0: %UnityEngineGameObject,
-    this\r\n    __instance_2B: %UnityEngineMaterial, null\r\n    __name_C: %SystemString,
-    null\r\n    __value_10: %UnityEngineVector4, null\r\n    __Single_6: %SystemSingle,
-    null\r\n    __Single_7: %SystemSingle, null\r\n    __Single_8: %SystemSingle,
-    null\r\n    __Single_9: %SystemSingle, null\r\n    __instance_2C: %UnityEngineVector3,
-    null\r\n    __instance_2E: %UnityEngineVector3, null\r\n    __instance_2F: %UnityEngineVector3,
-    null\r\n    __instance_2D: %VRCSDKBaseVRCPlayerApi, null\r\n    __Boolean_15:
-    %SystemBoolean, null\r\n    __instance_30: %UnityEngineMaterial, null\r\n   
-    __name_D: %SystemString, null\r\n    __values_0: %UnityEngineVector4Array, null\r\n   
-    __source_0: %UnityEngineTexture, null\r\n    __dest_0: %UnityEngineRenderTexture,
+    __x_0: %SystemSingle, null\r\n    __y_0: %SystemSingle, null\r\n    __z_0: %SystemSingle,
+    null\r\n    __w_0: %SystemSingle, null\r\n    __instance_24: %UnityEngineVector3,
+    null\r\n    __instance_27: %UnityEngineVector3, null\r\n    __instance_28: %UnityEngineVector3,
+    null\r\n    __instance_25: %VRCSDKBaseVRCPlayerApi, null\r\n    __instance_26:
+    %VRCSDKBaseVRCPlayerApiArray, null\r\n    __Int32_8: %SystemInt32, null\r\n   
+    __Int32_5: %SystemInt32, null\r\n    __Int32_6: %SystemInt32, null\r\n    __start_0:
+    %SystemInt32, null\r\n    __end_0: %SystemInt32, null\r\n    __step_0: %SystemInt32,
+    null\r\n    __value_F: %SystemInt32, null\r\n    __min_0: %SystemInt32, null\r\n   
+    __max_0: %SystemInt32, null\r\n    __Int32_2: %SystemInt32, null\r\n    __Int32_3:
+    %SystemInt32, null\r\n    __Int32_9: %SystemInt32, null\r\n    __Int32_A: %SystemInt32,
+    null\r\n    __Int32_B: %SystemInt32, null\r\n    __Int32_C: %SystemInt32, null\r\n   
+    __instance_29: %VRCUdonUdonBehaviour, this\r\n    __eventName_B: %SystemString,
+    null\r\n    __delayFrames_0: %SystemInt32, null\r\n    __eventTiming_0: %VRCUdonCommonEnumsEventTiming,
+    null\r\n    __Boolean_14: %SystemBoolean, null\r\n    __instance_2A: %UnityEngineGameObject,
+    this\r\n    __GameObject_0: %UnityEngineGameObject, this\r\n    __instance_2B:
+    %UnityEngineMaterial, null\r\n    __name_C: %SystemString, null\r\n    __value_10:
+    %UnityEngineVector4, null\r\n    __x_1: %SystemSingle, null\r\n    __y_1: %SystemSingle,
+    null\r\n    __z_1: %SystemSingle, null\r\n    __w_1: %SystemSingle, null\r\n   
+    __instance_2C: %UnityEngineVector3, null\r\n    __instance_2E: %UnityEngineVector3,
+    null\r\n    __instance_2F: %UnityEngineVector3, null\r\n    __instance_2D: %VRCSDKBaseVRCPlayerApi,
+    null\r\n    __Boolean_15: %SystemBoolean, null\r\n    __instance_30: %UnityEngineMaterial,
+    null\r\n    __name_D: %SystemString, null\r\n    __values_0: %UnityEngineVector4Array,
+    null\r\n    __source_0: %UnityEngineTexture, null\r\n    __dest_0: %UnityEngineRenderTexture,
     null\r\n    __mat_0: %UnityEngineMaterial, null\r\n    __instance_31: %VRCUdonUdonBehaviour,
     this\r\n    __eventName_C: %SystemString, null\r\n    __delayFrames_1: %SystemInt32,
     null\r\n    __eventTiming_1: %VRCUdonCommonEnumsEventTiming, null\r\n    __instance_32:
@@ -124,10 +123,10 @@ MonoBehaviour:
     null\r\n    __Int32_11: %SystemInt32, null\r\n    __Vector4_1: %UnityEngineVector4,
     null\r\n    __start_2: %SystemInt32, null\r\n    __end_2: %SystemInt32, null\r\n   
     __step_2: %SystemInt32, null\r\n    __instance_36: %VRCSDKBaseVRCPlayerApiArray,
-    null\r\n    __Single_A: %SystemSingle, null\r\n    __Single_B: %SystemSingle,
-    null\r\n    __Single_C: %SystemSingle, null\r\n    __Single_D: %SystemSingle,
-    null\r\n    __instance_3B: %UnityEngineVector4, null\r\n    __instance_3D: %UnityEngineVector4,
-    null\r\n    __instance_3E: %UnityEngineVector4, null\r\n    __instance_3C: %UnityEngineVector4Array,
+    null\r\n    __x_2: %SystemSingle, null\r\n    __y_2: %SystemSingle, null\r\n   
+    __z_2: %SystemSingle, null\r\n    __w_2: %SystemSingle, null\r\n    __instance_3B:
+    %UnityEngineVector4, null\r\n    __instance_3D: %UnityEngineVector4, null\r\n   
+    __instance_3E: %UnityEngineVector4, null\r\n    __instance_3C: %UnityEngineVector4Array,
     null\r\n    __Int32_12: %SystemInt32, null\r\n    __Boolean_1D: %SystemBoolean,
     null\r\n    __Boolean_1E: %SystemBoolean, null\r\n    captureLayers: %UnityEngineLayerMask,
     null\r\n    miniMapTex: %UnityEngineRenderTexture, null\r\n    maxPlayers: %SystemInt32,
@@ -279,19 +278,19 @@ MonoBehaviour:
     PUSH, __Int32_8\r\n        COPY\r\n        PUSH, __instance_26\r\n        PUSH,
     __Int32_4\r\n        PUSH, __instance_25\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApiArray.__Get__SystemInt32__VRCSDKBaseVRCPlayerApi\"\r\n       
     PUSH, __instance_25\r\n        PUSH, __instance_24\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__GetPosition__UnityEngineVector3\"\r\n       
-    PUSH, __instance_24\r\n        PUSH, __Single_2\r\n        EXTERN, \"UnityEngineVector3.__get_x__SystemSingle\"\r\n       
+    PUSH, __instance_24\r\n        PUSH, __x_0\r\n        EXTERN, \"UnityEngineVector3.__get_x__SystemSingle\"\r\n       
     PUSH, _players\r\n        PUSH, __instance_26\r\n        COPY\r\n        PUSH,
     __index_0\r\n        PUSH, __Int32_6\r\n        COPY\r\n        PUSH, __Int32_4\r\n       
     PUSH, __Int32_8\r\n        COPY\r\n        PUSH, __instance_24\r\n        PUSH,
     __instance_27\r\n        COPY\r\n        PUSH, __instance_24\r\n        PUSH,
-    __Single_3\r\n        EXTERN, \"UnityEngineVector3.__get_y__SystemSingle\"\r\n       
+    __y_0\r\n        EXTERN, \"UnityEngineVector3.__get_y__SystemSingle\"\r\n       
     PUSH, _players\r\n        PUSH, __instance_26\r\n        COPY\r\n        PUSH,
     __index_0\r\n        PUSH, __Int32_6\r\n        COPY\r\n        PUSH, __Int32_4\r\n       
     PUSH, __Int32_8\r\n        COPY\r\n        PUSH, __instance_24\r\n        PUSH,
     __instance_28\r\n        COPY\r\n        PUSH, __instance_24\r\n        PUSH,
-    __Single_4\r\n        EXTERN, \"UnityEngineVector3.__get_z__SystemSingle\"\r\n       
-    PUSH, __Single_2\r\n        PUSH, __Single_3\r\n        PUSH, __Single_4\r\n       
-    PUSH, __Single_5\r\n        PUSH, __Vector4_0\r\n        EXTERN, \"UnityEngineVector4.__ctor__SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineVector4\"\r\n       
+    __z_0\r\n        EXTERN, \"UnityEngineVector3.__get_z__SystemSingle\"\r\n       
+    PUSH, __x_0\r\n        PUSH, __y_0\r\n        PUSH, __z_0\r\n        PUSH, __w_0\r\n       
+    PUSH, __Vector4_0\r\n        EXTERN, \"UnityEngineVector4.__ctor__SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineVector4\"\r\n       
     PUSH, __instance_23\r\n        PUSH, __Int32_4\r\n        PUSH, __Vector4_0\r\n       
     EXTERN, \"UnityEngineVector4Array.__Set__SystemInt32_UnityEngineVector4__SystemVoid\"\r\n       
     JUMP, 0x00000B60\r\n        JUMP, 0x00000B68\r\n        PUSH, __index_0\r\n       
@@ -310,15 +309,15 @@ MonoBehaviour:
     PUSH, __instance_2B\r\n        COPY\r\n        PUSH, _lPlayer\r\n        PUSH,
     __instance_2D\r\n        COPY\r\n        PUSH, __instance_2D\r\n        PUSH,
     __instance_2C\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__GetPosition__UnityEngineVector3\"\r\n       
-    PUSH, __instance_2C\r\n        PUSH, __Single_6\r\n        EXTERN, \"UnityEngineVector3.__get_x__SystemSingle\"\r\n       
+    PUSH, __instance_2C\r\n        PUSH, __x_1\r\n        EXTERN, \"UnityEngineVector3.__get_x__SystemSingle\"\r\n       
     PUSH, _lPlayer\r\n        PUSH, __instance_2D\r\n        COPY\r\n        PUSH,
     __instance_2C\r\n        PUSH, __instance_2E\r\n        COPY\r\n        PUSH,
-    __instance_2C\r\n        PUSH, __Single_7\r\n        EXTERN, \"UnityEngineVector3.__get_y__SystemSingle\"\r\n       
+    __instance_2C\r\n        PUSH, __y_1\r\n        EXTERN, \"UnityEngineVector3.__get_y__SystemSingle\"\r\n       
     PUSH, _lPlayer\r\n        PUSH, __instance_2D\r\n        COPY\r\n        PUSH,
     __instance_2C\r\n        PUSH, __instance_2F\r\n        COPY\r\n        PUSH,
-    __instance_2C\r\n        PUSH, __Single_8\r\n        EXTERN, \"UnityEngineVector3.__get_z__SystemSingle\"\r\n       
-    PUSH, __Single_6\r\n        PUSH, __Single_7\r\n        PUSH, __Single_8\r\n       
-    PUSH, __Single_9\r\n        PUSH, __value_10\r\n        EXTERN, \"UnityEngineVector4.__ctor__SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineVector4\"\r\n       
+    __instance_2C\r\n        PUSH, __z_1\r\n        EXTERN, \"UnityEngineVector3.__get_z__SystemSingle\"\r\n       
+    PUSH, __x_1\r\n        PUSH, __y_1\r\n        PUSH, __z_1\r\n        PUSH, __w_1\r\n       
+    PUSH, __value_10\r\n        EXTERN, \"UnityEngineVector4.__ctor__SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineVector4\"\r\n       
     PUSH, __instance_2B\r\n        PUSH, __name_C\r\n        PUSH, __value_10\r\n       
     EXTERN, \"UnityEngineMaterial.__SetVector__SystemString_UnityEngineVector4__SystemVoid\"\r\n       
     PUSH, _showOthers\r\n        JUMP_IF_FALSE, 0x00000DCC\r\n        PUSH, miniMapBlitter\r\n       
@@ -385,15 +384,15 @@ MonoBehaviour:
     __index_2\r\n        PUSH, __Int32_11\r\n        COPY\r\n        PUSH, _playerPositions\r\n       
     PUSH, __instance_3C\r\n        COPY\r\n        PUSH, __instance_3C\r\n       
     PUSH, __Int32_12\r\n        PUSH, __instance_3B\r\n        EXTERN, \"UnityEngineVector4Array.__Get__SystemInt32__UnityEngineVector4\"\r\n       
-    PUSH, __instance_3B\r\n        PUSH, __Single_A\r\n        EXTERN, \"UnityEngineVector4.__get_x__SystemSingle\"\r\n       
+    PUSH, __instance_3B\r\n        PUSH, __x_2\r\n        EXTERN, \"UnityEngineVector4.__get_x__SystemSingle\"\r\n       
     PUSH, _playerPositions\r\n        PUSH, __instance_3C\r\n        COPY\r\n       
     PUSH, __instance_3B\r\n        PUSH, __instance_3D\r\n        COPY\r\n       
-    PUSH, __instance_3B\r\n        PUSH, __Single_B\r\n        EXTERN, \"UnityEngineVector4.__get_y__SystemSingle\"\r\n       
+    PUSH, __instance_3B\r\n        PUSH, __y_2\r\n        EXTERN, \"UnityEngineVector4.__get_y__SystemSingle\"\r\n       
     PUSH, _playerPositions\r\n        PUSH, __instance_3C\r\n        COPY\r\n       
     PUSH, __instance_3B\r\n        PUSH, __instance_3E\r\n        COPY\r\n       
-    PUSH, __instance_3B\r\n        PUSH, __Single_C\r\n        EXTERN, \"UnityEngineVector4.__get_z__SystemSingle\"\r\n       
-    PUSH, __Single_A\r\n        PUSH, __Single_B\r\n        PUSH, __Single_C\r\n       
-    PUSH, __Single_D\r\n        PUSH, __Vector4_1\r\n        EXTERN, \"UnityEngineVector4.__ctor__SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineVector4\"\r\n       
+    PUSH, __instance_3B\r\n        PUSH, __z_2\r\n        EXTERN, \"UnityEngineVector4.__get_z__SystemSingle\"\r\n       
+    PUSH, __x_2\r\n        PUSH, __y_2\r\n        PUSH, __z_2\r\n        PUSH, __w_2\r\n       
+    PUSH, __Vector4_1\r\n        EXTERN, \"UnityEngineVector4.__ctor__SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineVector4\"\r\n       
     PUSH, __instance_3A\r\n        PUSH, __Int32_11\r\n        PUSH, __Vector4_1\r\n       
     EXTERN, \"UnityEngineVector4Array.__Set__SystemInt32_UnityEngineVector4__SystemVoid\"\r\n       
     PUSH, __Boolean_1D\r\n        PUSH, _onLeaveProcessed\r\n        COPY\r\n       

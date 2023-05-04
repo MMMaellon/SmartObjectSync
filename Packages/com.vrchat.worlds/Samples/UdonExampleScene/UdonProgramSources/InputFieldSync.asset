@@ -277,8 +277,5 @@ MonoBehaviour:
     jsonData: '{"uid":"82acebd0-d18e-4def-b018-e5caed36a642","layout":{"serializedVersion":"2","x":-600.0,"y":-280.0,"width":1412.0,"height":348.0},"containedElements":["0cb40eff-4fec-4eed-ba1d-89008fe8cf27","89f2ad6b-3973-4adf-bcf7-1085cbbc9b8c","390b2b52-bbe6-4144-87ba-12ce667722aa","efc2f13a-6113-4e24-8698-020a22220c2f","00f18aae-cc0b-46fd-809d-148756d7d410","4355f5f7-4caa-41af-8f9c-01658fdaa2ba","6eca1f22-6fd9-45fb-a91c-b22aa81c26b6","7e6437ef-5bfe-4403-8e21-0b710054b6cd","35f5296f-3392-4320-b521-728e899423d1","4136c903-d3f9-45c4-ad90-2836483ee843","61a3d97b-85c6-4931-b7eb-5af1cc57400d","91fe498f-5d9f-499f-815e-a82cae144e73"],"title":"When
       UI is changed, check that it''s different than the variable, then become owner
       and update it","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
-  viewTransform:
-    position: {x: 512, y: 283}
-    scale: 0.6928969
   version: 1.0.0
   showAssembly: 0

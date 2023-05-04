@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: ToggleGameObject
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: d999ca9f7f2798149a5fda55c7d6b98a,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 102efca543d69d24688fddf80647f5ba,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export targetGameObject\r\n    \r\n    __instance_0:
     %UnityEngineGameObject, this\r\n    __value_0: %SystemBoolean, null\r\n    __Boolean_0:
@@ -116,8 +116,5 @@ MonoBehaviour:
   - type: 4
     uid: 660ed7e9-fdef-48a0-be18-1e45b935b733
     jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: 417.54822, y: 729.8235}
-    scale: 1
   version: 1.0.0
   showAssembly: 0

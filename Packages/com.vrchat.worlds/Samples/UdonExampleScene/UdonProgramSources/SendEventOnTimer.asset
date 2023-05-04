@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: SendEventOnTimer
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 0f379b6b70f03b2438d16a111f5bc8c9,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: a0defc1f77fe54b4da4a30917e71cf56,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export target\r\n    .export eventName\r\n   
     .export duration\r\n    \r\n    __Boolean_0: %SystemBoolean, null\r\n    __Single_0:
@@ -269,8 +269,5 @@ MonoBehaviour:
   - type: 4
     uid: 46d8d053-df09-42aa-b83b-0d8d8bbabc43
     jsonData: '{"visible":false,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: 544.5098, y: 565.3605}
-    scale: 0.5019608
   version: 1.0.0
   showAssembly: 1

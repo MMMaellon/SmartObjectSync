@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: StationGraph
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b78d5f2ad0e986a4296278c9b279c9eb,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: cacdee78bb04a2c4fa6390cbb713e4ff,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    \r\n    __instance_0: %VRCSDKBaseVRCPlayerApi,
     null\r\n    __message_0: %SystemObject, null\r\n    __format_0: %SystemString,
@@ -160,8 +160,5 @@ MonoBehaviour:
   - type: 4
     uid: 660ed7e9-fdef-48a0-be18-1e45b935b733
     jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: -349.61578, y: 322.0548}
-    scale: 0.57175326
   version: 1.0.0
   showAssembly: 0

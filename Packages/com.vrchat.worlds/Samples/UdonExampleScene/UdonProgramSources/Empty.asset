@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: Empty
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: cbaf416d493a4f440861af53f488df09,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 8bacd1880c2f85d4c9818b88cba49375,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    \r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n\r\n.code_end\r\n"
   assemblyError: 
@@ -33,8 +33,5 @@ MonoBehaviour:
   - type: 4
     uid: 46d8d053-df09-42aa-b83b-0d8d8bbabc43
     jsonData: '{"visible":false,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: 550.61536, y: 464.55908}
-    scale: 2.0113573
   version: 1.0.0
   showAssembly: 0

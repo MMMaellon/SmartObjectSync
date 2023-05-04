@@ -20,11 +20,11 @@ MonoBehaviour:
     %UnityEngineTransform, this\r\n    __value_0: %UnityEngineVector3, null\r\n   
     __a_0: %UnityEngineVector3, null\r\n    __b_0: %UnityEngineVector3, null\r\n   
     __t_0: %SystemSingle, null\r\n    __instance_1: %UnityEngineTransform, this\r\n   
-    __Single_0: %SystemSingle, null\r\n    __Single_1: %SystemSingle, null\r\n   
-    __Single_2: %SystemSingle, null\r\n    __instance_2: %UnityEngineVector3, null\r\n   
-    __instance_5: %UnityEngineVector3, null\r\n    __instance_3: %VRCSDKBaseVRCPlayerApiTrackingData,
-    null\r\n    __instance_4: %VRCSDKBaseVRCPlayerApi, null\r\n    __tt_0: %VRCSDKBaseVRCPlayerApiTrackingDataType,
-    null\r\n    __Single_3: %SystemSingle, null\r\n    __Single_4: %SystemSingle,
+    __x_0: %SystemSingle, null\r\n    __y_0: %SystemSingle, null\r\n    __z_0: %SystemSingle,
+    null\r\n    __instance_2: %UnityEngineVector3, null\r\n    __instance_5: %UnityEngineVector3,
+    null\r\n    __instance_3: %VRCSDKBaseVRCPlayerApiTrackingData, null\r\n    __instance_4:
+    %VRCSDKBaseVRCPlayerApi, null\r\n    __tt_0: %VRCSDKBaseVRCPlayerApiTrackingDataType,
+    null\r\n    __Single_0: %SystemSingle, null\r\n    __Single_1: %SystemSingle,
     null\r\n    smoothPosition: %SystemSingle, null\r\n    target: %UnityEngineTransform,
     this\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n    .export _lateUpdate\r\n   
     \r\n    _lateUpdate:\r\n    \r\n        PUSH, __Object_0\r\n        EXTERN, \"VRCSDKBaseNetworking.__get_LocalPlayer__VRCSDKBaseVRCPlayerApi\"\r\n       
@@ -37,14 +37,14 @@ MonoBehaviour:
     __Object_0\r\n        PUSH, __instance_4\r\n        COPY\r\n        PUSH, __Object_0\r\n       
     PUSH, __tt_0\r\n        PUSH, __instance_3\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__GetTrackingData__VRCSDKBaseVRCPlayerApiTrackingDataType__VRCSDKBaseVRCPlayerApiTrackingData\"\r\n       
     PUSH, __instance_3\r\n        PUSH, __instance_2\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApiTrackingData.__get_position__UnityEngineVector3\"\r\n       
-    PUSH, __instance_2\r\n        PUSH, __Single_0\r\n        EXTERN, \"UnityEngineVector3.__get_x__SystemSingle\"\r\n       
+    PUSH, __instance_2\r\n        PUSH, __x_0\r\n        EXTERN, \"UnityEngineVector3.__get_x__SystemSingle\"\r\n       
     PUSH, __Object_0\r\n        PUSH, __instance_4\r\n        COPY\r\n        PUSH,
     __instance_2\r\n        PUSH, __instance_5\r\n        COPY\r\n        PUSH, __instance_2\r\n       
-    PUSH, __Single_2\r\n        EXTERN, \"UnityEngineVector3.__get_z__SystemSingle\"\r\n       
-    PUSH, __Single_0\r\n        PUSH, __Single_1\r\n        PUSH, __Single_2\r\n       
-    PUSH, __b_0\r\n        EXTERN, \"UnityEngineVector3.__ctor__SystemSingle_SystemSingle_SystemSingle__UnityEngineVector3\"\r\n       
-    PUSH, __Single_3\r\n        EXTERN, \"UnityEngineTime.__get_deltaTime__SystemSingle\"\r\n       
-    PUSH, __Single_3\r\n        PUSH, smoothPosition\r\n        PUSH, __t_0\r\n       
+    PUSH, __z_0\r\n        EXTERN, \"UnityEngineVector3.__get_z__SystemSingle\"\r\n       
+    PUSH, __x_0\r\n        PUSH, __y_0\r\n        PUSH, __z_0\r\n        PUSH, __b_0\r\n       
+    EXTERN, \"UnityEngineVector3.__ctor__SystemSingle_SystemSingle_SystemSingle__UnityEngineVector3\"\r\n       
+    PUSH, __Single_0\r\n        EXTERN, \"UnityEngineTime.__get_deltaTime__SystemSingle\"\r\n       
+    PUSH, __Single_0\r\n        PUSH, smoothPosition\r\n        PUSH, __t_0\r\n       
     EXTERN, \"SystemSingle.__op_Multiplication__SystemSingle_SystemSingle__SystemSingle\"\r\n       
     PUSH, __a_0\r\n        PUSH, __b_0\r\n        PUSH, __t_0\r\n        PUSH, __value_0\r\n       
     EXTERN, \"UnityEngineVector3.__Lerp__UnityEngineVector3_UnityEngineVector3_SystemSingle__UnityEngineVector3\"\r\n       
@@ -333,8 +333,5 @@ MonoBehaviour:
   - type: 4
     uid: dd099afa-04a3-413a-b572-f7670acebb86
     jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: 1126.2573, y: 551.0502}
-    scale: 0.7561437
   version: 1.0.0
   showAssembly: 0

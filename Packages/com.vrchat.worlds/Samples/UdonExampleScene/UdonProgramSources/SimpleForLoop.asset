@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: SimpleForLoop
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 706cc7380ff010d45911b49ddbeaf9c1,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: b5ecd7f7854b0b041aba75a3a3cc0321,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export textField\r\n    .export numberOfLoops\r\n   
     \r\n    __instance_0: %UnityEngineUIText, null\r\n    __value_0: %SystemString,
@@ -218,8 +218,5 @@ MonoBehaviour:
       For node runs ''numberOfLoops'' times, running the flow connected to ''Body''
       each time, with the ''int'' output set to the number of the loop we''re on
       - 0,1,2 etc.","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
-  viewTransform:
-    position: {x: 0, y: 0}
-    scale: 1
   version: 1.0.0
   showAssembly: 0

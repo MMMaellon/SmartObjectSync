@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: GetPlayersText
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: ac19e3104812df646bb74d6926cad38f,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: eca4a208b3dae3642af2a2271432ecd5,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export maxPlayers\r\n    .export playerFields\r\n   
     \r\n    __index_0: %SystemInt32, null\r\n    __condition_0: %SystemBoolean, null\r\n   
@@ -370,8 +370,5 @@ MonoBehaviour:
   - type: 4
     uid: 25c71a9f-5913-4001-a143-ae5ba6d24c38
     jsonData: '{"visible":false,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: -442.38187, y: 563.498}
-    scale: 0.65751624
   version: 1.0.0
   showAssembly: 0

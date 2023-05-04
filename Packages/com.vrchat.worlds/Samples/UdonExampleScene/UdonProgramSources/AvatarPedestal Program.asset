@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: AvatarPedestal Program
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 1288dced0b0080c4a9c9363ad61c4290,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 8a8493ff62e392d4f8e539c553c4ce7f,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    \r\n    __instance_0: %VRCSDK3ComponentsVRCAvatarPedestal,
     null\r\n    __instigator_0: %VRCSDKBaseVRCPlayerApi, null\r\n    __instance_1:
@@ -113,8 +113,5 @@ MonoBehaviour:
   - type: 4
     uid: 660ed7e9-fdef-48a0-be18-1e45b935b733
     jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: 951.5367, y: 659.19214}
-    scale: 0.7561437
   version: 1.0.0
   showAssembly: 0

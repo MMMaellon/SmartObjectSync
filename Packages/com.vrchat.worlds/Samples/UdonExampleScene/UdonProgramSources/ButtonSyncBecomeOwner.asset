@@ -278,8 +278,5 @@ MonoBehaviour:
     uid: 9cc4edc9-1c0f-477f-ac9a-bdacbd3b32bd
     jsonData: '{"uid":"9cc4edc9-1c0f-477f-ac9a-bdacbd3b32bd","layout":{"serializedVersion":"2","x":-490.0,"y":-190.0,"width":618.0,"height":324.0},"containedElements":["6db53f3c-a646-4f97-afc4-74fe64186239","14e655d5-733c-45aa-9c0b-161a18ead4a7","4b420ac5-0590-4ed1-b0c0-6c7136ddef8b","153012b4-7498-492e-befc-a44d596ad615"],"title":"Update
       Text when clickCount changes","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
-  viewTransform:
-    position: {x: 793.45886, y: 731.05963}
-    scale: 0.8695652
   version: 1.0.0
   showAssembly: 0

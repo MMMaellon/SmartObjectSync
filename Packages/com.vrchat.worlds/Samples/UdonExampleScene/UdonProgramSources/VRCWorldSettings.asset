@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: VRCWorldSettings
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 14d69608db290c34e8ffc6c3f6e28cb6,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: d56f48495f840984f879607d699d8a0e,
     type: 2}
   udonAssembly: ".data_start\r\n\r\n    .export jumpImpulse\r\n    .export walkSpeed\r\n   
     .export runSpeed\r\n    .export strafeSpeed\r\n    \r\n    __object_0: %SystemObject,
@@ -286,8 +286,5 @@ MonoBehaviour:
   - type: 4
     uid: 834e7bf3-134c-4610-98e2-89177dd69dd4
     jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
-  viewTransform:
-    position: {x: 631, y: 106}
-    scale: 0.55618376
   version: 1.0.0
   showAssembly: 0
