@@ -54,14 +54,14 @@ jobs:
             const path = require('path');
             const { owner, repo } = context.repo;
             const tagName = '${{ steps.version.outputs.prop }}';
-            const existingRelease = await github.repos.getReleaseByTag({ owner, repo, tag: tagName }).catch(() => null);
+            const existingRelease = await github.rest.repos.getReleaseByTag({ owner, repo, tag: tagName }).catch(() => null);
 
             if (existingRelease) {
-              await github.repos.deleteRelease({ owner, repo, release_id: existingRelease.data.id });
-              await github.git.deleteRef({ owner, repo, ref: `tags/${tagName}` });
+              await github.rest.repos.deleteRelease({ owner, repo, release_id: existingRelease.data.id });
+              await github.rest.git.deleteRef({ owner, repo, ref: `tags/${tagName}` });
             }
 
-            const release = await github.repos.createRelease({
+            const release = await github.rest.repos.createRelease({
               owner,
               repo,
               tag_name: tagName,
@@ -79,7 +79,7 @@ jobs:
 
             for (const file of files) {
               const content = await fs.promises.readFile(file.path, { encoding: 'base64' });
-              await github.repos.uploadReleaseAsset({
+              await github.rest.repos.uploadReleaseAsset({
                 owner,
                 repo,
                 release_id: releaseId,
