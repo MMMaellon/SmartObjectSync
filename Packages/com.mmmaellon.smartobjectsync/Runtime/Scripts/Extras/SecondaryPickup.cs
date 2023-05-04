@@ -114,6 +114,12 @@ namespace MMMaellon
             sync.AddListener(this);
             primaryPickup.AddListener(this);
             RecordOffsets();
+
+            if (disableWhenPrimaryPickupDropped)
+            {
+                sync.pickup.pickupable = primaryPickup.pickup.IsHeld;
+                sync.pickup.Drop();
+            }
         }
 
         public void RecordOffsets()
