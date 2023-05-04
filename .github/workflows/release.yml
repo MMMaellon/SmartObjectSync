@@ -32,17 +32,18 @@ jobs:
           echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage" >> $GITHUB_ENV
 
       - name: Create Zip
-        uses: montudor/action-zip@v0.1.0
+        uses: thedoctor0/zip-release@09336613be18a8208dfa66bd57efafd9e2685657
         with:
-          zipname: ../${{ env.zipFile }}
-          working-directory: Packages/${{env.packageName}}
+          type: 'zip'
+          directory: 'Packages/${{env.packageName}}/'
+          filename: '../../${{env.zipFile}}' # make the zip file two directories up, since we start two directories in above
 
       - run: find "Packages/${{env.packageName}}/" -name \*.meta >> metaList
 
       - name: Create UnityPackage
         uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
         with:
-          package-path: ../${{ env.unityPackage }}
+          package-path: ${{ env.unityPackage }}
           include-files: metaList
 
       - name: Overwrite Release
@@ -72,8 +73,8 @@ jobs:
             const { id: releaseId } = release.data;
 
             const files = [
-              { path: '../${{ env.zipFile }}', content_type: 'application/zip' },
-              { path: '../${{ env.unityPackage }}', content_type: 'application/octet-stream' },
+              { path: '${{ env.zipFile }}', content_type: 'application/zip' },
+              { path: '${{ env.unityPackage }}', content_type: 'application/octet-stream' },
               { path: 'Packages/${{ env.packageName }}/package.json', content_type: 'application/json' },
             ];
 
