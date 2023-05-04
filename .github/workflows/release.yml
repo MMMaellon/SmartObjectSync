@@ -65,15 +65,15 @@ jobs:
               repo,
               tag_name: tagName,
               name: tagName,
-              prerelease: true,
-              draft: false
+              draft: false,
+              prerelease: true
             });
 
             const { id: releaseId } = release.data;
 
             const files = [
-              { path: '${{ env.zipFile }}', content_type: 'application/zip' },
-              { path: '${{ env.unityPackage }}', content_type: 'application/octet-stream' },
+              { path: '../${{ env.zipFile }}', content_type: 'application/zip' },
+              { path: '../${{ env.unityPackage }}', content_type: 'application/octet-stream' },
               { path: 'Packages/${{ env.packageName }}/package.json', content_type: 'application/json' },
             ];
 
