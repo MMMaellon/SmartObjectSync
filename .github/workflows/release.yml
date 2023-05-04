@@ -34,7 +34,7 @@ jobs:
       - name: Create Zip
         uses: montudor/action-zip@v0.1.0
         with:
-          zipname: ${{ env.zipFile }}
+          zipname: ../${{ env.zipFile }}
           working-directory: Packages/${{env.packageName}}
 
       - run: find "Packages/${{env.packageName}}/" -name \*.meta >> metaList
@@ -42,7 +42,7 @@ jobs:
       - name: Create UnityPackage
         uses: pCYSl5EDgo/create-unitypackage@cfcd3cf0391a5ef1306342794866a9897c32af0b
         with:
-          package-path: ${{ env.unityPackage }}
+          package-path: ../${{ env.unityPackage }}
           include-files: metaList
 
       - name: Overwrite Release
