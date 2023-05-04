@@ -14,8 +14,8 @@ namespace MMMaellon
         public SmartObjectSync primaryPickup;
         public Transform constrainedObject;
         public bool resetOnDrop = false;
-        public bool disableWhenPrimaryPickupDropped = false;
-        public bool allowMultiplePickupOwners = true;
+        public bool disableWhenNotHoldingPrimaryPickup = false;
+        public bool allowDifferentPickupOwners = true;
 
         [Tooltip("0 means the object will move with the primary pickup. 1 means the object will move with this pickup.")]
         public float positionBias = 0.5f;
@@ -77,7 +77,7 @@ namespace MMMaellon
                     {
                         ConstrainPrimaryPickupToThis();
                     }
-                    if (disableWhenPrimaryPickupDropped)
+                    if (disableWhenNotHoldingPrimaryPickup)
                     {
                         sync.pickup.pickupable = primaryPickup.pickup.IsHeld;
                         sync.pickup.Drop();
@@ -91,7 +91,7 @@ namespace MMMaellon
 
         public override void OnChangeOwner(SmartObjectSync s, VRCPlayerApi oldPlayer, VRCPlayerApi newPlayer)
         {
-            if (allowMultiplePickupOwners || !newPlayer.isLocal)
+            if (allowDifferentPickupOwners || !newPlayer.isLocal)
             {
                 return;
             }
@@ -115,7 +115,7 @@ namespace MMMaellon
             primaryPickup.AddListener(this);
             RecordOffsets();
 
-            if (disableWhenPrimaryPickupDropped)
+            if (disableWhenNotHoldingPrimaryPickup)
             {
                 sync.pickup.pickupable = primaryPickup.pickup.IsHeld;
                 sync.pickup.Drop();
