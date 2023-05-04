@@ -61,32 +61,14 @@ jobs:
               await github.rest.git.deleteRef({ owner, repo, ref: `tags/${tagName}` });
             }
 
-            const release = await github.rest.repos.createRelease({
-              owner,
-              repo,
-              tag_name: tagName,
-              name: tagName,
-              draft: false,
-              prerelease: true
-            });
+      - name: Make Release
+        uses: softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5
+        with:
+          tag_name: ${{ steps.version.outputs.prop }}
+          files: |
+            ${{ env.zipFile }}
+            ${{ env.unityPackage }}
+            Packages/${{ env.packageName }}/package.json
+          prerelease: true
 
-            const { id: releaseId } = release.data;
-
-            const files = [
-              { path: '${{ env.zipFile }}', content_type: 'application/zip' },
-              { path: '${{ env.unityPackage }}', content_type: 'application/octet-stream' },
-              { path: 'Packages/${{ env.packageName }}/package.json', content_type: 'application/json' },
-            ];
-
-            for (const file of files) {
-              const content = await fs.promises.readFile(file.path, { encoding: 'base64' });
-              await github.rest.repos.uploadReleaseAsset({
-                owner,
-                repo,
-                release_id: releaseId,
-                name: path.basename(file.path),
-                data: content,
-                content_type: file.content_type,
-              });
-            }
 
