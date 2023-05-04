@@ -32,10 +32,10 @@ jobs:
           echo "unityPackage=${{ env.packageName }}-${{ steps.version.outputs.prop }}.unitypackage" >> $GITHUB_ENV
 
       - name: Create Zip
-        uses: montudor/action-zip@v1
+        uses: montudor/action-zip@v0.1.0
         with:
-          args: -r -q -j "../../${{ env.zipFile }}" "Packages/${{env.packageName}}"
-
+          zipname: ${{ env.zipFile }}
+          working-directory: Packages/${{env.packageName}}
 
       - run: find "Packages/${{env.packageName}}/" -name \*.meta >> metaList
 
