@@ -16,6 +16,7 @@ namespace MMMaellon
         public bool resetOnDrop = false;
         public bool disableWhenNotHoldingPrimaryPickup = false;
         public bool allowDifferentPickupOwners = true;
+        public bool preventOneHandedSteal = true;
 
         [Tooltip("0 means the object will move with the primary pickup. 1 means the object will move with this pickup.")]
         public float positionBias = 0.5f;
@@ -47,7 +48,7 @@ namespace MMMaellon
                     }
                     else
                     {
-                        ConstrainPrimaryPickupToThis();
+                        ConstrainThisToPrimaryPickup();
                     }
                     if (!primaryPickup.IsHeld())
                     {
@@ -73,20 +74,17 @@ namespace MMMaellon
                     {
                         RecordCurrentOffsets();
                     }
-                    else
+                    else if (sync.IsHeld())
                     {
                         ConstrainPrimaryPickupToThis();
                     }
-                    if (disableWhenNotHoldingPrimaryPickup)
-                    {
-                        sync.pickup.pickupable = primaryPickup.pickup.IsHeld;
-                        sync.pickup.Drop();
-                    }
-                } else if (s.IsLocalOwner() && newState == SmartObjectSync.STATE_TELEPORTING && sync.state != SmartObjectSync.STATE_TELEPORTING)
+                }
+                else if (s.IsLocalOwner() && newState == SmartObjectSync.STATE_TELEPORTING && sync.state != SmartObjectSync.STATE_TELEPORTING)
                 {
                     sync.Respawn();
                 }
             }
+            HandlePickupable();
         }
 
         public override void OnChangeOwner(SmartObjectSync s, VRCPlayerApi oldPlayer, VRCPlayerApi newPlayer)
@@ -115,10 +113,30 @@ namespace MMMaellon
             primaryPickup.AddListener(this);
             RecordOffsets();
 
+            HandlePickupable();
+        }
+
+        public void HandlePickupable()
+        {
             if (disableWhenNotHoldingPrimaryPickup)
             {
-                sync.pickup.pickupable = primaryPickup.pickup.IsHeld;
-                sync.pickup.Drop();
+                if (primaryPickup.pickup.IsHeld)
+                {
+                    sync.pickup.pickupable = !sync.pickup.IsHeld;
+                }
+                else
+                {
+                    if (sync.pickup.IsHeld)
+                    {
+                        sync.pickup.pickupable = false;
+                        sync.pickup.Drop();
+                    }
+                }
+            }
+            else if (preventOneHandedSteal)
+            {
+                primaryPickup.pickup.pickupable = !primaryPickup.pickup.IsHeld && (sync.pickup.IsHeld || !sync.IsHeld());
+                sync.pickup.pickupable = !sync.pickup.IsHeld && (primaryPickup.pickup.IsHeld || !primaryPickup.IsHeld());
             }
         }
 
@@ -197,6 +215,7 @@ namespace MMMaellon
                 else
                 {
                     ConstrainPrimaryPickupToThis();
+                    ZeroVelocity();
                     RecordTransforms();
                 }
             }
@@ -283,10 +302,14 @@ namespace MMMaellon
                 sync.transform.rotation = currentRot;
                 ConstrainObjectToGrips();
             }
-            primaryPickup.rigid.velocity = Vector3.zero;
-            primaryPickup.rigid.angularVelocity = Vector3.zero;
             calcedVel = CalcVel();
             calcedSpin = CalcSpin();
+        }
+
+        public void ZeroVelocity()
+        {
+            primaryPickup.rigid.velocity = Vector3.zero;
+            primaryPickup.rigid.angularVelocity = Vector3.zero;
         }
 
         public void RecordTransforms()

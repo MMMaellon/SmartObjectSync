@@ -1433,7 +1433,7 @@ namespace MMMaellon
                     }
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
-                        return generic_OnInterpolationEnd();
+                        return genericAttachment_OnInterpolationEnd();
                     }
                 case (STATE_WORLD_LOCK):
                     {
@@ -1443,7 +1443,7 @@ namespace MMMaellon
                     {
                         if (state < 0)
                         {
-                            return generic_OnInterpolationEnd();
+                            return genericAttachment_OnInterpolationEnd();
                         }
                         else if (customState)
                         {
@@ -1774,7 +1774,7 @@ namespace MMMaellon
             rigid.velocity = Vector3.zero;
             rigid.angularVelocity = Vector3.zero;
         }
-        public bool generic_OnInterpolationEnd()
+        public bool genericAttachment_OnInterpolationEnd()
         {
             if (IsLocalOwner())
             {
@@ -1782,6 +1782,7 @@ namespace MMMaellon
                 {
                     if (lastResync + lerpTime < Time.timeSinceLevelLoad)
                     {
+                        lastResync = Time.timeSinceLevelLoad;
                         Serialize();
                     }
                 }
@@ -1912,21 +1913,22 @@ namespace MMMaellon
         {
             if (IsLocalOwner() && (pickup.orientation != VRC_Pickup.PickupOrientation.Any || owner.IsUserInVR()) && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0))
             {
-                if (generic_ObjectMoved())
+                if (lastResync + lerpTime < Time.timeSinceLevelLoad)
                 {
-                    if (lastResync + lerpTime < Time.timeSinceLevelLoad)
+                    if (generic_ObjectMoved())
                     {
+                        lastResync = Time.timeSinceLevelLoad;
                         Serialize();
                     }
-                }
-                else
-                {
-                    lastResync = Time.timeSinceLevelLoad;
-                    return false;
+                    else
+                    {
+                        lastResync = Time.timeSinceLevelLoad;
+                        return false;
+                    }
                 }
                 return true;
             }
-            return generic_OnInterpolationEnd();
+            return true;
         }
         
         public void genericHand_OnExitState()
