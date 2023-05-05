@@ -28,7 +28,7 @@ namespace MMMaellon
         SerializedProperty m_kinematicWhileHeld;
         SerializedProperty m_nonKinematicPickupJitterPreventionTime;
         SerializedProperty m_reduceJitterDuringSleep;
-        SerializedProperty m_worldSpaceRespawn;
+        SerializedProperty m_worldSpaceTeleport;
         SerializedProperty m_worldSpaceSleep;
         
         void OnEnable(){
@@ -39,7 +39,7 @@ namespace MMMaellon
             m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
             m_nonKinematicPickupJitterPreventionTime = serializedObject.FindProperty("nonKinematicPickupJitterPreventionTime");
             m_reduceJitterDuringSleep = serializedObject.FindProperty("reduceJitterDuringSleep");
-            m_worldSpaceRespawn = serializedObject.FindProperty("worldSpaceRespawn");
+            m_worldSpaceTeleport = serializedObject.FindProperty("worldSpaceTeleport");
             m_worldSpaceSleep = serializedObject.FindProperty("worldSpaceSleep");
         }
         
@@ -251,7 +251,7 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_kinematicWhileHeld);
                 EditorGUILayout.PropertyField(m_nonKinematicPickupJitterPreventionTime);
                 EditorGUILayout.PropertyField(m_reduceJitterDuringSleep);
-                EditorGUILayout.PropertyField(m_worldSpaceRespawn);
+                EditorGUILayout.PropertyField(m_worldSpaceTeleport);
                 EditorGUILayout.PropertyField(m_worldSpaceSleep);
                 serializedObject.ApplyModifiedProperties();
             }
@@ -277,8 +277,8 @@ namespace MMMaellon
         [HideInInspector]
         public bool printDebugMessages = false;
         [HideInInspector, Tooltip("By default, calling respawn will make the object reset it's local object space transforms.")]
-        public bool worldSpaceRespawn = false;
-        [HideInInspector, Tooltip("By default, everything is calculated in world space. Check this if this object's parent is going to be moving a lot and staying in sync with the parent is more important.")]
+        public bool worldSpaceTeleport = false;
+        [HideInInspector, Tooltip("By default, everything is in world space. Uncheck if the relationship between this object and it's parent is more important than it and the world.")]
         public bool worldSpaceSleep = true;
         [HideInInspector, Tooltip("VRCObjectSync will set rigidbodies' collision detection mode to ContinuousSpeculative. This recreates that feature.")]
         public bool forceContinuousSpeculative = true;
@@ -766,7 +766,7 @@ namespace MMMaellon
 
         public void SetSpawn()
         {
-            if (worldSpaceRespawn)
+            if (worldSpaceTeleport)
             {
                 spawnPos = transform.position;
                 spawnRot = transform.rotation;
@@ -780,15 +780,7 @@ namespace MMMaellon
         {
             _print("Respawn");
             TakeOwnership(false);
-            if (worldSpaceRespawn)
-            {
-                TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
-            } else
-            {
-                transform.localPosition = spawnPos;
-                transform.localRotation = spawnRot;
-                TeleportTo(transform.position, transform.rotation, Vector3.zero, Vector3.zero);
-            }
+            TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
         }
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
@@ -959,6 +951,26 @@ namespace MMMaellon
                 if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
                 {
                     state = STATE_INTERPOLATING;
+                }
+            } else
+            {
+                //decide if we need to take ownership of the object we collided with
+                if (allowOthersToTakeOwnershipOnCollision && Utilities.IsValid(other.GetComponent<ParticleSystem>()) && !IsAttachedToPlayer())
+                {
+                    otherSync = other.GetComponent<SmartObjectSync>();
+                    if (!Utilities.IsValid(otherSync) && Utilities.IsValid(other.transform.parent))
+                    {
+                        otherSync = other.GetComponentInParent<SmartObjectSync>();
+                    }
+                    if (Utilities.IsValid(otherSync) && otherSync.IsLocalOwner() && otherSync.takeOwnershipOfOtherObjectsOnCollision)
+                    {
+                        TakeOwnership(true);
+                        if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
+                        {
+                            state = STATE_INTERPOLATING;
+                        }
+                        Serialize();
+                    }
                 }
             }
         }
@@ -1472,7 +1484,7 @@ namespace MMMaellon
         [System.NonSerialized] public float lastSleep = -1001f;
         public void sleep_OnInterpolationStart()
         {
-            if (worldSpaceSleep)
+            if (worldSpaceSleep && !rigid.isKinematic)
             {
                 startPos = transform.position;
                 startRot = transform.rotation;
@@ -1494,7 +1506,7 @@ namespace MMMaellon
             }
             if (interpolation < 1.0f)
             {
-                if (worldSpaceSleep)
+                if (worldSpaceSleep && !rigid.isKinematic)
                 {
                     transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
                     transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
@@ -1508,8 +1520,16 @@ namespace MMMaellon
             }
             else if (!reduceJitterDuringSleep || ObjectMovedDuringSleep())
             {
-                transform.position = pos;
-                transform.rotation = rot;
+                if (worldSpaceSleep && !rigid.isKinematic)
+                {
+                    transform.position = pos;
+                    transform.rotation = rot;
+                }
+                else
+                {
+                    transform.localPosition = pos;
+                    transform.localRotation = rot;
+                }
                 rigid.velocity = Vector3.zero;
                 rigid.angularVelocity = Vector3.zero;
                 rigid.Sleep();
@@ -1529,7 +1549,7 @@ namespace MMMaellon
 
         public void sleep_OnSmartObjectSerialize()
         {
-            if (worldSpaceSleep)
+            if (worldSpaceSleep && !rigid.isKinematic)
             {
                 pos = transform.position;
                 rot = transform.rotation;
@@ -1555,12 +1575,24 @@ namespace MMMaellon
         {
             if (IsLocalOwner())
             {
-                transform.position = pos;
-                transform.rotation = rot;
-                if (rigid && !rigid.isKinematic)
+                if (worldSpaceTeleport)
                 {
-                    rigid.velocity = vel;
-                    rigid.angularVelocity = spin;
+                    transform.position = pos;
+                    transform.rotation = rot;
+                    if (rigid && !rigid.isKinematic)
+                    {
+                        rigid.velocity = vel;
+                        rigid.angularVelocity = spin;
+                    }
+                } else
+                {
+                    transform.localPosition = pos;
+                    transform.localRotation = rot;
+                    if (rigid && !rigid.isKinematic)
+                    {
+                        rigid.velocity = transform.TransformVector(vel);
+                        rigid.angularVelocity = transform.TransformVector(spin);
+                    }
                 }
             }
         }
@@ -1568,24 +1600,48 @@ namespace MMMaellon
         {
             if (!IsLocalOwner())
             {
-                transform.position = pos;
-                transform.rotation = rot;
-                if (rigid && !rigid.isKinematic)
+                if (worldSpaceTeleport)
                 {
-                    rigid.velocity = vel;
-                    rigid.angularVelocity = spin;
+                    transform.position = pos;
+                    transform.rotation = rot;
+                    if (rigid && !rigid.isKinematic)
+                    {
+                        rigid.velocity = vel;
+                        rigid.angularVelocity = spin;
+                    }
+                } else
+                {
+                    transform.localPosition = pos;
+                    transform.localRotation = rot;
+                    if (rigid && !rigid.isKinematic)
+                    {
+                        rigid.velocity = transform.TransformVector(vel);
+                        rigid.angularVelocity = transform.TransformVector(spin);
+                    }
                 }
             }
             loop = false;//turn off immediately for max optimization
         }
         public void teleport_OnSmartObjectSerialize()
         {
-            pos = transform.position;
-            rot = transform.rotation;
-            if (rigid && !rigid.isKinematic)
+            if (worldSpaceTeleport)
             {
-                vel = rigid.velocity;
-                spin = rigid.angularVelocity;
+                pos = transform.position;
+                rot = transform.rotation;
+                if (rigid && !rigid.isKinematic)
+                {
+                    vel = rigid.velocity;
+                    spin = rigid.angularVelocity;
+                }
+            } else
+            {
+                pos = transform.localPosition;
+                rot = transform.localRotation;
+                if (rigid && !rigid.isKinematic)
+                {
+                    vel = transform.InverseTransformVector(rigid.velocity);
+                    spin = transform.InverseTransformVector(rigid.angularVelocity);
+                }
             }
         }
 

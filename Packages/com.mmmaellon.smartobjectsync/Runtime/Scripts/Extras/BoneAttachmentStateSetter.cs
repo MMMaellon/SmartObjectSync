@@ -142,7 +142,11 @@ namespace MMMaellon
                 return;
             }
             int closestBone = GetClosestBone(localPlayer);
-            Vector3 bonePos = FindBoneCenter((HumanBodyBones) closestBone, localPlayer);
+            if (closestBone < 0)
+            {
+                return;
+            }
+            Vector3 bonePos = FindBoneCenter((HumanBodyBones)closestBone, localPlayer);
             if (Vector3.Distance(bonePos, transform.position) < autoAttachDistance)
             {
                 bone = closestBone;
