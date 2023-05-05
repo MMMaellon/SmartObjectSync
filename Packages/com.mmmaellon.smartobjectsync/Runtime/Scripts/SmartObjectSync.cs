@@ -28,6 +28,8 @@ namespace MMMaellon
         SerializedProperty m_kinematicWhileHeld;
         SerializedProperty m_nonKinematicPickupJitterPreventionTime;
         SerializedProperty m_reduceJitterDuringSleep;
+        SerializedProperty m_worldSpaceRespawn;
+        SerializedProperty m_worldSpaceSleep;
         
         void OnEnable(){
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
@@ -37,6 +39,8 @@ namespace MMMaellon
             m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
             m_nonKinematicPickupJitterPreventionTime = serializedObject.FindProperty("nonKinematicPickupJitterPreventionTime");
             m_reduceJitterDuringSleep = serializedObject.FindProperty("reduceJitterDuringSleep");
+            m_worldSpaceRespawn = serializedObject.FindProperty("worldSpaceRespawn");
+            m_worldSpaceSleep = serializedObject.FindProperty("worldSpaceSleep");
         }
         
         public static void _print(SmartObjectSync sync, string message)
@@ -247,6 +251,8 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_kinematicWhileHeld);
                 EditorGUILayout.PropertyField(m_nonKinematicPickupJitterPreventionTime);
                 EditorGUILayout.PropertyField(m_reduceJitterDuringSleep);
+                EditorGUILayout.PropertyField(m_worldSpaceRespawn);
+                EditorGUILayout.PropertyField(m_worldSpaceSleep);
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -272,6 +278,8 @@ namespace MMMaellon
         public bool printDebugMessages = false;
         [HideInInspector, Tooltip("By default, calling respawn will make the object reset it's local object space transforms.")]
         public bool worldSpaceRespawn = false;
+        [HideInInspector, Tooltip("By default, everything is calculated in world space. Check this if this object's parent is going to be moving a lot and staying in sync with the parent is more important.")]
+        public bool worldSpaceSleep = true;
         [HideInInspector, Tooltip("VRCObjectSync will set rigidbodies' collision detection mode to ContinuousSpeculative. This recreates that feature.")]
         public bool forceContinuousSpeculative = true;
         [HideInInspector, Tooltip("When picked up, this object will maintain its offset instead of snapping to your hand.")]
@@ -285,7 +293,7 @@ namespace MMMaellon
         public float nonKinematicPickupJitterPreventionTime = 0;
 
         [HideInInspector, Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
-        public bool reduceJitterDuringSleep = false;
+        public bool reduceJitterDuringSleep = true;
         [HideInInspector]
         public VRC_Pickup pickup;
         [HideInInspector]
@@ -1464,10 +1472,19 @@ namespace MMMaellon
         [System.NonSerialized] public float lastSleep = -1001f;
         public void sleep_OnInterpolationStart()
         {
-            startPos = transform.position;
-            startRot = transform.rotation;
-            startVel = rigid.velocity;
-            startSpin = rigid.angularVelocity;
+            if (worldSpaceSleep)
+            {
+                startPos = transform.position;
+                startRot = transform.rotation;
+                startVel = rigid.velocity;
+                startSpin = rigid.angularVelocity;
+            } else
+            {
+                startPos = transform.localPosition;
+                startRot = transform.localRotation;
+                startVel = transform.InverseTransformVector(rigid.velocity);
+                startSpin = transform.InverseTransformVector(rigid.angularVelocity);
+            }
         }
         public void sleep_Interpolate(float interpolation)
         {
@@ -1477,8 +1494,15 @@ namespace MMMaellon
             }
             if (interpolation < 1.0f)
             {
-                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
-                transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
+                if (worldSpaceSleep)
+                {
+                    transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
+                    transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
+                } else
+                {
+                    transform.localPosition = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
+                    transform.localRotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
+                }
                 rigid.velocity = Vector3.zero;
                 rigid.angularVelocity = Vector3.zero;
             }
@@ -1505,8 +1529,15 @@ namespace MMMaellon
 
         public void sleep_OnSmartObjectSerialize()
         {
-            pos = transform.position;
-            rot = transform.rotation;
+            if (worldSpaceSleep)
+            {
+                pos = transform.position;
+                rot = transform.rotation;
+            } else
+            {
+                pos = transform.localPosition;
+                rot = transform.localRotation;
+            }
             vel = Vector3.zero;
             spin = Vector3.zero;
         }
@@ -1911,22 +1942,18 @@ namespace MMMaellon
 
         public bool genericHand_onInterpolationEnd()
         {
-            if (IsLocalOwner() && (pickup.orientation != VRC_Pickup.PickupOrientation.Any || owner.IsUserInVR()) && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0))
+            if (IsLocalOwner() && (pickup.orientation != VRC_Pickup.PickupOrientation.Any || owner.IsUserInVR()) && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0) && lastResync + lerpTime < Time.timeSinceLevelLoad && interpolationStartTime + 0.5f < Time.timeSinceLevelLoad)//hard coded 0.5f because VRChat is like that
             {
-                if (lastResync + lerpTime < Time.timeSinceLevelLoad)
+                if (generic_ObjectMoved())
                 {
-                    if (generic_ObjectMoved())
-                    {
-                        lastResync = Time.timeSinceLevelLoad;
-                        Serialize();
-                    }
-                    else
-                    {
-                        lastResync = Time.timeSinceLevelLoad;
-                        return false;
-                    }
+                    lastResync = Time.timeSinceLevelLoad;
+                    Serialize();
                 }
-                return true;
+                else
+                {
+                    lastResync = Time.timeSinceLevelLoad;
+                    return false;
+                }
             }
             return true;
         }
