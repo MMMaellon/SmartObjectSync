@@ -135,8 +135,8 @@ namespace MMMaellon
             }
             else if (preventOneHandedSteal)
             {
-                primaryPickup.pickup.pickupable = !primaryPickup.pickup.IsHeld && (sync.pickup.IsHeld || !sync.IsHeld());
-                sync.pickup.pickupable = !sync.pickup.IsHeld && (primaryPickup.pickup.IsHeld || !primaryPickup.IsHeld());
+                primaryPickup.pickup.pickupable = (sync.pickup.IsHeld || !sync.IsHeld()) && !primaryPickup.IsHeld();
+                sync.pickup.pickupable = (primaryPickup.pickup.IsHeld || !primaryPickup.IsHeld()) && !sync.IsHeld();
             }
         }
 
