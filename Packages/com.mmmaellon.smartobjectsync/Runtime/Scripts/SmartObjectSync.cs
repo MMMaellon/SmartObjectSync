@@ -2011,7 +2011,7 @@ namespace MMMaellon
                     return false;
                 }
             }
-            return true;
+            return genericAttachment_OnInterpolationEnd();
         }
         
         public void genericHand_OnExitState()
