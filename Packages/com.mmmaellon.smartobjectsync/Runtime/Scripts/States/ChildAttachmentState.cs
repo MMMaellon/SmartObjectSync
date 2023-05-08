@@ -143,6 +143,10 @@ namespace MMMaellon
         public void Attach(Transform t)
         {
             sync.TakeOwnership(false);
+            if (IsActiveState())
+            {
+                ExitState();
+            }
             parentTransformName = GetFullPath(t);
             EnterState();
         }
