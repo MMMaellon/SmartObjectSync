@@ -142,7 +142,8 @@ namespace MMMaellon
                 if (sync.IsLocalOwner())
                 {
                     transform.localScale = Vector3.Lerp(transform.localScale, Vector3.Lerp(new Vector3(0.000001f, 0.000001f, 0.000001f), startScale * inventoryItemScale, inventoryIndex < 0 ? manager.leftInventoryOpen : manager.rightInventoryOpen), slowerInterpolation);
-                } else
+                }
+                else
                 {
                     transform.localScale = Vector3.Lerp(transform.localScale, new Vector3(0.000001f, 0.000001f, 0.000001f), slowerInterpolation);
                 }
@@ -175,12 +176,14 @@ namespace MMMaellon
                     {
                         leftHand = sync.owner.GetPosition();
                     }
-                    if(!sync.IsLocalOwner()){
+                    if (!sync.IsLocalOwner())
+                    {
                         return leftHand;
                     }
                     Vector3 projected = Vector3.ProjectOnPlane(leftHand - sync.owner.GetPosition(), sync.owner.GetRotation() * Vector3.left) + sync.owner.GetPosition();
                     return Vector3.Lerp(leftHand, Vector3.Lerp(projected, leftHand, 0.5f) + sync.owner.GetRotation() * offset, manager.leftInventoryOpen);
-                } else
+                }
+                else
                 {
                     Vector3 rightHand = sync.owner.GetBonePosition(HumanBodyBones.RightHand);
                     if (rightHand == Vector3.zero)
@@ -191,7 +194,8 @@ namespace MMMaellon
                     {
                         rightHand = sync.owner.GetPosition();
                     }
-                    if(!sync.IsLocalOwner()){
+                    if (!sync.IsLocalOwner())
+                    {
                         return rightHand;
                     }
                     Vector3 projected = Vector3.ProjectOnPlane(rightHand - sync.owner.GetPosition(), sync.owner.GetRotation() * Vector3.left) + sync.owner.GetPosition();
@@ -258,6 +262,10 @@ namespace MMMaellon
         public override void OnDrop()
         {
             sync._print("Inventory OnDrop");
+            if (!manager.AllowVR || !Networking.LocalPlayer.IsUserInVR())
+            {
+                return;
+            }
             if (useLeftHandInventory)
             {
                 if (IsHoveringLeftInventory())

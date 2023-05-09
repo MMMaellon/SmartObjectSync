@@ -54,6 +54,7 @@ namespace MMMaellon
 
         [System.NonSerialized]
         public InventoryState[] rightInventoryCache = new InventoryState[0];
+        public bool AllowVR = true;
         public bool AllowDesktopShortcuts = true;
         public KeyCode addToInventoryShortcut = KeyCode.B;
         [System.NonSerialized]
@@ -75,7 +76,8 @@ namespace MMMaellon
 
         public void AddToLeftInventory(InventoryState state)
         {
-            if(state){
+            if (state)
+            {
                 state.inventoryIndex = -1 - leftInventoryCache.Length;
                 InventoryState[] newCache = new InventoryState[leftInventoryCache.Length + 1];
                 leftInventoryCache.CopyTo(newCache, 0);
@@ -92,7 +94,8 @@ namespace MMMaellon
         }
         public void AddToRightInventory(InventoryState state)
         {
-            if(state){
+            if (state)
+            {
                 state.inventoryIndex = rightInventoryCache.Length;
                 InventoryState[] newCache = new InventoryState[rightInventoryCache.Length + 1];
                 rightInventoryCache.CopyTo(newCache, 0);
@@ -113,7 +116,8 @@ namespace MMMaellon
             if (index < 0)
             {
                 RemoveFromLeftInventory(-1 - index);
-            } else
+            }
+            else
             {
                 RemoveFromRightInventory(index);
             }
@@ -163,7 +167,7 @@ namespace MMMaellon
                     }
                 }
                 rightInventoryCache = newCache;
-                
+
                 foreach (InventoryState state in rightInventoryCache)
                 {
                     //restart interpolation
@@ -171,11 +175,12 @@ namespace MMMaellon
                 }
             }
         }
-float lastHapticLeft = -1001f;
-float lastHapticRight = -1001f;
+        float lastHapticLeft = -1001f;
+        float lastHapticRight = -1001f;
         public void Update()
         {
-            if (Networking.LocalPlayer.IsUserInVR()){
+            if (Networking.LocalPlayer.IsUserInVR())
+            {
                 VRCPlayerApi.TrackingData leftData = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.LeftHand);
                 VRCPlayerApi.TrackingData rightData = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.RightHand);
                 VRCPlayerApi.TrackingData headData = Networking.LocalPlayer.GetTrackingData(VRCPlayerApi.TrackingDataType.Head);

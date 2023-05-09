@@ -30,6 +30,7 @@ namespace MMMaellon
         SerializedProperty m_reduceJitterDuringSleep;
         SerializedProperty m_worldSpaceTeleport;
         SerializedProperty m_worldSpaceSleep;
+        SerializedProperty m_preventStealWhileAttachedToPlayer;
         
         void OnEnable(){
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
@@ -41,6 +42,7 @@ namespace MMMaellon
             m_reduceJitterDuringSleep = serializedObject.FindProperty("reduceJitterDuringSleep");
             m_worldSpaceTeleport = serializedObject.FindProperty("worldSpaceTeleport");
             m_worldSpaceSleep = serializedObject.FindProperty("worldSpaceSleep");
+            m_preventStealWhileAttachedToPlayer = serializedObject.FindProperty("preventStealWhileAttachedToPlayer");
         }
         
         public static void _print(SmartObjectSync sync, string message)
@@ -253,6 +255,7 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_reduceJitterDuringSleep);
                 EditorGUILayout.PropertyField(m_worldSpaceTeleport);
                 EditorGUILayout.PropertyField(m_worldSpaceSleep);
+                EditorGUILayout.PropertyField(m_preventStealWhileAttachedToPlayer);
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -294,6 +297,8 @@ namespace MMMaellon
 
         [HideInInspector, Tooltip("If the rigidbody is unable to fall asleep we hold it in place. Makes object sync more accurate, at the cost of more CPU usage for non-owners in some edge cases where your physics are unstable.")]
         public bool reduceJitterDuringSleep = true;
+        [HideInInspector, Tooltip("Only applies when we're attached to a player's playspace or avatar. Prevents other players from taking it.")]
+        public bool preventStealWhileAttachedToPlayer = true;
         [HideInInspector]
         public VRC_Pickup pickup;
         [HideInInspector]
@@ -1130,6 +1135,10 @@ namespace MMMaellon
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
                         //do nothing
+                        if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
+                        {
+                            pickup.pickupable = IsLocalOwner();
+                        }
                         return;
                     }
                 case (STATE_WORLD_LOCK):
@@ -1194,6 +1203,10 @@ namespace MMMaellon
                 case (STATE_ATTACHED_TO_PLAYSPACE):
                     {
                         //do nothing
+                        if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
+                        {
+                            pickup.pickupable = true;
+                        }
                         return;
                     }
                 case (STATE_WORLD_LOCK):
@@ -1206,6 +1219,10 @@ namespace MMMaellon
                         if (state < 0)
                         {
                             SetVelocityFromLastTransform();
+                            if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
+                            {
+                                pickup.pickupable = true;
+                            }
                         }
                         else if (customState)
                         {
@@ -2065,6 +2082,11 @@ namespace MMMaellon
         public void bone_OnEnterState()
         {
             bone = (HumanBodyBones)(-1 - state);
+
+            if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
+            {
+                pickup.pickupable = IsLocalOwner();
+            }
         }
         public void bone_OnInterpolationStart()
         {
