@@ -29,21 +29,21 @@ MonoBehaviour:
     null\r\n    __Boolean_0: %SystemBoolean, null\r\n    __obj_1: %UnityEngineGameObject,
     this\r\n    __object_3: %SystemObject, null\r\n    __result_3: %SystemBoolean,
     null\r\n    __instance_5: %VRCUdonUdonBehaviour, this\r\n    __symbolName_1:
-    %SystemString, null\r\n    __value_1: %SystemObject, null\r\n    __x_0: %SystemSingle,
-    null\r\n    __y_0: %SystemSingle, null\r\n    __instance_6: %VRCSDK3VideoComponentsBaseBaseVRCVideoPlayer,
-    null\r\n    __value_2: %SystemDouble, null\r\n    __instance_7: %VRCUdonUdonBehaviour,
-    this\r\n    __Boolean_1: %SystemBoolean, null\r\n    __Single_0: %SystemSingle,
-    null\r\n    __Single_1: %SystemSingle, null\r\n    __instance_8: %VRCUdonUdonBehaviour,
-    this\r\n    __eventName_1: %SystemString, null\r\n    __delaySeconds_0: %SystemSingle,
-    null\r\n    __eventTiming_0: %VRCUdonCommonEnumsEventTiming, null\r\n    __instance_9:
-    %VRCUdonUdonBehaviour, this\r\n    __eventName_2: %SystemString, null\r\n   
-    __Boolean_2: %SystemBoolean, null\r\n    __obj_2: %UnityEngineGameObject, this\r\n   
-    __instance_A: %VRCUdonUdonBehaviour, this\r\n    __eventName_3: %SystemString,
+    %SystemString, null\r\n    __value_1: %SystemObject, null\r\n    __Single_0:
+    %SystemSingle, null\r\n    __Single_1: %SystemSingle, null\r\n    __instance_6:
+    %VRCSDK3VideoComponentsBaseBaseVRCVideoPlayer, null\r\n    __value_2: %SystemDouble,
+    null\r\n    __instance_7: %VRCUdonUdonBehaviour, this\r\n    __Boolean_1: %SystemBoolean,
+    null\r\n    __Single_2: %SystemSingle, null\r\n    __Single_3: %SystemSingle,
+    null\r\n    __instance_8: %VRCUdonUdonBehaviour, this\r\n    __eventName_1: %SystemString,
+    null\r\n    __delaySeconds_0: %SystemSingle, null\r\n    __eventTiming_0: %VRCUdonCommonEnumsEventTiming,
+    null\r\n    __instance_9: %VRCUdonUdonBehaviour, this\r\n    __eventName_2: %SystemString,
+    null\r\n    __Boolean_2: %SystemBoolean, null\r\n    __obj_2: %UnityEngineGameObject,
+    this\r\n    __instance_A: %VRCUdonUdonBehaviour, this\r\n    __eventName_3: %SystemString,
     null\r\n    __object_4: %SystemObject, null\r\n    __result_4: %SystemBoolean,
     null\r\n    __instance_B: %VRCSDK3VideoComponentsBaseBaseVRCVideoPlayer, null\r\n   
-    __value_3: %SystemSingle, null\r\n    __Single_2: %SystemSingle, null\r\n   
-    __Single_3: %SystemSingle, null\r\n    __instance_C: %UnityEngineVector2, null\r\n   
-    __Single_4: %SystemSingle, null\r\n    __Single_5: %SystemSingle, null\r\n   
+    __value_3: %SystemSingle, null\r\n    __Single_4: %SystemSingle, null\r\n   
+    __Single_5: %SystemSingle, null\r\n    __instance_C: %UnityEngineVector2, null\r\n   
+    __Single_6: %SystemSingle, null\r\n    __Single_7: %SystemSingle, null\r\n   
     __value_4: %SystemDouble, null\r\n    __instance_D: %UnityEngineVector2, null\r\n   
     player: %VRCSDK3VideoComponentsBaseBaseVRCVideoPlayer, null\r\n    url: %VRCSDKBaseVRCUrl,
     null\r\n    urlInputField: %VRCSDK3ComponentsVRCUrlInputField, null\r\n    timeAndOffset:
@@ -80,15 +80,15 @@ MonoBehaviour:
     __result_3\r\n        EXTERN, \"VRCSDKBaseUtilities.__IsValid__SystemObject__SystemBoolean\"\r\n       
     PUSH, __result_3\r\n        JUMP_IF_FALSE, 0x0000031C\r\n        PUSH, player\r\n       
     PUSH, __instance_6\r\n        COPY\r\n        PUSH, __instance_6\r\n        PUSH,
-    __x_0\r\n        EXTERN, \"VRCSDK3VideoComponentsBaseBaseVRCVideoPlayer.__GetTime__SystemSingle\"\r\n       
+    __Single_0\r\n        EXTERN, \"VRCSDK3VideoComponentsBaseBaseVRCVideoPlayer.__GetTime__SystemSingle\"\r\n       
     PUSH, __value_2\r\n        EXTERN, \"VRCSDKBaseNetworking.__GetServerTimeInSeconds__SystemDouble\"\r\n       
-    PUSH, __value_2\r\n        PUSH, __y_0\r\n        EXTERN, \"SystemConvert.__ToSingle__SystemDouble__SystemSingle\"\r\n       
-    PUSH, __x_0\r\n        PUSH, __y_0\r\n        PUSH, __value_1\r\n        EXTERN,
-    \"UnityEngineVector2.__ctor__SystemSingle_SystemSingle__UnityEngineVector2\"\r\n       
+    PUSH, __value_2\r\n        PUSH, __Single_1\r\n        EXTERN, \"SystemConvert.__ToSingle__SystemDouble__SystemSingle\"\r\n       
+    PUSH, __Single_0\r\n        PUSH, __Single_1\r\n        PUSH, __value_1\r\n       
+    EXTERN, \"UnityEngineVector2.__ctor__SystemSingle_SystemSingle__UnityEngineVector2\"\r\n       
     PUSH, __instance_5\r\n        PUSH, __symbolName_1\r\n        PUSH, __value_1\r\n       
     EXTERN, \"VRCUdonCommonInterfacesIUdonEventReceiver.__SetProgramVariable__SystemString_SystemObject__SystemVoid\"\r\n       
     PUSH, __instance_7\r\n        EXTERN, \"VRCUdonCommonInterfacesIUdonEventReceiver.__RequestSerialization__SystemVoid\"\r\n       
-    PUSH, syncFrequency\r\n        PUSH, __Single_1\r\n        PUSH, __Boolean_1\r\n       
+    PUSH, syncFrequency\r\n        PUSH, __Single_3\r\n        PUSH, __Boolean_1\r\n       
     EXTERN, \"SystemSingle.__op_GreaterThan__SystemSingle_SystemSingle__SystemBoolean\"\r\n       
     PUSH, __Boolean_1\r\n        JUMP_IF_FALSE, 0x00000314\r\n        PUSH, __instance_8\r\n       
     PUSH, __eventName_1\r\n        PUSH, syncFrequency\r\n        PUSH, __eventTiming_0\r\n       
@@ -105,13 +105,13 @@ MonoBehaviour:
     PUSH, __object_4\r\n        PUSH, __result_4\r\n        EXTERN, \"VRCSDKBaseUtilities.__IsValid__SystemObject__SystemBoolean\"\r\n       
     PUSH, __result_4\r\n        JUMP_IF_FALSE, 0x0000049C\r\n        PUSH, player\r\n       
     PUSH, __instance_B\r\n        COPY\r\n        PUSH, timeAndOffset\r\n       
-    PUSH, __Single_2\r\n        EXTERN, \"UnityEngineVector2.__get_x__SystemSingle\"\r\n       
+    PUSH, __Single_4\r\n        EXTERN, \"UnityEngineVector2.__get_x__SystemSingle\"\r\n       
     PUSH, __value_4\r\n        EXTERN, \"VRCSDKBaseNetworking.__GetServerTimeInSeconds__SystemDouble\"\r\n       
-    PUSH, __value_4\r\n        PUSH, __Single_4\r\n        EXTERN, \"SystemConvert.__ToSingle__SystemDouble__SystemSingle\"\r\n       
-    PUSH, timeAndOffset\r\n        PUSH, __Single_5\r\n        EXTERN, \"UnityEngineVector2.__get_y__SystemSingle\"\r\n       
-    PUSH, __Single_4\r\n        PUSH, __Single_5\r\n        PUSH, __Single_3\r\n       
+    PUSH, __value_4\r\n        PUSH, __Single_6\r\n        EXTERN, \"SystemConvert.__ToSingle__SystemDouble__SystemSingle\"\r\n       
+    PUSH, timeAndOffset\r\n        PUSH, __Single_7\r\n        EXTERN, \"UnityEngineVector2.__get_y__SystemSingle\"\r\n       
+    PUSH, __Single_6\r\n        PUSH, __Single_7\r\n        PUSH, __Single_5\r\n       
     EXTERN, \"SystemSingle.__op_Subtraction__SystemSingle_SystemSingle__SystemSingle\"\r\n       
-    PUSH, __Single_2\r\n        PUSH, __Single_3\r\n        PUSH, __value_3\r\n       
+    PUSH, __Single_4\r\n        PUSH, __Single_5\r\n        PUSH, __value_3\r\n       
     EXTERN, \"SystemSingle.__op_Addition__SystemSingle_SystemSingle__SystemSingle\"\r\n       
     PUSH, __instance_B\r\n        PUSH, __value_3\r\n        EXTERN, \"VRCSDK3VideoComponentsBaseBaseVRCVideoPlayer.__SetTime__SystemSingle__SystemVoid\"\r\n       
     JUMP, 0x0000049C\r\n        JUMP, 0xFFFFFFFC\r\n    \r\n    .export _onOwnershipRequest\r\n   
@@ -861,5 +861,8 @@ MonoBehaviour:
     uid: c4324c30-684e-4557-8811-81c06b24e746
     jsonData: '{"uid":"c4324c30-684e-4557-8811-81c06b24e746","layout":{"serializedVersion":"2","x":1812.0001220703125,"y":908.0000610351563,"width":486.0,"height":312.0},"containedElements":["8f46e525-153b-4b02-a136-8d7475790e43","8e01d6cb-f182-4f7b-955a-715079e2a392","2d7db82f-8037-4bf6-86ca-cc25d3b23971"],"title":"Enable
       / Disable Guest Control","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
+  viewTransform:
+    position: {x: 383.33334, y: -184.66667}
+    scale: 0.64672804
   version: 1.0.0
   showAssembly: 0

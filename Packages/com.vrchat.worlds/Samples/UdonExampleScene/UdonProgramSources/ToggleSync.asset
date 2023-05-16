@@ -275,5 +275,8 @@ MonoBehaviour:
     uid: e25196e3-3844-48ed-88a3-b8b6f9709516
     jsonData: '{"uid":"e25196e3-3844-48ed-88a3-b8b6f9709516","layout":{"serializedVersion":"2","x":-400.0,"y":-450.0,"width":1354.0,"height":434.0},"containedElements":["0cb40eff-4fec-4eed-ba1d-89008fe8cf27","89f2ad6b-3973-4adf-bcf7-1085cbbc9b8c","a5df33d8-196b-4676-a6e2-17e738e85255","2047edc3-fc6e-4fcc-bb7c-764d203daf10","0e08b1cf-28e9-4023-9916-2acd91d7112f","e7fb03eb-1a6a-4d36-a949-21152420d47f","454bc07a-b74b-40d6-9f1d-e3eeff692150","2116f67d-4065-4215-99d7-d057bc1dd8fa","26f1f7c3-9dee-4b74-b6a2-c41efe73a2c6","84c21bfa-be8b-43e4-aa7d-7fe2400d8b95","1c9ec285-72f7-4e32-a233-e12629f99ad7","7a531c3f-2f21-4ae9-83a1-01c9768e1f84"],"title":"Become
       Owner when you Change it, send the new Value","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
+  viewTransform:
+    position: {x: 468.649, y: 578.1555}
+    scale: 0.7561437
   version: 1.0.0
   showAssembly: 0

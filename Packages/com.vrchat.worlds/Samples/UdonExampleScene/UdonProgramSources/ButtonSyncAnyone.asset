@@ -252,5 +252,8 @@ MonoBehaviour:
     uid: dd4702bd-f4c5-4f78-9744-0a32b9b155b8
     jsonData: '{"uid":"dd4702bd-f4c5-4f78-9744-0a32b9b155b8","layout":{"serializedVersion":"2","x":-400.0,"y":260.0,"width":798.0,"height":364.0},"containedElements":["3832f067-5742-4e87-b545-71deb903f2f2","7d6f37d7-1157-44e2-a2a4-2e03c31d91b9","2c28868c-e3fc-4368-a68e-f1ec43264593","6dff22a2-f752-4a8f-b9fe-12861e4cafe0","78f29d17-6063-4cf3-a7b5-770dd2725a3f","2f6778f5-14c7-4b9a-ae68-53d47ad4ae16","d4868e2f-ce41-4d0c-9a23-c44b0dee1552","f2224a8d-9070-42c4-bc0b-aff6f94149dd","3e0bc186-9753-440e-a535-dcff1d37f2d8"],"title":"clickCount
       Change triggers whenever the synced variable changes","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
+  viewTransform:
+    position: {x: 686.2118, y: 303.53906}
+    scale: 0.8695652
   version: 1.0.0
   showAssembly: 1

@@ -289,6 +289,7 @@ namespace VRC.Udon
                               HideFlags.DontSaveInEditor |
                               HideFlags.DontSaveInBuild;
             #endif
+            _udonManager.Blacklist(proxy, false);
             proxy.EventReceiver = this;
             proxy.enabled = enabled;
 

@@ -16,7 +16,7 @@ public sealed class ONSPSettings : ScriptableObject
         {
             if (instance == null)
             {
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                 instance = Resources.Load<ONSPSettings>("ONSPSettings-Android");
 #else
                 instance = Resources.Load<ONSPSettings>("ONSPSettings");
@@ -39,7 +39,7 @@ public sealed class ONSPSettings : ScriptableObject
 
                     string fullPath = System.IO.Path.Combine(
                         System.IO.Path.Combine("Assets", "Resources"),
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                         "ONSPSettings-Android.asset");
 #else 
                         "ONSPSettings.asset");

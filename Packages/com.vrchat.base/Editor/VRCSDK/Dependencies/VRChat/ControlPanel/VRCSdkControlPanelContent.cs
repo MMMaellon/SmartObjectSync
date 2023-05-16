@@ -70,7 +70,7 @@ public partial class VRCSdkControlPanel : EditorWindow
         if (!APIUser.IsLoggedIn)
             yield break;
 
-        ApiCache.ClearResponseCache();
+        ApiCache.Clear();
         VRCCachedWebRequest.ClearOld();
 
         if (fetchingAvatars == null)
@@ -124,7 +124,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     private static void FetchTestAvatars()
     {
 #if VRC_SDK_VRCSDK3
-        string sdkAvatarFolder = VRC.SDKBase.Editor.VRC_SdkBuilder.GetKnownFolderPath(VRC.SDKBase.Editor.VRC_SdkBuilder.LocalLowGUID) + "/VRChat/vrchat/Avatars/";
+        string sdkAvatarFolder = VRC.SDKBase.Editor.VRC_SdkBuilder.GetLocalLowPath() + "/VRChat/VRChat/Avatars/";
         string[] sdkavatars = Directory.GetFiles(sdkAvatarFolder);
         string filename = "";
         List<ApiAvatar> avatars = new List<ApiAvatar>();

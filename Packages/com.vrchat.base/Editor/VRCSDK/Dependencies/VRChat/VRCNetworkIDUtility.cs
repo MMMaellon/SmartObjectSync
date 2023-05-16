@@ -228,8 +228,7 @@ public class VRCNetworkIDUtility : EditorWindow
                 using(new EditorGUILayout.HorizontalScope())
                 {
                     GUILayout.FlexibleSpace();
-                    //GUILayout.Label("Please load a scene with a Scene or Avatar Descriptor.", EditorStyles.helpBox, GUILayout.ExpandWidth(true));
-                    GUILayout.Label("Please load a scene with a Scene Descriptor.", EditorStyles.helpBox, GUILayout.ExpandWidth(true)); //TEMPORARY CHANGE
+                    GUILayout.Label("Please load a scene with a Scene or Avatar Descriptor.", EditorStyles.helpBox, GUILayout.ExpandWidth(true));
                     GUILayout.FlexibleSpace();
                 }
                 return;
@@ -719,10 +718,8 @@ public class VRCNetworkIDUtility : EditorWindow
         var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
         foreach(var obj in activeScene.GetRootGameObjects())
         {
-            //networkTargets.AddRange(obj.GetComponentsInChildren<INetworkIDContainer>(true));
-            networkTargets.AddRange(obj.GetComponentsInChildren<VRC_SceneDescriptor>(true)); //TEMPORARY CHANGE
+            networkTargets.AddRange(obj.GetComponentsInChildren<INetworkIDContainer>(true));
         }
-            
 
         //Names
         networkTargetNames = new string[networkTargets.Count];

@@ -31,18 +31,19 @@ namespace VRC.Editor
         #if !VRC_CLIENT
     private static readonly BuildTarget[] allowedBuildtargets = {
         BuildTarget.StandaloneWindows64,
-        BuildTarget.Android
+        BuildTarget.Android,
+        BuildTarget.iOS,
     };
         #endif
 
         private static readonly Dictionary<BuildTarget, GraphicsDeviceType[]> allowedGraphicsAPIs = new Dictionary<BuildTarget, GraphicsDeviceType[]>()
         {
             { BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3, /* GraphicsDeviceType.Vulkan */ } },
-            { BuildTarget.iOS, null },
+            { BuildTarget.iOS, new[] { GraphicsDeviceType.Metal } },
             { BuildTarget.StandaloneLinux64, null },
             { BuildTarget.StandaloneWindows, new[] { GraphicsDeviceType.Direct3D11 } },
             { BuildTarget.StandaloneWindows64, new[] { GraphicsDeviceType.Direct3D11 } },
-            { BuildTarget.StandaloneOSX, null }
+            { BuildTarget.StandaloneOSX, new[] { GraphicsDeviceType.Metal } }
         };
 
         #if ENV_SET_INCLUDED_SHADERS && VRC_CLIENT
@@ -289,6 +290,7 @@ namespace VRC.Editor
                 importer.SetCompatibleWithAnyPlatform(true);
                 importer.SetExcludeEditorFromAnyPlatform(false);
                 importer.SetExcludeFromAnyPlatform(BuildTarget.Android, false);
+                importer.SetExcludeFromAnyPlatform(BuildTarget.iOS, false);
                 importer.SetExcludeFromAnyPlatform(BuildTarget.StandaloneWindows, false);
                 importer.SetExcludeFromAnyPlatform(BuildTarget.StandaloneWindows64, false);
                 importer.SetExcludeFromAnyPlatform(BuildTarget.StandaloneLinux64, false);
@@ -298,6 +300,7 @@ namespace VRC.Editor
                 importer.SetCompatibleWithAnyPlatform(false);
                 importer.SetCompatibleWithEditor(false);
                 importer.SetCompatibleWithPlatform(BuildTarget.Android, false);
+                importer.SetCompatibleWithPlatform(BuildTarget.iOS, false);
                 importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows, false);
                 importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows64, false);
                 importer.SetCompatibleWithPlatform(BuildTarget.StandaloneLinux64, false);
@@ -1038,7 +1041,7 @@ namespace VRC.Editor
 
             SerializedProperty virtualVoiceCountSerializedProperty = audioManagerSerializedObject.FindProperty("m_VirtualVoiceCount");
             SerializedProperty realVoiceCountSerializedProperty = audioManagerSerializedObject.FindProperty("m_RealVoiceCount");
-            if(EditorUserBuildSettings.selectedBuildTargetGroup == BuildTargetGroup.Android)
+            if(EditorUserBuildSettings.selectedBuildTargetGroup == BuildTargetGroup.Android || EditorUserBuildSettings.selectedBuildTargetGroup == BuildTargetGroup.iOS)
             {
                 virtualVoiceCountSerializedProperty.intValue = 32;
                 realVoiceCountSerializedProperty.intValue = 24;

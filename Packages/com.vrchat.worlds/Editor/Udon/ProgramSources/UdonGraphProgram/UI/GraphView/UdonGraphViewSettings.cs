@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using VRC.Core;
 
 namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
 {
@@ -60,7 +61,7 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
                 }
                 else
                 {
-                    assetPath = programBehaviour.transform.GetHierarchyPath();
+                    assetPath = VRC.Core.ExtensionMethods.GetHierarchyPath(programBehaviour.transform);
                     scenePath = programBehaviour.gameObject.scene.path;
                     this.programAsset = programAsset;
                 }

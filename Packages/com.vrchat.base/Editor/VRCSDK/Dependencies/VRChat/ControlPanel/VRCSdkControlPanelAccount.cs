@@ -532,6 +532,7 @@ public partial class VRCSdkControlPanel : EditorWindow
             {
                 Logout();
                 error = c.Error;
+                EditorUtility.DisplayDialog("Error logging in", error, "OK");
                 VRC.Core.Logger.Log("Error logging in: " + error);
             },
             delegate (ApiModelContainer<API2FA> c)
@@ -560,6 +561,12 @@ public partial class VRCSdkControlPanel : EditorWindow
                 || APIUser.IsLoggedIn
                 || (!explicitAttempt && string.IsNullOrEmpty(storedUsername)))
                 return;
+
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                EditorUtility.DisplayDialog("Error logging in", "Please enter a valid username and password.", "OK");
+                return;
+            }
 
             signingIn = true;
         }

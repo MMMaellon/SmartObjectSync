@@ -12,7 +12,7 @@ namespace VRC.SDKBase.Editor.ShaderStripping
 
         public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
         {
-            if(EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
+            if(EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android && EditorUserBuildSettings.activeBuildTarget != BuildTarget.iOS)
             {
                 return;
             }

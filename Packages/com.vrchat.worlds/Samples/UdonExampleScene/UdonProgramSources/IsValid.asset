@@ -12,25 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: IsValid
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 6d4922fb7bd509742b11a2f372550615,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: b47a68d4bb7f9f649b231a75d0c605a7,
     type: 2}
-  udonAssembly: ".data_start\r\n\r\n    \r\n    __object_0: %SystemObject, null\r\n   
-    __result_0: %SystemBoolean, null\r\n    __message_0: %SystemObject, null\r\n   
-    __format_0: %SystemString, null\r\n    __arg0_0: %SystemObject, null\r\n    __instance_0:
-    %VRCSDKBaseVRCPlayerApi, null\r\n    __message_1: %SystemObject, null\r\n   
-    __String_0: %SystemString, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n   
-    .export _start\r\n    \r\n    _start:\r\n    \r\n        PUSH, __object_0\r\n       
-    EXTERN, \"VRCSDKBaseNetworking.__get_LocalPlayer__VRCSDKBaseVRCPlayerApi\"\r\n       
-    PUSH, __object_0\r\n        PUSH, __result_0\r\n        EXTERN, \"VRCSDKBaseUtilities.__IsValid__SystemObject__SystemBoolean\"\r\n       
-    PUSH, __result_0\r\n        JUMP_IF_FALSE, 0x0000009C\r\n        PUSH, __object_0\r\n       
-    PUSH, __instance_0\r\n        COPY\r\n        PUSH, __object_0\r\n        PUSH,
-    __arg0_0\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__get_displayName__SystemString\"\r\n       
-    PUSH, __format_0\r\n        PUSH, __arg0_0\r\n        PUSH, __message_0\r\n       
-    EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n       
-    PUSH, __message_0\r\n        EXTERN, \"UnityEngineDebug.__Log__SystemObject__SystemVoid\"\r\n       
-    JUMP, 0x000000C0\r\n        PUSH, __String_0\r\n        PUSH, __message_1\r\n       
-    COPY\r\n        PUSH, __message_1\r\n        EXTERN, \"UnityEngineDebug.__Log__SystemObject__SystemVoid\"\r\n       
-    JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+  udonAssembly: ".data_start\r\n\r\n    \r\n    object_0: %SystemObject, null\r\n
+    \   result_0: %SystemBoolean, null\r\n    message_0: %SystemObject, null\r\n    format_0:
+    %SystemString, null\r\n    arg0_0: %SystemObject, null\r\n    VRCPlayerApi_0:
+    %VRCSDKBaseVRCPlayerApi, null\r\n    message_1: %SystemObject, null\r\n    String_0:
+    %SystemString, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n    .export _start\r\n
+    \   \r\n    _start:\r\n    \r\n        PUSH, object_0\r\n        EXTERN, \"VRCSDKBaseNetworking.__get_LocalPlayer__VRCSDKBaseVRCPlayerApi\"\r\n
+    \       PUSH, object_0\r\n        PUSH, result_0\r\n        EXTERN, \"VRCSDKBaseUtilities.__IsValid__SystemObject__SystemBoolean\"\r\n
+    \       PUSH, result_0\r\n        JUMP_IF_FALSE, 0x0000009C\r\n        PUSH, object_0\r\n
+    \       PUSH, VRCPlayerApi_0\r\n        COPY\r\n        PUSH, object_0\r\n        PUSH,
+    arg0_0\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__get_displayName__SystemString\"\r\n
+    \       PUSH, format_0\r\n        PUSH, arg0_0\r\n        PUSH, message_0\r\n
+    \       EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n
+    \       PUSH, message_0\r\n        EXTERN, \"UnityEngineDebug.__Log__SystemObject__SystemVoid\"\r\n
+    \       JUMP, 0x000000C0\r\n        PUSH, String_0\r\n        PUSH, message_1\r\n
+    \       COPY\r\n        PUSH, message_1\r\n        EXTERN, \"UnityEngineDebug.__Log__SystemObject__SystemVoid\"\r\n
+    \       JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
   assemblyError: 
   graphData:
     name: 
@@ -118,5 +117,8 @@ MonoBehaviour:
   - type: 4
     uid: d7f4e9cb-92e5-43cf-b4cd-1c319687e8f2
     jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
+  viewTransform:
+    position: {x: -21.73816, y: -28.592041}
+    scale: 1.15
   version: 1.0.0
   showAssembly: 0

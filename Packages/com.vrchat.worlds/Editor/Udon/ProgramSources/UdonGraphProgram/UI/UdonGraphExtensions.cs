@@ -333,6 +333,8 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
             typeString = typeString.Replace("SDK3VideoComponentsBaseBase", "");
             typeString = typeString.Replace("SDK3stringLoading", "");
             typeString = typeString.Replace("SDK3Image", "");
+            typeString = typeString.Replace("VRCSDK3Data", "");
+            typeString = typeString.Replace("SDK3Data", "");
             typeString = typeString.Replace("SDKBase", "");
             typeString = typeString.Replace("SDK3Components", "");
             typeString = typeString.Replace("VRCVRC", "VRC");
@@ -341,6 +343,7 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
             typeString = typeString.Replace("VRCUdonCommon", "");
             typeString = typeString.Replace("Shuffle[]", "ShuffleArray");
             typeString = typeString.Replace("RenderingPostProcessing", "");
+            typeString = typeString.Replace("VRCSDK3Rendering", "");
             // ReSharper disable once StringLiteralTypo
             if (typeString.Replace("ector", "").Contains("ctor")) //Handle "Vector/vector"
             {

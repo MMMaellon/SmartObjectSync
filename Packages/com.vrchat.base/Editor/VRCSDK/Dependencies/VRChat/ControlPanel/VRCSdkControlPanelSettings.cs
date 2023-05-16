@@ -128,6 +128,25 @@ public partial class VRCSdkControlPanel : EditorWindow
             {
                 UnityEditor.EditorPrefs.SetBool("futureProofPublish", futureProofPublish);
             }
+
+            // V3
+            if (APIUser.CurrentUser != null)
+            {
+                bool enableV3 = UnityEditor.EditorPrefs.GetBool("VRC.SDK3.EnableV3", false);
+                if (APIUser.CurrentUser.hasSuperPowers)
+                {
+                    bool newEnableV3 = EditorGUILayout.ToggleLeft("Enable V3 (Admin Only)", enableV3);
+                    if (newEnableV3 != enableV3)
+                    {
+                        UnityEditor.EditorPrefs.SetBool("VRC.SDK3.EnableV3", newEnableV3);
+                    }
+                }
+                else if (enableV3)
+                {
+                    UnityEditor.EditorPrefs.SetBool("VRC.SDK3.EnableV3", false);
+                }
+            }
+            
             EditorGUILayout.LabelField("Client Version Date", clientVersionDate);
             EditorGUILayout.LabelField("SDK Version Date", sdkVersionDate);
 

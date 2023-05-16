@@ -23,7 +23,6 @@ namespace MMMaellon
         //Advanced settings
         SerializedProperty m_printDebugMessages;
         SerializedProperty m_forceContinuousSpeculative;
-        SerializedProperty m_preventPickupSnapping;
         SerializedProperty m_lerpTime;
         SerializedProperty m_kinematicWhileHeld;
         SerializedProperty m_nonKinematicPickupJitterPreventionTime;
@@ -35,7 +34,6 @@ namespace MMMaellon
         void OnEnable(){
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
             m_forceContinuousSpeculative = serializedObject.FindProperty("forceContinuousSpeculative");
-            m_preventPickupSnapping = serializedObject.FindProperty("preventPickupSnapping");
             m_lerpTime = serializedObject.FindProperty("lerpTime");
             m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
             m_nonKinematicPickupJitterPreventionTime = serializedObject.FindProperty("nonKinematicPickupJitterPreventionTime");
@@ -248,7 +246,6 @@ namespace MMMaellon
             if(foldoutOpen){
                 EditorGUILayout.PropertyField(m_printDebugMessages);
                 EditorGUILayout.PropertyField(m_forceContinuousSpeculative);
-                EditorGUILayout.PropertyField(m_preventPickupSnapping);
                 EditorGUILayout.PropertyField(m_lerpTime);
                 EditorGUILayout.PropertyField(m_kinematicWhileHeld);
                 EditorGUILayout.PropertyField(m_nonKinematicPickupJitterPreventionTime);
@@ -285,8 +282,6 @@ namespace MMMaellon
         public bool worldSpaceSleep = true;
         [HideInInspector, Tooltip("VRCObjectSync will set rigidbodies' collision detection mode to ContinuousSpeculative. This recreates that feature.")]
         public bool forceContinuousSpeculative = true;
-        [HideInInspector, Tooltip("When picked up, this object will maintain its offset instead of snapping to your hand.")]
-        public bool preventPickupSnapping = false;
         [HideInInspector, Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
         public float lerpTime = 0.1f;
         [HideInInspector, Tooltip("Turns the object kinematic when held. Will result in dampened collisions because that's just how Unity is.")]
@@ -1920,14 +1915,14 @@ namespace MMMaellon
         {
             return (transform.position - lastPos) / Time.deltaTime;
         }
-        
+
+        float angle;
+        Vector3 axis;
         public Vector3 CalcSpin()
         {
             //angular velocity is normalized rotation axis * angle in radians: https://answers.unity.com/questions/49082/rotation-quaternion-to-angular-velocity.html
-            float angle;
-            Vector3 axis;
-            (Quaternion.Inverse(lastRot) * transform.rotation).ToAngleAxis(out angle, out axis);
-            return axis * angle * Mathf.Deg2Rad / Time.deltaTime;
+            Quaternion.Normalize(Quaternion.Inverse(lastRot) * transform.rotation).ToAngleAxis(out angle, out axis);
+            return transform.rotation * axis * angle * Mathf.Deg2Rad / Time.deltaTime;
         }
 
         public bool generic_ObjectMoved()
@@ -1957,7 +1952,7 @@ namespace MMMaellon
             //let the VRC_pickup script handle transforms for the local owner
             //only reposition it for non-owners
             bone_CalcParentTransform();
-            if (!IsLocalOwner() || preventPickupSnapping)
+            if (!IsLocalOwner())
             {
                 generic_Interpolate(interpolation);
             }
@@ -1980,7 +1975,7 @@ namespace MMMaellon
             //only reposition it for non-owners
             //we need to keep the parent transform up to date though
             bone_CalcParentTransform();
-            if (!IsLocalOwner() || preventPickupSnapping)
+            if (!IsLocalOwner())
             {
                 generic_Interpolate(interpolation);
             }
@@ -2054,7 +2049,7 @@ namespace MMMaellon
             //only reposition it for non-owners
             //we need to keep the parent transform up to date though
             noHand_CalcParentTransform();
-            if (!IsLocalOwner() || preventPickupSnapping)
+            if (!IsLocalOwner())
             {
                 generic_Interpolate(interpolation);
             }

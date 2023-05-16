@@ -268,7 +268,7 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
                 var gameObjects = Resources.FindObjectsOfTypeAll<GameObject>();
                 foreach (var gameObject in gameObjects)
                 {
-                    if (gameObject.scene == targetScene && gameObject.transform.GetHierarchyPath() == assetPath)
+                    if (gameObject.scene == targetScene && VRC.Core.ExtensionMethods.GetHierarchyPath(gameObject.transform) == assetPath)
                     {
                         targetObject = gameObject;
                         break;

@@ -452,12 +452,13 @@ namespace VRC.SDKBase.Editor
                 if (go.transform.parent == null)
                 {
                     // check root game objects
-#if UNITY_ANDROID
-                IEnumerable<Shader> illegalShaders = VRC.SDKBase.Validation.WorldValidation.FindIllegalShaders(go);
-                foreach (Shader s in illegalShaders)
-                {
-                    _builder.OnGUIWarning(scene, "World uses unsupported shader '" + s.name + "'. This could cause low performance or future compatibility issues.", null, null);
-                }
+#if UNITY_ANDROID || UNITY_IOS
+                    // check root game objects for illegal shaders
+                    IEnumerable<Shader> illegalShaders = VRC.SDKBase.Validation.WorldValidation.FindIllegalShaders(go);
+                    foreach (Shader s in illegalShaders)
+                    {
+                        _builder.OnGUIWarning(scene, "World uses unsupported shader '" + s.name + "'. This could cause low performance or future compatibility issues.", null, null);
+                    }
 #endif
                 }
             }
@@ -553,7 +554,7 @@ namespace VRC.SDKBase.Editor
                                 {
                                     Core.Logger.Log(
                                         $"Could not load world {pms[0].blueprintId} because it didn't exist.", Core.DebugLevel.All);
-                                    Core.ApiCache.Invalidate<Core.ApiWorld>(pms[0].blueprintId);
+                                    Core.ApiCache.Invalidate(pms[0].blueprintId);
                                 }
                                 else
                                     Debug.LogErrorFormat("Could not load world {0} because {1}", pms[0].blueprintId,

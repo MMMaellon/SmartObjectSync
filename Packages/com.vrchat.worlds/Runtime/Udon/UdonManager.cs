@@ -652,14 +652,14 @@ namespace VRC.Udon
             _udonClientInterface.FilterBlacklisted(ref objectToFilter);
         }
 
-        public void Blacklist(Object objectToBlacklist)
+        public void Blacklist(Object objectToBlacklist, bool includeParents = true)
         {
-            _udonClientInterface.Blacklist(objectToBlacklist);
+            _udonClientInterface.Blacklist(objectToBlacklist, includeParents);
         }
 
-        public void Blacklist(IEnumerable<Object> objectsToBlacklist)
+        public void Blacklist(IEnumerable<Object> objectsToBlacklist, bool includeParents = true)
         {
-            _udonClientInterface.Blacklist(objectsToBlacklist);
+            _udonClientInterface.Blacklist(objectsToBlacklist, includeParents);
         }
 
         public void FilterBlacklisted(ref Object objectToFilter)
@@ -667,14 +667,14 @@ namespace VRC.Udon
             _udonClientInterface.FilterBlacklisted(ref objectToFilter);
         }
 
+        public void CleanBlacklist()
+        {
+            _udonClientInterface.CleanBlacklist();
+        }
+
         public bool IsBlacklisted(Object objectToCheck)
         {
             return _udonClientInterface.IsBlacklisted(objectToCheck);
-        }
-
-        public void ClearBlacklist()
-        {
-            _udonClientInterface.ClearBlacklist();
         }
 
         public bool IsBlacklisted<T>(T objectToCheck)

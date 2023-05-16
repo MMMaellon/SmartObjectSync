@@ -164,8 +164,8 @@ namespace VRC.SDK3.Editor
             GUI.enabled = _builder.NoGuiErrorsOrIssues() ||
                           Core.APIUser.CurrentUser.developerType == Core.APIUser.DeveloperType.Internal;
 
-#if UNITY_ANDROID
-        EditorGUI.BeginDisabledGroup(true);
+#if UNITY_ANDROID || UNITY_IOS
+            EditorGUI.BeginDisabledGroup(true);
 #endif
             string buildLabel = doReload ? "Build & Reload" : "Build & Test";
             if (GUILayout.Button(buildLabel))
@@ -187,8 +187,8 @@ namespace VRC.SDK3.Editor
                     }
                 }
             }
-#if UNITY_ANDROID
-        EditorGUI.EndDisabledGroup();
+#if UNITY_ANDROID || UNITY_IOS
+            EditorGUI.EndDisabledGroup();
 #endif
 
             GUILayout.EndVertical();

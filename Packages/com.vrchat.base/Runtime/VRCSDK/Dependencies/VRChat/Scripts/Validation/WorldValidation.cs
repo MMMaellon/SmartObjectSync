@@ -454,6 +454,7 @@ namespace VRC.SDKBase.Validation
             "VRC.SDK3.Video.Components.AVPro.VRCAVProVideoScreen",
             "VRC.SDK3.Video.Components.AVPro.VRCAVProVideoSpeaker",
             "VRC.SDK3.Midi.VRCMidiListener",
+            "VRC.SDK3.Midi.VRCMidiPlayer",
             "VRC.Udon.UdonBehaviour",
             "VRC.Udon.AbstractUdonBehaviourEventProxy",
             "UnityEngine.Animations.AimConstraint",
@@ -496,7 +497,7 @@ namespace VRC.SDKBase.Validation
             "Cinemachine.CinemachineSameAsFollowTarget",
             "Cinemachine.CinemachineTrackedDolly",
             "Cinemachine.CinemachineTransposer",
-            "Cinemachine.CinemachineCore"
+            "Cinemachine.CinemachineCore",
         };
 
         public static readonly string[] ShaderWhiteList = new string[]

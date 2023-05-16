@@ -131,7 +131,7 @@ namespace VRCSDK2
                         switch (pipelineManager.fallbackStatus)
                         {
                             case PipelineManager.FallbackStatus.Valid:
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                                 tagFallback.interactable = true;
                                 tagFallback.GetComponentInChildren<Text>().text = "Use for Fallback";
 #else
@@ -184,7 +184,7 @@ namespace VRCSDK2
                     switch (pipelineManager.fallbackStatus)
                     {
                         case PipelineManager.FallbackStatus.Valid:
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                             tagFallback.interactable = true;
                             tagFallback.GetComponentInChildren<Text>().text = "Use for Fallback";
 #else

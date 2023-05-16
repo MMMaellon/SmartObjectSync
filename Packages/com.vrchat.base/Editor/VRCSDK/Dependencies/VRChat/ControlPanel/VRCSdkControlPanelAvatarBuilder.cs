@@ -346,7 +346,7 @@ namespace VRC.SDKBase.Editor
                 }
 
                 // additional messages for Poor and Very Poor Avatars
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                 if (rating > PerformanceRating.Poor)
                     _builder.OnGUIInformation(avatar, "This avatar will be blocked by default due to performance. Your fallback will be shown instead.");
                 else if (rating > PerformanceRating.Medium)
@@ -446,7 +446,7 @@ namespace VRC.SDKBase.Editor
                         EnvConfig.SetFogSettings(
                             new EnvConfig.FogSettings(EnvConfig.FogSettings.FogStrippingMode.Custom, true, true, true));
 
-#if UNITY_ANDROID
+#if UNITY_ANDROID || UNITY_IOS
                         EditorPrefs.SetBool("VRC.SDKBase_StripAllShaders", true);
 #else
                         EditorPrefs.SetBool("VRC.SDKBase_StripAllShaders", false);
@@ -504,7 +504,7 @@ namespace VRC.SDKBase.Editor
                                 Core.Logger.Log(
                                     $"Could not load avatar {pm.blueprintId} because it didn't exist.",
                                     Core.DebugLevel.API);
-                                Core.ApiCache.Invalidate<Core.ApiWorld>(pm.blueprintId);
+                                Core.ApiCache.Invalidate(pm.blueprintId);
                             }
                             else
                                 Debug.LogErrorFormat("Could not load avatar {0} because {1}", pm.blueprintId, c.Error);

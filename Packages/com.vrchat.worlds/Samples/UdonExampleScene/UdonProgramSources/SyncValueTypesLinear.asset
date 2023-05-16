@@ -12,100 +12,97 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: SyncValueTypesLinear
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 5ed577eb1b5ac0248a02a2485225e547,
-    type: 2}
-  udonAssembly: ".data_start\r\n\r\n    .export uiText\r\n    .sync boolValue, linear\r\n   
-    .sync intValue, linear\r\n    .sync floatValue, linear\r\n    .sync stringValue,
-    linear\r\n    .sync colorValue, linear\r\n    .sync vector3Value, linear\r\n   
-    .sync quaternionValue, linear\r\n    \r\n    __Boolean_0: %SystemBoolean, null\r\n   
-    __Boolean_1: %SystemBoolean, null\r\n    __Boolean_2: %SystemBoolean, null\r\n   
-    __key_0: %UnityEngineKeyCode, null\r\n    __Single_0: %SystemSingle, null\r\n   
-    __Single_1: %SystemSingle, null\r\n    __min_0: %SystemInt32, null\r\n    __max_0:
-    %SystemInt32, null\r\n    __min_1: %SystemSingle, null\r\n    __max_1: %SystemSingle,
-    null\r\n    __instance_0: %SystemInt32, null\r\n    __min_2: %SystemInt32, null\r\n   
-    __max_2: %SystemInt32, null\r\n    __hueMin_0: %SystemSingle, null\r\n    __hueMax_0:
-    %SystemSingle, null\r\n    __saturationMin_0: %SystemSingle, null\r\n    __saturationMax_0:
-    %SystemSingle, null\r\n    __valueMin_0: %SystemSingle, null\r\n    __valueMax_0:
-    %SystemSingle, null\r\n    __instance_1: %UnityEngineUIText, null\r\n    __value_0:
-    %SystemString, null\r\n    __str0_0: %SystemString, null\r\n    __str1_0: %SystemString,
-    null\r\n    __str2_0: %SystemString, null\r\n    __str3_0: %SystemString, null\r\n   
-    __str0_1: %SystemString, null\r\n    __str1_1: %SystemString, null\r\n    __str2_1:
-    %SystemString, null\r\n    __str3_1: %SystemString, null\r\n    __format_0: %SystemString,
-    null\r\n    __arg0_0: %SystemObject, null\r\n    __format_1: %SystemString, null\r\n   
-    __arg0_1: %SystemObject, null\r\n    __format_2: %SystemString, null\r\n    __arg0_2:
-    %SystemObject, null\r\n    __format_3: %SystemString, null\r\n    __arg0_3: %SystemObject,
-    null\r\n    __format_4: %SystemString, null\r\n    __arg0_4: %SystemObject, null\r\n   
-    __format_5: %SystemString, null\r\n    __arg0_5: %SystemObject, null\r\n    __format_6:
-    %SystemString, null\r\n    __arg0_6: %SystemObject, null\r\n    __arg1_0: %SystemObject,
-    null\r\n    __format_7: %SystemString, null\r\n    __arg0_7: %SystemObject, null\r\n   
-    __arg1_1: %SystemObject, null\r\n    __arg2_0: %SystemObject, null\r\n    __f_0:
-    %SystemSingle, null\r\n    __Single_2: %SystemSingle, null\r\n    __Single_3:
-    %SystemSingle, null\r\n    __instance_2: %UnityEngineColor, null\r\n    __f_1:
-    %SystemSingle, null\r\n    __Single_4: %SystemSingle, null\r\n    __Single_5:
-    %SystemSingle, null\r\n    __instance_3: %UnityEngineColor, null\r\n    __f_2:
-    %SystemSingle, null\r\n    __Single_6: %SystemSingle, null\r\n    __Single_7:
-    %SystemSingle, null\r\n    __instance_4: %UnityEngineColor, null\r\n    boolValue:
-    %SystemBoolean, null\r\n    uiText: %UnityEngineUIText, null\r\n    intValue:
-    %SystemInt32, null\r\n    floatValue: %SystemSingle, null\r\n    stringValue:
-    %SystemString, null\r\n    colorValue: %UnityEngineColor, null\r\n    vector3Value:
-    %UnityEngineVector3, null\r\n    quaternionValue: %UnityEngineQuaternion, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n   
-    .export _update\r\n    \r\n    _update:\r\n    \r\n        PUSH, __Boolean_1\r\n       
-    EXTERN, \"VRCSDKBaseNetworking.__get_IsMaster__SystemBoolean\"\r\n        PUSH,
-    __key_0\r\n        PUSH, __Boolean_2\r\n        EXTERN, \"UnityEngineInput.__GetKeyDown__UnityEngineKeyCode__SystemBoolean\"\r\n       
-    PUSH, __Boolean_1\r\n        PUSH, __Boolean_2\r\n        PUSH, __Boolean_0\r\n       
-    EXTERN, \"SystemBoolean.__op_ConditionalAnd__SystemBoolean_SystemBoolean__SystemBoolean\"\r\n       
-    PUSH, __Boolean_0\r\n        JUMP_IF_FALSE, 0x00000168\r\n        PUSH, __Single_0\r\n       
-    EXTERN, \"UnityEngineRandom.__get_value__SystemSingle\"\r\n        PUSH, __Single_0\r\n       
-    PUSH, __Single_1\r\n        PUSH, boolValue\r\n        EXTERN, \"SystemSingle.__op_GreaterThan__SystemSingle_SystemSingle__SystemBoolean\"\r\n       
-    PUSH, __min_0\r\n        PUSH, __max_0\r\n        PUSH, intValue\r\n        EXTERN,
-    \"UnityEngineRandom.__Range__SystemInt32_SystemInt32__SystemInt32\"\r\n       
-    PUSH, __min_1\r\n        PUSH, __max_1\r\n        PUSH, floatValue\r\n       
-    EXTERN, \"UnityEngineRandom.__Range__SystemSingle_SystemSingle__SystemSingle\"\r\n       
-    PUSH, __min_2\r\n        PUSH, __max_2\r\n        PUSH, __instance_0\r\n       
-    EXTERN, \"UnityEngineRandom.__Range__SystemInt32_SystemInt32__SystemInt32\"\r\n       
-    PUSH, __instance_0\r\n        PUSH, stringValue\r\n        EXTERN, \"SystemInt32.__ToString__SystemString\"\r\n       
-    PUSH, vector3Value\r\n        EXTERN, \"UnityEngineRandom.__get_insideUnitSphere__UnityEngineVector3\"\r\n       
-    PUSH, quaternionValue\r\n        EXTERN, \"UnityEngineRandom.__get_rotation__UnityEngineQuaternion\"\r\n       
-    PUSH, __hueMin_0\r\n        PUSH, __hueMax_0\r\n        PUSH, __saturationMin_0\r\n       
-    PUSH, __saturationMax_0\r\n        PUSH, __valueMin_0\r\n        PUSH, __valueMax_0\r\n       
-    PUSH, colorValue\r\n        EXTERN, \"UnityEngineRandom.__ColorHSV__SystemSingle_SystemSingle_SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineColor\"\r\n       
-    JUMP, 0x00000168\r\n        JUMP, 0xFFFFFFFC\r\n    \r\n    .export _lateUpdate\r\n   
-    \r\n    _lateUpdate:\r\n    \r\n        PUSH, uiText\r\n        PUSH, __instance_1\r\n       
-    COPY\r\n        PUSH, __format_0\r\n        PUSH, boolValue\r\n        PUSH,
-    __str0_1\r\n        EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n       
-    PUSH, __format_1\r\n        PUSH, intValue\r\n        PUSH, __str1_1\r\n       
-    EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n       
-    PUSH, __format_2\r\n        PUSH, floatValue\r\n        PUSH, __str2_1\r\n       
-    EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n       
-    PUSH, stringValue\r\n        PUSH, __arg0_3\r\n        COPY\r\n        PUSH,
-    __format_3\r\n        PUSH, __arg0_3\r\n        PUSH, __str3_1\r\n        EXTERN,
-    \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n       
-    PUSH, __str0_1\r\n        PUSH, __str1_1\r\n        PUSH, __str2_1\r\n       
-    PUSH, __str3_1\r\n        PUSH, __str0_0\r\n        EXTERN, \"SystemString.__Concat__SystemString_SystemString_SystemString_SystemString__SystemString\"\r\n       
-    PUSH, __format_4\r\n        PUSH, vector3Value\r\n        PUSH, __str1_0\r\n       
-    EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n       
-    PUSH, __format_5\r\n        PUSH, quaternionValue\r\n        PUSH, __str2_0\r\n       
-    EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n       
-    PUSH, colorValue\r\n        PUSH, __Single_2\r\n        EXTERN, \"UnityEngineColor.__get_r__SystemSingle\"\r\n       
-    PUSH, __Single_2\r\n        PUSH, __Single_3\r\n        PUSH, __f_0\r\n       
-    EXTERN, \"SystemSingle.__op_Multiplication__SystemSingle_SystemSingle__SystemSingle\"\r\n       
-    PUSH, __f_0\r\n        PUSH, __arg0_7\r\n        EXTERN, \"UnityEngineMathf.__RoundToInt__SystemSingle__SystemInt32\"\r\n       
-    PUSH, colorValue\r\n        PUSH, __Single_4\r\n        EXTERN, \"UnityEngineColor.__get_g__SystemSingle\"\r\n       
-    PUSH, __Single_4\r\n        PUSH, __Single_5\r\n        PUSH, __f_1\r\n       
-    EXTERN, \"SystemSingle.__op_Multiplication__SystemSingle_SystemSingle__SystemSingle\"\r\n       
-    PUSH, __f_1\r\n        PUSH, __arg1_1\r\n        EXTERN, \"UnityEngineMathf.__RoundToInt__SystemSingle__SystemInt32\"\r\n       
-    PUSH, colorValue\r\n        PUSH, __Single_6\r\n        EXTERN, \"UnityEngineColor.__get_b__SystemSingle\"\r\n       
-    PUSH, __Single_6\r\n        PUSH, __Single_7\r\n        PUSH, __f_2\r\n       
-    EXTERN, \"SystemSingle.__op_Multiplication__SystemSingle_SystemSingle__SystemSingle\"\r\n       
-    PUSH, __f_2\r\n        PUSH, __arg2_0\r\n        EXTERN, \"UnityEngineMathf.__RoundToInt__SystemSingle__SystemInt32\"\r\n       
-    PUSH, __format_7\r\n        PUSH, __arg0_7\r\n        PUSH, __arg1_1\r\n       
-    PUSH, __arg2_0\r\n        PUSH, __arg0_6\r\n        EXTERN, \"SystemString.__Format__SystemString_SystemObject_SystemObject_SystemObject__SystemString\"\r\n       
-    PUSH, __format_6\r\n        PUSH, __arg0_6\r\n        PUSH, colorValue\r\n       
-    PUSH, __str3_0\r\n        EXTERN, \"SystemString.__Format__SystemString_SystemObject_SystemObject__SystemString\"\r\n       
-    PUSH, __str0_0\r\n        PUSH, __str1_0\r\n        PUSH, __str2_0\r\n       
-    PUSH, __str3_0\r\n        PUSH, __value_0\r\n        EXTERN, \"SystemString.__Concat__SystemString_SystemString_SystemString_SystemString__SystemString\"\r\n       
-    PUSH, __instance_1\r\n        PUSH, __value_0\r\n        EXTERN, \"UnityEngineUIText.__set_text__SystemString__SystemVoid\"\r\n       
-    JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+  serializedUdonProgramAsset: {fileID: 0}
+  udonAssembly: ".data_start\r\n\r\n    .export uiText\r\n    .sync boolValue, linear\r\n
+    \   .sync intValue, linear\r\n    .sync floatValue, linear\r\n    .sync stringValue,
+    linear\r\n    .sync colorValue, linear\r\n    .sync vector3Value, linear\r\n    .sync
+    quaternionValue, linear\r\n    \r\n    Boolean_0: %SystemBoolean, null\r\n    Boolean_1:
+    %SystemBoolean, null\r\n    Boolean_2: %SystemBoolean, null\r\n    key_0: %UnityEngineKeyCode,
+    null\r\n    Single_0: %SystemSingle, null\r\n    Single_1: %SystemSingle, null\r\n
+    \   min_0: %SystemInt32, null\r\n    max_0: %SystemInt32, null\r\n    min_1: %SystemSingle,
+    null\r\n    max_1: %SystemSingle, null\r\n    instance_0: %SystemInt32, null\r\n
+    \   min_2: %SystemInt32, null\r\n    max_2: %SystemInt32, null\r\n    hueMin_0:
+    %SystemSingle, null\r\n    hueMax_0: %SystemSingle, null\r\n    saturationMin_0:
+    %SystemSingle, null\r\n    saturationMax_0: %SystemSingle, null\r\n    valueMin_0:
+    %SystemSingle, null\r\n    valueMax_0: %SystemSingle, null\r\n    instance_1:
+    %UnityEngineUIText, null\r\n    value_0: %SystemString, null\r\n    str0_0: %SystemString,
+    null\r\n    str1_0: %SystemString, null\r\n    str2_0: %SystemString, null\r\n
+    \   str3_0: %SystemString, null\r\n    str0_1: %SystemString, null\r\n    str1_1:
+    %SystemString, null\r\n    str2_1: %SystemString, null\r\n    str3_1: %SystemString,
+    null\r\n    format_0: %SystemString, null\r\n    arg0_0: %SystemObject, null\r\n
+    \   format_1: %SystemString, null\r\n    arg0_1: %SystemObject, null\r\n    format_2:
+    %SystemString, null\r\n    arg0_2: %SystemObject, null\r\n    format_3: %SystemString,
+    null\r\n    arg0_3: %SystemObject, null\r\n    format_4: %SystemString, null\r\n
+    \   arg0_4: %SystemObject, null\r\n    format_5: %SystemString, null\r\n    arg0_5:
+    %SystemObject, null\r\n    format_6: %SystemString, null\r\n    arg0_6: %SystemObject,
+    null\r\n    arg1_0: %SystemObject, null\r\n    format_7: %SystemString, null\r\n
+    \   arg0_7: %SystemObject, null\r\n    arg1_1: %SystemObject, null\r\n    arg2_0:
+    %SystemObject, null\r\n    f_0: %SystemSingle, null\r\n    Single_2: %SystemSingle,
+    null\r\n    Single_3: %SystemSingle, null\r\n    Color_0: %UnityEngineColor, null\r\n
+    \   f_1: %SystemSingle, null\r\n    Single_4: %SystemSingle, null\r\n    Single_5:
+    %SystemSingle, null\r\n    Color_1: %UnityEngineColor, null\r\n    f_2: %SystemSingle,
+    null\r\n    Single_6: %SystemSingle, null\r\n    Single_7: %SystemSingle, null\r\n
+    \   Color_2: %UnityEngineColor, null\r\n    boolValue: %SystemBoolean, null\r\n
+    \   uiText: %UnityEngineUIText, null\r\n    intValue: %SystemInt32, null\r\n    floatValue:
+    %SystemSingle, null\r\n    stringValue: %SystemString, null\r\n    colorValue:
+    %UnityEngineColor, null\r\n    vector3Value: %UnityEngineVector3, null\r\n    quaternionValue:
+    %UnityEngineQuaternion, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n    .export
+    _update\r\n    \r\n    _update:\r\n    \r\n        PUSH, Boolean_1\r\n        EXTERN,
+    \"VRCSDKBaseNetworking.__get_IsMaster__SystemBoolean\"\r\n        PUSH, key_0\r\n
+    \       PUSH, Boolean_2\r\n        EXTERN, \"UnityEngineInput.__GetKeyDown__UnityEngineKeyCode__SystemBoolean\"\r\n
+    \       PUSH, Boolean_1\r\n        PUSH, Boolean_2\r\n        PUSH, Boolean_0\r\n
+    \       EXTERN, \"SystemBoolean.__op_ConditionalAnd__SystemBoolean_SystemBoolean__SystemBoolean\"\r\n
+    \       PUSH, Boolean_0\r\n        JUMP_IF_FALSE, 0x000168\r\n        PUSH, Single_0\r\n
+    \       EXTERN, \"UnityEngineRandom.__get_value__SystemSingle\"\r\n        PUSH,
+    Single_0\r\n        PUSH, Single_1\r\n        PUSH, boolValue\r\n        EXTERN,
+    \"SystemSingle.__op_GreaterThan__SystemSingle_SystemSingle__SystemBoolean\"\r\n
+    \       PUSH, min_0\r\n        PUSH, max_0\r\n        PUSH, intValue\r\n        EXTERN,
+    \"UnityEngineRandom.__Range__SystemInt32_SystemInt32__SystemInt32\"\r\n        PUSH,
+    min_1\r\n        PUSH, max_1\r\n        PUSH, floatValue\r\n        EXTERN, \"UnityEngineRandom.__Range__SystemSingle_SystemSingle__SystemSingle\"\r\n
+    \       PUSH, min_2\r\n        PUSH, max_2\r\n        PUSH, instance_0\r\n        EXTERN,
+    \"UnityEngineRandom.__Range__SystemInt32_SystemInt32__SystemInt32\"\r\n        PUSH,
+    instance_0\r\n        PUSH, stringValue\r\n        EXTERN, \"SystemInt32.__ToString__SystemString\"\r\n
+    \       PUSH, vector3Value\r\n        EXTERN, \"UnityEngineRandom.__get_insideUnitSphere__UnityEngineVector3\"\r\n
+    \       PUSH, quaternionValue\r\n        EXTERN, \"UnityEngineRandom.__get_rotation__UnityEngineQuaternion\"\r\n
+    \       PUSH, hueMin_0\r\n        PUSH, hueMax_0\r\n        PUSH, saturationMin_0\r\n
+    \       PUSH, saturationMax_0\r\n        PUSH, valueMin_0\r\n        PUSH, valueMax_0\r\n
+    \       PUSH, colorValue\r\n        EXTERN, \"UnityEngineRandom.__ColorHSV__SystemSingle_SystemSingle_SystemSingle_SystemSingle_SystemSingle_SystemSingle__UnityEngineColor\"\r\n
+    \       JUMP, 0x000168\r\n        JUMP, 0xFFFFFFFC\r\n    \r\n    .export _lateUpdate\r\n
+    \   \r\n    _lateUpdate:\r\n    \r\n        PUSH, uiText\r\n        PUSH, instance_1\r\n
+    \       COPY\r\n        PUSH, format_0\r\n        PUSH, boolValue\r\n        PUSH,
+    str0_1\r\n        EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n
+    \       PUSH, format_1\r\n        PUSH, intValue\r\n        PUSH, str1_1\r\n        EXTERN,
+    \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n        PUSH,
+    format_2\r\n        PUSH, floatValue\r\n        PUSH, str2_1\r\n        EXTERN,
+    \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n        PUSH,
+    stringValue\r\n        PUSH, arg0_3\r\n        COPY\r\n        PUSH, format_3\r\n
+    \       PUSH, arg0_3\r\n        PUSH, str3_1\r\n        EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n
+    \       PUSH, str0_1\r\n        PUSH, str1_1\r\n        PUSH, str2_1\r\n        PUSH,
+    str3_1\r\n        PUSH, str0_0\r\n        EXTERN, \"SystemString.__Concat__SystemString_SystemString_SystemString_SystemString__SystemString\"\r\n
+    \       PUSH, format_4\r\n        PUSH, vector3Value\r\n        PUSH, str1_0\r\n
+    \       EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n
+    \       PUSH, format_5\r\n        PUSH, quaternionValue\r\n        PUSH, str2_0\r\n
+    \       EXTERN, \"SystemString.__Format__SystemString_SystemObject__SystemString\"\r\n
+    \       PUSH, colorValue\r\n        PUSH, Single_2\r\n        EXTERN, \"UnityEngineColor.__get_r__SystemSingle\"\r\n
+    \       PUSH, Single_2\r\n        PUSH, Single_3\r\n        PUSH, f_0\r\n        EXTERN,
+    \"SystemSingle.__op_Multiplication__SystemSingle_SystemSingle__SystemSingle\"\r\n
+    \       PUSH, f_0\r\n        PUSH, arg0_7\r\n        EXTERN, \"UnityEngineMathf.__RoundToInt__SystemSingle__SystemInt32\"\r\n
+    \       PUSH, colorValue\r\n        PUSH, Single_4\r\n        EXTERN, \"UnityEngineColor.__get_g__SystemSingle\"\r\n
+    \       PUSH, Single_4\r\n        PUSH, Single_5\r\n        PUSH, f_1\r\n        EXTERN,
+    \"SystemSingle.__op_Multiplication__SystemSingle_SystemSingle__SystemSingle\"\r\n
+    \       PUSH, f_1\r\n        PUSH, arg1_1\r\n        EXTERN, \"UnityEngineMathf.__RoundToInt__SystemSingle__SystemInt32\"\r\n
+    \       PUSH, colorValue\r\n        PUSH, Single_6\r\n        EXTERN, \"UnityEngineColor.__get_b__SystemSingle\"\r\n
+    \       PUSH, Single_6\r\n        PUSH, Single_7\r\n        PUSH, f_2\r\n        EXTERN,
+    \"SystemSingle.__op_Multiplication__SystemSingle_SystemSingle__SystemSingle\"\r\n
+    \       PUSH, f_2\r\n        PUSH, arg2_0\r\n        EXTERN, \"UnityEngineMathf.__RoundToInt__SystemSingle__SystemInt32\"\r\n
+    \       PUSH, format_7\r\n        PUSH, arg0_7\r\n        PUSH, arg1_1\r\n        PUSH,
+    arg2_0\r\n        PUSH, arg0_6\r\n        EXTERN, \"SystemString.__Format__SystemString_SystemObject_SystemObject_SystemObject__SystemString\"\r\n
+    \       PUSH, format_6\r\n        PUSH, arg0_6\r\n        PUSH, colorValue\r\n
+    \       PUSH, str3_0\r\n        EXTERN, \"SystemString.__Format__SystemString_SystemObject_SystemObject__SystemString\"\r\n
+    \       PUSH, str0_0\r\n        PUSH, str1_0\r\n        PUSH, str2_0\r\n        PUSH,
+    str3_0\r\n        PUSH, value_0\r\n        EXTERN, \"SystemString.__Concat__SystemString_SystemString_SystemString_SystemString__SystemString\"\r\n
+    \       PUSH, instance_1\r\n        PUSH, value_0\r\n        EXTERN, \"UnityEngineUIText.__set_text__SystemString__SystemVoid\"\r\n
+    \       JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
   assemblyError: 
   graphData:
     name: 
@@ -127,11 +124,9 @@ MonoBehaviour:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|boolValue
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|linear
     - fullName: VRCSDKBaseNetworking.__get_IsMaster__SystemBoolean
@@ -221,8 +216,8 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|bool: {0}                                                  '
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|bool:
+          {0}                                                  '
       - unityObjectValue: {fileID: 0}
         stringValue: 
       - unityObjectValue: {fileID: 0}
@@ -252,11 +247,9 @@ MonoBehaviour:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|uiText
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|7207c816-4e47-40f3-a001-c14aee68a26f
     - fullName: UnityEngineUIText.__set_text__SystemString__SystemVoid
@@ -322,11 +315,9 @@ MonoBehaviour:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|intValue
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|linear
     - fullName: Set_Variable
@@ -372,8 +363,8 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|int: {0}                                                              '
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|int:
+          {0}                                                              '
       - unityObjectValue: {fileID: 0}
         stringValue: 
     - fullName: Variable_SystemSingle
@@ -392,11 +383,9 @@ MonoBehaviour:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|floatValue
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|linear
     - fullName: UnityEngineRandom.__Range__SystemSingle_SystemSingle__SystemSingle
@@ -433,8 +422,8 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|float: {0}                                                  '
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|float:
+          {0}                                                  '
       - unityObjectValue: {fileID: 0}
         stringValue: 
     - fullName: Get_Variable
@@ -462,11 +451,9 @@ MonoBehaviour:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|stringValue
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|linear
     - fullName: Variable_UnityEngineColor
@@ -481,16 +468,14 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0,
-          Culture=neutral, PublicKeyToken=null|{"r":0.3921568691730499,"g":0.3921568691730499,"b":0.3921568691730499,"a":1.0}
+        stringValue: UnityEngine.Color, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral,
+          PublicKeyToken=null|{"r":0.3921568691730499,"g":0.3921568691730499,"b":0.3921568691730499,"a":1.0}
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|colorValue
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|linear
     - fullName: Set_Variable
@@ -588,8 +573,8 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|string: {0}                                          '
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|string:
+          {0}                                          '
       - unityObjectValue: {fileID: 0}
         stringValue: 
     - fullName: Get_Variable
@@ -611,8 +596,8 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|<color="#{0}">color: {1}</color>'
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|<color="#{0}">color:
+          {1}</color>'
       - unityObjectValue: {fileID: 0}
         stringValue: 
       - unityObjectValue: {fileID: 0}
@@ -760,11 +745,9 @@ MonoBehaviour:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|vector3Value
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|linear
     - fullName: Variable_UnityEngineQuaternion
@@ -784,11 +767,9 @@ MonoBehaviour:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|quaternionValue
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|False
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|False
       - unityObjectValue: {fileID: 0}
-        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|True
+        stringValue: System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|True
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|linear
     - fullName: Set_Variable
@@ -838,8 +819,8 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|vector3: {0}                         '
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|vector3:
+          {0}                         '
       - unityObjectValue: {fileID: 0}
         stringValue: 
     - fullName: Get_Variable
@@ -860,8 +841,8 @@ MonoBehaviour:
       flowUIDs: []
       nodeValues:
       - unityObjectValue: {fileID: 0}
-        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral,
-          PublicKeyToken=b77a5c561934e089|quaternion: {0}                         '
+        stringValue: 'System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|quaternion:
+          {0}                         '
       - unityObjectValue: {fileID: 0}
         stringValue: 
     - fullName: Get_Variable
@@ -873,7 +854,5 @@ MonoBehaviour:
       nodeValues:
       - unityObjectValue: {fileID: 0}
         stringValue: System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089|9ac1b6df-3a90-47ab-b4d5-8ed39c123b0c
-    updateOrder: 0
   graphElementData: []
-  version: 1.0.0
   showAssembly: 0

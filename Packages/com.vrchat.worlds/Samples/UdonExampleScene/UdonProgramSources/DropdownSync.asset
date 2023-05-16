@@ -271,5 +271,8 @@ MonoBehaviour:
     jsonData: '{"uid":"5b2498dd-08e1-4c68-85a9-f6310aefc4dc","layout":{"serializedVersion":"2","x":-500.0,"y":-680.0,"width":1293.0,"height":383.0},"containedElements":["0cb40eff-4fec-4eed-ba1d-89008fe8cf27","89f2ad6b-3973-4adf-bcf7-1085cbbc9b8c","2e9330b2-2126-4972-9455-b5e87ce4daef","ea9a568e-a801-46a5-8b35-7bfc4bfb49da","ae888b9b-5f27-40f5-a1ea-1baa70f8b0fa","a7df1c8a-d181-460c-92e4-f11284b2fc73","42b9c93b-521e-471a-aca0-5d608110c88f","8be4bd79-e6a9-485c-8c18-f0ddd63d42dd","1862e8d9-c8f0-4ba0-b119-d83c74930193","ecd10661-99d1-4d05-bb43-299acf14383b","a7777e46-e783-4a80-a9c8-f542206e0534","31e277cd-2079-4567-925e-982b1f4c304f","4868c934-23de-4e61-947d-50b6c3aca0a3"],"title":"When
       UI is changed, check that it''s different than the variable, then become owner
       and update it","layer":0,"elementTypeColor":{"r":0.0,"g":0.0,"b":0.0,"a":0.0}}'
+  viewTransform:
+    position: {x: 904.4009, y: 1008.8304}
+    scale: 0.8695652
   version: 1.0.0
   showAssembly: 0

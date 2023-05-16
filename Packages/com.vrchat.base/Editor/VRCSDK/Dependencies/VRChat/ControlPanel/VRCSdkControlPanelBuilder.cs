@@ -20,7 +20,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     const string kCantPublishAvatars = "Before you can upload avatars, you will need to spend some time in VRChat.";
     const string kCantPublishWorlds = "Before you can upload worlds, you will need to spend some time in VRChat.";
     private const string FIX_ISSUES_TO_BUILD_OR_TEST_WARNING_STRING = "You must address the above issues before you can build or test this content!";
-    
+
     static Texture _perfIcon_Excellent;
     static Texture _perfIcon_Good;
     static Texture _perfIcon_Medium;
@@ -87,7 +87,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     {
         return GUIErrors.Count == 0 && CheckedForIssues;
     }
-    
+
     void AddToReport(Dictionary<Object, List<Issue>> report, Object subject, string output, System.Action show, System.Action fix)
     {
         if (subject == null)
@@ -159,9 +159,9 @@ public partial class VRCSdkControlPanel : EditorWindow
             }
         }
     }
-    
+
     private IVRCSdkControlPanelBuilder[] _sdkBuilders;
-    
+
     private static List<Type> GetSdkBuilderTypesFromAttribute()
     {
         Type sdkBuilderInterfaceType = typeof(IVRCSdkControlPanelBuilder);
@@ -214,13 +214,13 @@ public partial class VRCSdkControlPanel : EditorWindow
         }
         _sdkBuilders = builders.ToArray();
     }
-    
+
     void ShowBuilders()
     {
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical();
-        
+
         if (VRC.Core.ConfigManager.RemoteConfig.IsInitialized())
         {
             string sdkUnityVersion = VRC.Core.ConfigManager.RemoteConfig.GetString("sdkUnityVersion");
@@ -232,7 +232,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                 );
             }
         }
-        
+
         if (VRCSdk3Analysis.IsSdkDllActive(VRCSdk3Analysis.SdkVersion.VRCSDK2) && VRCSdk3Analysis.IsSdkDllActive(VRCSdk3Analysis.SdkVersion.VRCSDK3))
         {
             List<Component> sdk2Components = VRCSdk3Analysis.GetSDKInScene(VRCSdk3Analysis.SdkVersion.VRCSDK2);
@@ -246,7 +246,33 @@ public partial class VRCSdkControlPanel : EditorWindow
                 );
             }
         }
-        
+
+        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android &&
+                EditorUserBuildSettings.androidBuildSubtarget != MobileTextureSubtarget.ASTC)
+        {
+            OnGUIError(null,
+                "Default texture format on Android should be set to the newer ASTC format to reduce VRAM usage (this could take a while). Texture settings can be overridden on an individual basis.",
+                null,
+                () =>
+                {
+                    // This will be reimported automatically on build.
+                    EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
+                }
+            );
+        }
+
+        #if !VRC_MOBILE_IOS
+        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS)
+        {
+            OnGUIError(null,
+                "iOS is not supported as a build target.",
+                null,
+                null
+            );
+        }
+
+        #endif
+
         if (Lightmapping.giWorkflowMode == Lightmapping.GIWorkflowMode.Iterative)
         {
             OnGUIWarning(null,
@@ -270,7 +296,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                 }
             );
         }
-        
+
         PopulateSdkBuilders();
         IVRCSdkControlPanelBuilder selectedBuilder = null;
         string errorMessage = null;
@@ -321,7 +347,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                         builder.SelectAllComponents();
                     } },
                 null
-            );    
+            );
             OnGUIShowIssues();
         }
         else
@@ -336,7 +362,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     }
 
     public bool showLayerHelp = false;
-    
+
     bool ShouldShowLightmapWarning
     {
         get
@@ -554,26 +580,56 @@ public partial class VRCSdkControlPanel : EditorWindow
             EditorGUILayout.LabelField("Android Support: YES");
         else
             EditorGUILayout.LabelField("Android Support: NO");
+
+        #if VRC_MOBILE_IOS
+            if (m.supportedPlatforms == VRC.Core.ApiModel.SupportedPlatforms.iOS || m.supportedPlatforms == VRC.Core.ApiModel.SupportedPlatforms.All)
+                EditorGUILayout.LabelField("iOS Support: YES");
+            else
+                EditorGUILayout.LabelField("iOS Support: NO");
+        #endif
     }
 
     public static void DrawBuildTargetSwitcher()
     {
         EditorGUILayout.LabelField("Active Build Target: " + EditorUserBuildSettings.activeBuildTarget);
-        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows || EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64 && GUILayout.Button("Switch Build Target to Android"))
+
+        if (GUILayout.Button("Switch Build Target"))
         {
-            if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Android? This could take a while.", "Confirm", "Cancel"))
-            {
-                EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Android;
-                EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Android, BuildTarget.Android);
-            }
-        }
-        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android && GUILayout.Button("Switch Build Target to Windows"))
-        {
-            if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Windows? This could take a while.", "Confirm", "Cancel"))
-            {
-                EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Standalone;
-                EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
-            }
+            GenericMenu menu = new GenericMenu();
+            
+            menu.AddItem(new GUIContent("Windows"), EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows || EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64,
+                () =>
+                {
+                    if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Windows? This could take a while.", "Confirm", "Cancel"))
+                    {
+                        EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Standalone;
+                        EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+                    }
+                });
+            
+            menu.AddItem(new GUIContent("Android"), EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android,
+                () =>
+                {
+                    if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Android? This could take a while.", "Confirm", "Cancel"))
+                    {
+                        EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Android;
+                        EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Android, BuildTarget.Android);
+                    }
+                });
+
+            #if VRC_MOBILE_IOS
+            menu.AddItem(new GUIContent("iOS"), EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS,
+                () =>
+                {
+                    if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to iOS? This could take a while.", "Confirm", "Cancel"))
+                    {
+                        EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.iOS;
+                        EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.iOS, BuildTarget.iOS);
+                    }
+                });
+            #endif
+
+            menu.ShowAsContext();
         }
     }
 
@@ -584,6 +640,10 @@ public partial class VRCSdkControlPanel : EditorWindow
             buildButtonString = "Build & Publish for Windows";
         if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
             buildButtonString = "Build & Publish for Android";
+        #if VRC_MOBILE_IOS
+        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS)
+            buildButtonString = "Build & Publish for iOS";
+        #endif
 
         return buildButtonString;
     }

@@ -84,6 +84,10 @@ namespace MMMaellon
                     sync.Respawn();
                 }
             }
+            if (oldState != newState)
+            {
+                firstLoop = true;
+            }
             HandlePickupable();
         }
 
@@ -200,6 +204,7 @@ namespace MMMaellon
         Quaternion adjustmentRotation;
         Vector3 axis;
         float angle;
+        bool firstLoop;
         public override void PostLateUpdate()
         {
             if (!Utilities.IsValid(sync))
@@ -241,7 +246,18 @@ namespace MMMaellon
                 {
                     sync.bone_CalcParentTransform();
                 }
-                sync.generic_Interpolate(1.0f);
+                if (sync.interpolation >= 1 || !firstLoop)
+                {
+                    if (firstLoop)
+                    {
+                        firstLoop = false;
+                        //force recording of new transforms
+                        sync.OnSmartObjectSerialize();
+                        sync.Serialize();
+                    }
+
+                    sync.generic_Interpolate(1.0f);
+                }
             }
             newOffset = Quaternion.Inverse(primaryPickup.transform.rotation) * (GetGrabPos(sync) - GetGrabPos(primaryPickup));
             worldOffset = primaryPickup.transform.rotation * startOffset;
@@ -322,11 +338,11 @@ namespace MMMaellon
             return (sync.transform.TransformPoint(currentPosPrimary) - lastPos) / Time.deltaTime;
         }
 
+        Vector3 euler;
         public Vector3 CalcSpin()
         {
-            //angular velocity is normalized rotation axis * angle in radians: https://answers.unity.com/questions/49082/rotation-quaternion-to-angular-velocity.html
-            (Quaternion.Inverse(lastRot) * currentRot * currentRotPrimary).ToAngleAxis(out angle, out axis);
-            return axis * angle * Mathf.Deg2Rad / Time.deltaTime;
+            (Quaternion.Normalize(Quaternion.Inverse(lastRot) * currentRot)).ToAngleAxis(out angle, out axis);
+            return currentRot * axis * angle * Mathf.Deg2Rad / Time.deltaTime;
         }
     }
 }
