@@ -342,6 +342,14 @@ namespace MMMaellon
         public Vector3 CalcSpin()
         {
             (Quaternion.Normalize(Quaternion.Inverse(lastRot) * currentRot)).ToAngleAxis(out angle, out axis);
+            //Make sure we are using the smallest angle of rotation. I.E. -90 degrees instead of 270 degrees wherever possible
+            if (angle < -180)
+            {
+                angle += 360;
+            } else if (angle > 180)
+            {
+                angle -= 360;
+            }
             return currentRot * axis * angle * Mathf.Deg2Rad / Time.deltaTime;
         }
     }

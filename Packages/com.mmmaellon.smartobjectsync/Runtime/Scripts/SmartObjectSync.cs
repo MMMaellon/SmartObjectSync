@@ -1922,6 +1922,17 @@ namespace MMMaellon
         {
             //angular velocity is normalized rotation axis * angle in radians: https://answers.unity.com/questions/49082/rotation-quaternion-to-angular-velocity.html
             Quaternion.Normalize(Quaternion.Inverse(lastRot) * transform.rotation).ToAngleAxis(out angle, out axis);
+
+            //Make sure we are using the smallest angle of rotation. I.E. -90 degrees instead of 270 degrees wherever possible
+            if (angle < -180)
+            {
+                angle += 360;
+            }
+            else if (angle > 180)
+            {
+                angle -= 360;
+            }
+            
             return transform.rotation * axis * angle * Mathf.Deg2Rad / Time.deltaTime;
         }
 
