@@ -1,9 +1,13 @@
 name: Build Main Listing
 
-on:
+on: 
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Build Repo Listing]
+    types:
+      - completed
   release:
-    types: [published, unpublished, created, edited, deleted]
-  workflow_dispatch: 
+     types: [published, created, edited, unpublished, deleted, released]
 
 jobs:
   dispatch:
