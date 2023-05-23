@@ -395,7 +395,6 @@ namespace MMMaellon
                 lastState = _state;
                 _state = value;
                 OnEnterState();
-                stateChangeCounter++;
 
                 if (pickup && pickup.IsHeld && !IsHeld())
                 {
@@ -431,8 +430,19 @@ namespace MMMaellon
         }
         
         public int stateData{
-            get => _state >= 0 ? (_state * 10) + (stateChangeCounter % 10) : (_state * 10) - (stateChangeCounter % 10);
+            get
+            {
+                if (IsLocalOwner())
+                {
+                    return _state >= 0 ? (_state * 10) + (stateChangeCounter % 10) : (_state * 10) - (stateChangeCounter % 10);
+                }
+                return _stateData;
+            }
             set {
+                if (_stateData == value)
+                {
+                    return;
+                }
                 _stateData = value;
                 if (!IsLocalOwner())
                 {
@@ -686,9 +696,9 @@ namespace MMMaellon
             }
             if (serializeRequested && !Networking.IsClogged)
             {
-                if (state == STATE_SLEEPING)
+                if (state <= STATE_SLEEPING || state > STATE_FALLING)
                 {
-                    //prioritize sleep serialization because it will settle our world faster
+                    //prioritize non-collision serializations because they will settle our world faster
                     RequestSerialization();
                 }
                 else
