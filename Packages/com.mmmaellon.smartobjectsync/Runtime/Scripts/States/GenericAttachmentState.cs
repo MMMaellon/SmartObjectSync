@@ -59,7 +59,7 @@ namespace MMMaellon
             {
                 if (ObjectMoved())
                 {
-                    if (lastResync + sync.lerpTime < Time.timeSinceLevelLoad)
+                    if (lastResync + sync.lagTime < Time.timeSinceLevelLoad)
                     {
                         sync.RequestSerialization();
                     }

@@ -23,18 +23,17 @@ namespace MMMaellon
         //Advanced settings
         SerializedProperty m_printDebugMessages;
         SerializedProperty m_forceContinuousSpeculative;
-        SerializedProperty m_lerpTime;
         SerializedProperty m_kinematicWhileHeld;
         SerializedProperty m_nonKinematicPickupJitterPreventionTime;
         SerializedProperty m_reduceJitterDuringSleep;
         SerializedProperty m_worldSpaceTeleport;
         SerializedProperty m_worldSpaceSleep;
         SerializedProperty m_preventStealWhileAttachedToPlayer;
-        
-        void OnEnable(){
+
+        void OnEnable()
+        {
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
             m_forceContinuousSpeculative = serializedObject.FindProperty("forceContinuousSpeculative");
-            m_lerpTime = serializedObject.FindProperty("lerpTime");
             m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
             m_nonKinematicPickupJitterPreventionTime = serializedObject.FindProperty("nonKinematicPickupJitterPreventionTime");
             m_reduceJitterDuringSleep = serializedObject.FindProperty("reduceJitterDuringSleep");
@@ -42,7 +41,7 @@ namespace MMMaellon
             m_worldSpaceSleep = serializedObject.FindProperty("worldSpaceSleep");
             m_preventStealWhileAttachedToPlayer = serializedObject.FindProperty("preventStealWhileAttachedToPlayer");
         }
-        
+
         public static void _print(SmartObjectSync sync, string message)
         {
             if (sync && sync.printDebugMessages)
@@ -231,22 +230,22 @@ namespace MMMaellon
                 }
             }
             if (target && UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-            
+
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUILayout.Space();
-            
+
             base.OnInspectorGUI();
-            
+
             EditorGUILayout.Space();
             EditorGUILayout.Space();
             EditorGUILayout.Space();
-            
+
             foldoutOpen = EditorGUILayout.BeginFoldoutHeaderGroup(foldoutOpen, "Advanced Settings");
-            if(foldoutOpen){
+            if (foldoutOpen)
+            {
                 EditorGUILayout.PropertyField(m_printDebugMessages);
                 EditorGUILayout.PropertyField(m_forceContinuousSpeculative);
-                EditorGUILayout.PropertyField(m_lerpTime);
                 EditorGUILayout.PropertyField(m_kinematicWhileHeld);
                 EditorGUILayout.PropertyField(m_nonKinematicPickupJitterPreventionTime);
                 EditorGUILayout.PropertyField(m_reduceJitterDuringSleep);
@@ -282,8 +281,6 @@ namespace MMMaellon
         public bool worldSpaceSleep = true;
         [HideInInspector, Tooltip("VRCObjectSync will set rigidbodies' collision detection mode to ContinuousSpeculative. This recreates that feature.")]
         public bool forceContinuousSpeculative = true;
-        [HideInInspector, Tooltip("How much time we spend transitioning from our current transform, to the transform the owner just sent over the network. Recommended value: 0.1f")]
-        public float lerpTime = 0.1f;
         [HideInInspector, Tooltip("Turns the object kinematic when held. Will result in dampened collisions because that's just how Unity is.")]
         public bool kinematicWhileHeld = true;
 
@@ -358,18 +355,15 @@ namespace MMMaellon
         public float interpolationEndTime = -1001f;
         [System.NonSerialized]
         public float fallSpeed = 0f;
+        public float lagTime
+        {
+            get => Time.realtimeSinceStartup - Networking.SimulationTime(gameObject);
+        }
         public float interpolation
         {
             get
             {
-                if (interpolationStartTime <= 0 || lerpTime <= 0 || (Time.timeSinceLevelLoad - interpolationStartTime) >= lerpTime)
-                {
-                    return 1.0f;
-                }
-                else
-                {
-                    return (Time.timeSinceLevelLoad - interpolationStartTime) / lerpTime;
-                }
+                return lagTime <= 0 ? 1 : Mathf.Lerp(0, 1, (Time.timeSinceLevelLoad - interpolationStartTime) / lagTime);
             }
         }
         public SmartObjectSyncListener[] listeners = new SmartObjectSyncListener[0];
@@ -428,8 +422,9 @@ namespace MMMaellon
                 }
             }
         }
-        
-        public int stateData{
+
+        public int stateData
+        {
             get
             {
                 if (IsLocalOwner())
@@ -438,7 +433,8 @@ namespace MMMaellon
                 }
                 return _stateData;
             }
-            set {
+            set
+            {
                 if (_stateData == value)
                 {
                     return;
@@ -527,14 +523,14 @@ namespace MMMaellon
         Quaternion rotControl2;
         public Vector3 HermiteInterpolatePosition(Vector3 startPos, Vector3 startVel, Vector3 endPos, Vector3 endVel, float interpolation)
         {
-            posControl1 = startPos + startVel * lerpTime * interpolation / 3f;
-            posControl2 = endPos - endVel * lerpTime * (1.0f - interpolation) / 3f;
+            posControl1 = startPos + startVel * lagTime * interpolation / 3f;
+            posControl2 = endPos - endVel * lagTime * (1.0f - interpolation) / 3f;
             return Vector3.Lerp(posControl1, posControl2, interpolation);
         }
         public Quaternion HermiteInterpolateRotation(Quaternion startRot, Vector3 startSpin, Quaternion endRot, Vector3 endSpin, float interpolation)
         {
-            rotControl1 = startRot * Quaternion.Euler(startSpin * lerpTime * interpolation / 3f);
-            rotControl2 = endRot * Quaternion.Euler(-1.0f * endSpin * lerpTime * (1.0f - interpolation) / 3f);
+            rotControl1 = startRot * Quaternion.Euler(startSpin * lagTime * interpolation / 3f);
+            rotControl2 = endRot * Quaternion.Euler(-1.0f * endSpin * lagTime * (1.0f - interpolation) / 3f);
             return Quaternion.Slerp(rotControl1, rotControl2, interpolation);
         }
         public bool IsLocalOwner()
@@ -635,15 +631,17 @@ namespace MMMaellon
 
             //speed we gain from gravity in a free fall over the lerp time
             //used to decide if we simulate a bounce in the falling state
-            fallSpeed = lerpTime <= 0 ? 0 : Physics.gravity.magnitude * lerpTime;
+            fallSpeed = lagTime <= 0 ? 0 : Physics.gravity.magnitude * lagTime;
             startRan = true;
         }
         [System.NonSerialized]
         public bool _loop = false;
         bool loopRequested = false;
-        public bool loop {
+        public bool loop
+        {
             get => _loop;
-            set {
+            set
+            {
                 if (value)
                 {
                     disableRequested = false;
@@ -653,10 +651,12 @@ namespace MMMaellon
                         loopRequested = true;
                         SendCustomEventDelayedFrames(nameof(UpdateLoop), 0);
                     }
-                } else if (serializeRequested)
+                }
+                else if (serializeRequested)
                 {
                     disableRequested = true;
-                } else
+                }
+                else
                 {
                     _loop = false;
                 }
@@ -694,7 +694,7 @@ namespace MMMaellon
             {
                 Interpolate();
             }
-            if (serializeRequested && !Networking.IsClogged)
+            if (serializeRequested && !IsNetworkAtRisk())
             {
                 if (state <= STATE_SLEEPING || state > STATE_FALLING)
                 {
@@ -746,7 +746,8 @@ namespace MMMaellon
                     //force no interpolation
                     interpolationStartTime = -1001f;
                     Interpolate();
-                } else
+                }
+                else
                 {
                     RequestResync();
                 }
@@ -757,7 +758,7 @@ namespace MMMaellon
         {
             lastResyncRequest = Time.timeSinceLevelLoad;
             //stagger requests randomly to prevent network clogging
-            SendCustomEventDelayedSeconds(nameof(RequestResyncCallback), (2 * lerpTime) + Random.Range(0.0f, 1.0f));
+            SendCustomEventDelayedSeconds(nameof(RequestResyncCallback), (2 * lagTime) + Random.Range(0.0f, 1.0f));
         }
         public void RequestResyncCallback()
         {
@@ -765,7 +766,7 @@ namespace MMMaellon
             {
                 return;
             }
-            if (Networking.IsClogged)
+            if (IsNetworkAtRisk())
             {
                 //just wait it out;
                 RequestResync();
@@ -780,7 +781,8 @@ namespace MMMaellon
             {
                 spawnPos = transform.position;
                 spawnRot = transform.rotation;
-            } else
+            }
+            else
             {
                 spawnPos = transform.localPosition;
                 spawnRot = transform.localRotation;
@@ -842,15 +844,22 @@ namespace MMMaellon
 
 
         //Serialization
+        public float lastSerializeRequest = -1001f;
+        public bool IsNetworkAtRisk()
+        {
+            return Networking.IsClogged || (state >= STATE_SLEEPING && state <= STATE_FALLING && lastSerializeRequest + lagTime > Time.timeSinceLevelLoad);
+        }
         public void Serialize()
         {
-            if (Networking.IsClogged)
+            if (IsNetworkAtRisk())
             {
                 OnSerializationFailure();
-            } else
+            }
+            else
             {
                 RequestSerialization();
             }
+            lastSerializeRequest = Time.timeSinceLevelLoad;
         }
 
         public override void OnPreSerialization()
@@ -962,7 +971,8 @@ namespace MMMaellon
                 {
                     state = STATE_INTERPOLATING;
                 }
-            } else
+            }
+            else
             {
                 //decide if we need to take ownership of the object we collided with
                 if (allowOthersToTakeOwnershipOnCollision && Utilities.IsValid(other.GetComponent<ParticleSystem>()) && !IsAttachedToPlayer())
@@ -991,7 +1001,7 @@ namespace MMMaellon
         public override void OnPickup()
         {
             lastPickup = Time.timeSinceLevelLoad;
-            Networking.SetOwner(Networking.LocalPlayer, gameObject);
+            TakeOwnership(false);
             if (pickup)
             {
                 if (pickup.currentHand == VRC_Pickup.PickupHand.Left)
@@ -1000,7 +1010,8 @@ namespace MMMaellon
                     if (leftHandPos != Vector3.zero)
                     {
                         state = STATE_LEFT_HAND_HELD;
-                    } else //couldn't find left hand bone
+                    }
+                    else //couldn't find left hand bone
                     {
                         state = STATE_NO_HAND_HELD;
                     }
@@ -1072,7 +1083,7 @@ namespace MMMaellon
 
         public void TakeOwnership(bool checkIfClogged)
         {
-            if ((checkIfClogged && Networking.IsClogged) || IsLocalOwner())
+            if ((checkIfClogged && IsNetworkAtRisk()) || IsLocalOwner())
             {
                 //Let them cook
                 return;
@@ -1512,7 +1523,8 @@ namespace MMMaellon
                 startRot = transform.rotation;
                 startVel = rigid.velocity;
                 startSpin = rigid.angularVelocity;
-            } else
+            }
+            else
             {
                 startPos = transform.localPosition;
                 startRot = transform.localRotation;
@@ -1532,7 +1544,8 @@ namespace MMMaellon
                 {
                     transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
                     transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
-                } else
+                }
+                else
                 {
                     transform.localPosition = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
                     transform.localRotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
@@ -1575,7 +1588,8 @@ namespace MMMaellon
             {
                 pos = transform.position;
                 rot = transform.rotation;
-            } else
+            }
+            else
             {
                 pos = transform.localPosition;
                 rot = transform.localRotation;
@@ -1606,7 +1620,8 @@ namespace MMMaellon
                         rigid.velocity = vel;
                         rigid.angularVelocity = spin;
                     }
-                } else
+                }
+                else
                 {
                     transform.localPosition = pos;
                     transform.localRotation = rot;
@@ -1631,7 +1646,8 @@ namespace MMMaellon
                         rigid.velocity = vel;
                         rigid.angularVelocity = spin;
                     }
-                } else
+                }
+                else
                 {
                     transform.localPosition = pos;
                     transform.localRotation = rot;
@@ -1655,7 +1671,8 @@ namespace MMMaellon
                     vel = rigid.velocity;
                     spin = rigid.angularVelocity;
                 }
-            } else
+            }
+            else
             {
                 pos = transform.localPosition;
                 rot = transform.localRotation;
@@ -1792,7 +1809,7 @@ namespace MMMaellon
                 interpolate_Interpolate(interpolation);
                 return;
             }
-            
+
             if (IsLocalOwner())
             {
                 if (transform.position.y <= respawnHeight)
@@ -1804,7 +1821,7 @@ namespace MMMaellon
 
             if (!rigid.isKinematic && rigid.useGravity)
             {
-                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, startVel + Physics.gravity * lerpTime, interpolation);
+                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, startVel + Physics.gravity * lagTime, interpolation);
                 transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, startSpin, interpolation);
             }
             else
@@ -1889,7 +1906,7 @@ namespace MMMaellon
             {
                 if (generic_ObjectMoved())
                 {
-                    if (lastResync + lerpTime < Time.timeSinceLevelLoad)
+                    if (lastResync + lagTime < Time.timeSinceLevelLoad)
                     {
                         lastResync = Time.timeSinceLevelLoad;
                         Serialize();
@@ -1942,7 +1959,7 @@ namespace MMMaellon
             {
                 angle -= 360;
             }
-            
+
             return transform.rotation * axis * angle * Mathf.Deg2Rad / Time.deltaTime;
         }
 
@@ -2031,7 +2048,7 @@ namespace MMMaellon
 
         public bool genericHand_onInterpolationEnd()
         {
-            if (IsLocalOwner() && (pickup.orientation != VRC_Pickup.PickupOrientation.Any || owner.IsUserInVR()) && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0) && lastResync + lerpTime < Time.timeSinceLevelLoad && interpolationStartTime + 0.5f < Time.timeSinceLevelLoad)//hard coded 0.5f because VRChat is like that
+            if (IsLocalOwner() && (pickup.orientation != VRC_Pickup.PickupOrientation.Any || owner.IsUserInVR()) && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0) && lastResync + lagTime < Time.timeSinceLevelLoad && interpolationStartTime + 0.5f < Time.timeSinceLevelLoad)//hard coded 0.5f because VRChat is like that
             {
                 if (generic_ObjectMoved())
                 {
@@ -2046,7 +2063,7 @@ namespace MMMaellon
             }
             return genericAttachment_OnInterpolationEnd();
         }
-        
+
         public void genericHand_OnExitState()
         {
             if (pickup)
