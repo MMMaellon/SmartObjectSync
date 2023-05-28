@@ -844,6 +844,7 @@ namespace MMMaellon
 
 
         //Serialization
+        [System.NonSerialized]
         public float lastSerializeRequest = -1001f;
         public bool IsNetworkAtRisk()
         {
