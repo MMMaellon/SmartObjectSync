@@ -100,7 +100,8 @@ namespace MMMaellon
             sync.rigid.isKinematic = false;
             if (returnToStartingParentOnExit)
             {
-                parentTransformName = GetFullPath(startingParent);
+                _parentTransformName = GetFullPath(startingParent);
+                parentTransform = startingParent;
             }
         }
 
