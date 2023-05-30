@@ -43,19 +43,22 @@ namespace MMMaellon
                 {
                     _parentTransformName = value;
                     parentTransform = parentObj.transform;
-                    if (Utilities.IsValid(transform.parent))
+                    if (IsActiveState())
                     {
-                        if (sync.IsLocalOwner())
+                        if (Utilities.IsValid(transform.parent))
                         {
-                            sync.pos = transform.localPosition;
-                            sync.rot = transform.localRotation;
+                            if (sync.IsLocalOwner())
+                            {
+                                sync.pos = transform.localPosition;
+                                sync.rot = transform.localRotation;
+                            }
+                            sync.startPos = transform.localPosition;
+                            sync.startRot = transform.localRotation;
                         }
-                        sync.startPos = transform.localPosition;
-                        sync.startRot = transform.localRotation;
-                    }
-                    else if (sync.IsLocalOwner())
-                    {
-                        ExitState();
+                        else if (sync.IsLocalOwner())
+                        {
+                            ExitState();
+                        }
                     }
                     return;
                 }
