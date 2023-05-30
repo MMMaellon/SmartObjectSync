@@ -848,7 +848,7 @@ namespace MMMaellon
         public float lastSerializeRequest = -1001f;
         public bool IsNetworkAtRisk()
         {
-            return Networking.IsClogged || (state >= STATE_SLEEPING && state <= STATE_FALLING && lastSerializeRequest + lagTime > Time.timeSinceLevelLoad);
+            return Networking.IsClogged;
         }
         public void Serialize()
         {
