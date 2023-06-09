@@ -2032,11 +2032,11 @@ namespace MMMaellon
                 lastPickupable = pickup.pickupable;
                 if (IsLocalOwner())
                 {
-                    pickup.pickupable = allowTheftFromSelf;
+                    pickup.pickupable = lastPickupable && allowTheftFromSelf;
                 }
                 else
                 {
-                    pickup.pickupable = !pickup.DisallowTheft;
+                    pickup.pickupable = lastPickupable && !pickup.DisallowTheft;
                 }
             }
 
