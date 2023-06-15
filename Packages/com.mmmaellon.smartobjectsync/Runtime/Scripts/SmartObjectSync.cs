@@ -46,7 +46,7 @@ namespace MMMaellon
         {
             if (sync && sync.printDebugMessages)
             {
-                Debug.LogFormat("[SmartObjectSync] {0}: {1}", sync.name, message);
+                Debug.LogFormat(sync, "[SmartObjectSync] {0}: {1}", sync.name, message);
             }
         }
 
@@ -124,10 +124,6 @@ namespace MMMaellon
         }
         public override void OnInspectorGUI()
         {
-            // foreach (SmartObjectSyncHelper sync in Selection.GetFiltered<SmartObjectSyncHelper>(SelectionMode.Unfiltered))
-            // {
-            //     sync.hideFlags = HideFlags.None;
-            // }
             int syncCount = 0;
             int pickupSetupCount = 0;
             int rigidSetupCount = 0;
@@ -355,10 +351,17 @@ namespace MMMaellon
         public float interpolationEndTime = -1001f;
         [System.NonSerialized]
         public float fallSpeed = 0f;
+#if !UNITY_EDITOR
         public float lagTime
         {
             get => Time.realtimeSinceStartup - Networking.SimulationTime(gameObject);
         }
+#else
+        public float lagTime
+        {
+            get => 0.25f;
+        }
+#endif
         public float interpolation
         {
             get

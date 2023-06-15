@@ -1,5 +1,6 @@
 ﻿#if !COMPILER_UDONSHARP && UNITY_EDITOR
 using VRC.SDKBase.Editor.BuildPipeline;
+using VRC.SDKBase;
 using UnityEditor;
 using UnityEngine;
 using UdonSharpEditor;
@@ -7,94 +8,50 @@ using System.Collections.Immutable;
 
 namespace MMMaellon
 {
-    [CustomEditor(typeof(SmartObjectSyncState), true), CanEditMultipleObjects]
-
-    public class SmartObjectSyncStateEditor : Editor
+    [InitializeOnLoad]
+    public class SmartObjectSyncMenu : IVRCSDKBuildRequestedCallback
     {
-        public static void SetupSmartObjectSyncState(SmartObjectSync sync)
+        public int callbackOrder => 0;
+        [InitializeOnLoadMethod]
+        public static void Initialize()
         {
-            if (sync)
-            {
-                SmartObjectSyncEditor.SetupStates(sync);
-            }
-            else
-            {
-                
-                Debug.LogFormat("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
-            }
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
 
-
-        public static void SetupSelectedSmartObjectSyncStates()
+        public static void OnPlayModeStateChanged(PlayModeStateChange change)
         {
-            bool syncFound = false;
-            foreach (SmartObjectSync sync in Selection.GetFiltered<SmartObjectSync>(SelectionMode.Editable))
-            {
-                syncFound = true;
-                SetupSmartObjectSyncState(sync);
-            }
-
-            if (!syncFound)
-            {
-                Debug.LogFormat("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
-            }
+            if (change != PlayModeStateChange.ExitingEditMode) return;
+            Setup();
         }
-
-        public static void SelectedSmartObjectSyncStatesAddSync()
+        public bool OnBuildRequested(VRCSDKRequestedBuildType requestedBuildType)
         {
-            bool StateFound = false;
-            foreach (SmartObjectSyncState State in Selection.GetFiltered<SmartObjectSyncState>(SelectionMode.Editable))
-            {
-                if (State.GetComponent<SmartObjectSync>() == null)
-                {
-                    StateFound = true;
-                    State.gameObject.AddUdonSharpComponent<SmartObjectSync>();
-                }
-            }
-
-            if (!StateFound)
-            {
-                Debug.LogFormat("[SmartObjectSync] Auto Setup failed: No SmartObjectSync selected");
-            }
+            return Setup();
         }
-
-        public override void OnInspectorGUI()
+        public static void SetupSmartObjectSync(SmartObjectSync sync)
         {
-            int StateCount = 0;
-            int setupCount = 0;
-            int syncCount = 0;
-            foreach (SmartObjectSyncState State in Selection.GetFiltered<SmartObjectSyncState>(SelectionMode.Editable))
-            {
-                if (State)
-                {
-                    StateCount++;
-                }
-            }
-            if (setupCount > 0 || syncCount > 0)
-            {
-                if (syncCount > 0)
-                {
-                    EditorGUILayout.HelpBox(@"State requires a SmartObjectSync component", MessageType.Warning);
-                    if (GUILayout.Button(new GUIContent("Add SmartObjectSync")))
-                    {
-                        SetupSelectedSmartObjectSyncStates();
-                    }
-                }
-                if (setupCount > 0)
-                {
-                    EditorGUILayout.HelpBox(@"State not yet set up", MessageType.Warning);
-                    if (GUILayout.Button(new GUIContent("State Setup")))
-                    {
-                        SetupSelectedSmartObjectSyncStates();
-                    }
-                }
-            }
-            if (target == null || target.hideFlags == HideFlags.HideInInspector)
+            if (!Utilities.IsValid(sync))
             {
                 return;
             }
-            if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-            base.OnInspectorGUI();
+            if (!IsEditable(sync))
+            {
+                Debug.LogErrorFormat(sync, "<color=red>[SmartObjectSync AutoSetup]: ERROR</color> {0}", "SmartObjectSync is not editable");
+            }
+            SmartObjectSyncEditor.SetupStates(sync);
+        }
+        public static bool IsEditable(Component component)
+        {
+            return !EditorUtility.IsPersistent(component.transform.root.gameObject) && !(component.gameObject.hideFlags == HideFlags.NotEditable || component.gameObject.hideFlags == HideFlags.HideAndDontSave);
+        }
+
+
+        public static bool Setup()
+        {
+            foreach (SmartObjectSync sync in GameObject.FindObjectsOfType<SmartObjectSync>())
+            {
+                SetupSmartObjectSync(sync);
+            }
+            return true;
         }
     }
 }
