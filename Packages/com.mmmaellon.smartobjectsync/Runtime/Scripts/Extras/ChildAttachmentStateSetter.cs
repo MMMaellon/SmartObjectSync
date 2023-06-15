@@ -13,7 +13,7 @@ namespace MMMaellon.SmartObjectSyncExtra
         public bool attachOnCollision = true;
         public bool attachOnTrigger = true;
         public bool attachWhileHeldOrAttachedToPlayer = true;
-        public bool attachWhileInCustomState = true;
+        public bool attachWhileInCustomState = false;
         public Collider[] attachColliders;
         public Transform targetParent;
         float lastDetach = -1001f;
