@@ -14,6 +14,7 @@ namespace MMMaellon.SmartObjectSyncExtra
         public bool attachOnTrigger = true;
         public bool attachWhileHeldOrAttachedToPlayer = true;
         public bool attachWhileInCustomState = false;
+        public bool startInState = false;
         public Collider[] attachColliders;
         public Transform targetParent;
         float lastDetach = -1001f;
@@ -24,6 +25,10 @@ namespace MMMaellon.SmartObjectSyncExtra
         {
             child = GetComponent<ChildAttachmentState>();
             child.sync.AddListener(this);
+            if (startInState && child.sync.IsLocalOwner())
+            {
+                child.Attach(targetParent);
+            }
         }
 
         public void OnCollisionStay(Collision collision)
@@ -57,7 +62,8 @@ namespace MMMaellon.SmartObjectSyncExtra
 
         public void OnTriggerStay(Collider other)
         {
-            if(lastDetach + collisionCooldown > Time.timeSinceLevelLoad){
+            if (lastDetach + collisionCooldown > Time.timeSinceLevelLoad)
+            {
                 return;
             }
             if (!child.sync.IsLocalOwner() || !Utilities.IsValid(other))
@@ -68,7 +74,8 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 return;
             }
-            if(other.transform == child.parentTransform){
+            if (other.transform == child.parentTransform)
+            {
                 //we're already attached
                 return;
             }
@@ -89,10 +96,17 @@ namespace MMMaellon.SmartObjectSyncExtra
                 lastDetach = Time.timeSinceLevelLoad;
             }
         }
-
+        bool firstOwner = true;
         public override void OnChangeOwner(SmartObjectSync sync, VRCPlayerApi oldOwner, VRCPlayerApi newOwner)
         {
-            
+            if (firstOwner)
+            {
+                firstOwner = false;
+                if (startInState && Utilities.IsValid(newOwner) && newOwner.isLocal)
+                {
+                    child.Attach(targetParent);
+                }
+            }
         }
     }
 }
