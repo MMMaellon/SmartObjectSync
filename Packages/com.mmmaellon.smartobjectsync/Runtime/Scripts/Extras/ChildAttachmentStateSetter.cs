@@ -9,7 +9,7 @@ namespace MMMaellon.SmartObjectSyncExtra
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual), RequireComponent(typeof(ChildAttachmentState))]
     public class ChildAttachmentStateSetter : SmartObjectSyncListener
     {
-        public float collisionCooldown = 0.5f;
+        public float collisionCooldown = 0.25f;
         public bool attachOnCollision = true;
         public bool attachOnTrigger = true;
         public bool attachWhileHeldOrAttachedToPlayer = true;

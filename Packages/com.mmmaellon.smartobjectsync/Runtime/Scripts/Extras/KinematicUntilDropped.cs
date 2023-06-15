@@ -28,9 +28,14 @@ namespace MMMaellon.SmartObjectSyncExtra
         {
             if (kinematic)
             {
-                if (sync.IsHeld())
+                if (sync.IsHeld() && sync.kinematicWhileHeld)
                 {
                     sync.lastKinematic = false;
+                    kinematic = false;
+                }
+                else if (newState == SmartObjectSync.STATE_INTERPOLATING || newState == SmartObjectSync.STATE_FALLING)
+                {
+                    sync.rigid.isKinematic = false;
                     kinematic = false;
                 }
             }

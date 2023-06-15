@@ -137,21 +137,11 @@ namespace MMMaellon
         public override void OnDrop()
         {
             base.OnDrop();
-            if (autoAttachDistance <= 0)
+            if (autoAttachDistance <= 0 || !sync.IsLocalOwner())//make sure it's not being stolen
             {
                 return;
             }
-            int closestBone = GetClosestBone(localPlayer);
-            if (closestBone < 0)
-            {
-                return;
-            }
-            Vector3 bonePos = FindBoneCenter((HumanBodyBones)closestBone, localPlayer);
-            if (Vector3.Distance(bonePos, transform.position) < autoAttachDistance)
-            {
-                bone = closestBone;
-                Attach();
-            }
+            Attach();
         }
 
         public void Attach()
@@ -166,7 +156,13 @@ namespace MMMaellon
             {
                 VRCPlayerApi[] nearbyPlayers = GetNearbyPlayers(3);//arbitrarily pick the closest 3 players to compare against
                 VRCPlayerApi closestPlayer = null;
-                bone = GetClosestBoneInGroup(nearbyPlayers, ref closestPlayer);
+                GetClosestBoneInGroup(nearbyPlayers, ref closestPlayer);
+                if (autoAttachDistance > 0 && closestDistance > autoAttachDistance)
+                {
+                    return;
+                }
+
+                bone = closestBone;
                 playerId = closestPlayer.playerId;
 
                 Vector3 bonePos = closestPlayer.GetBonePosition((HumanBodyBones)(bone));
@@ -190,7 +186,12 @@ namespace MMMaellon
             }
             else if (allowAttachToSelf)
             {
-                bone = GetClosestBone(localPlayer);
+                GetClosestBone(localPlayer);
+                if (autoAttachDistance > 0 && closestDistance > autoAttachDistance)
+                {
+                    return;
+                }
+                bone = closestBone;
                 Vector3 bonePos = localPlayer.GetBonePosition((HumanBodyBones)(bone));
                 Quaternion boneRot = localPlayer.GetBoneRotation((HumanBodyBones)(bone));
                 localPosition = Quaternion.Inverse(boneRot) * (transform.position - bonePos);
@@ -251,21 +252,23 @@ namespace MMMaellon
             transform.rotation = boneRot * localRotation;
             if (bone >= 0)
             {
-                sync.AttachToBone((HumanBodyBones) bone);
+                sync.AttachToBone((HumanBodyBones)bone);
             }
             bone = -1001;
             playerId = -1001;
             RequestSerialization();
         }
 
+        int closestBone = -1001;
+        float closestDistance = -1001f;
         public int GetClosestBone(VRCPlayerApi player)
         {
             if (player == null || !player.IsValid())
             {
                 return -1001;
             }
-            int closestBone = -1001;
-            float closestDistance = -1001f;
+            closestBone = -1001;
+            closestDistance = -1001f;
             foreach (int i in allowedBones)
             {
                 Vector3 bonePos = FindBoneCenter((HumanBodyBones)i, player);
@@ -280,8 +283,8 @@ namespace MMMaellon
         }
         public int GetClosestBoneInGroup(VRCPlayerApi[] players, ref VRCPlayerApi closestPlayer)
         {
-            int closestBone = -1001;
-            float closestDistance = -1001f;
+            closestBone = -1001;
+            closestDistance = -1001f;
             foreach (VRCPlayerApi player in players)
             {
                 if (!Utilities.IsValid(player))
