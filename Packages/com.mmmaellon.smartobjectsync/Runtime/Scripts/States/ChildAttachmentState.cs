@@ -8,7 +8,7 @@ namespace MMMaellon
 {
     public class ChildAttachmentState : SmartObjectSyncState
     {
-        public bool disableCollisions = true;
+        public bool disableCollisions = false;
         [Tooltip("Time to wait after detaching before we turn on collisions again")]
         public float collisionCooldown = 0.1f;
         [Tooltip("How the child should move when attaching itself to the parent, local to the parent's transform. If this is all zeros then the child just lerps smoothly in place. If this is is (0,0,1), then the child will lerp smoothly to (0,0,1) and then slide along the z axis into place")]
@@ -49,8 +49,8 @@ namespace MMMaellon
                         {
                             if (sync.IsLocalOwner())
                             {
-                                sync.pos = transform.localPosition;
-                                sync.rot = transform.localRotation;
+                                sync.pos = Vector3.zero;
+                                sync.rot = Quaternion.identity;
                             }
                             sync.startPos = transform.localPosition;
                             sync.startRot = transform.localRotation;
@@ -112,7 +112,8 @@ namespace MMMaellon
 
         public override void OnSmartObjectSerialize()
         {
-
+            sync.pos = Vector3.zero;
+            sync.rot = Quaternion.identity;
         }
 
         public override void OnInterpolationStart()

@@ -28,15 +28,10 @@ namespace MMMaellon.SmartObjectSyncExtra
         {
             if (kinematic)
             {
-                if (newState != SmartObjectSync.STATE_SLEEPING && !sync.IsHeld() || oldState == SmartObjectSync.STATE_LEFT_HAND_HELD || oldState == SmartObjectSync.STATE_NO_HAND_HELD || oldState == SmartObjectSync.STATE_RIGHT_HAND_HELD)
+                if (sync.IsHeld())
                 {
-                    sync.rigid.isKinematic = false;
                     sync.lastKinematic = false;
                     kinematic = false;
-                }
-                else if (sync.IsHeld())
-                {
-                    sync.lastKinematic = false;
                 }
             }
             else
