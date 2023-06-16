@@ -342,17 +342,28 @@ namespace VRC.Editor
             SetPlayerSettings();
 
             #if VRC_CLIENT
+                #if VRC_DISABLE_XR_MANAGEMENT
+            PlatformSwitcher.RefreshRequiredPackages(EditorUserBuildSettings.selectedBuildTargetGroup, true);
+                #else
+            PlatformSwitcher.RefreshRequiredPackages(EditorUserBuildSettings.selectedBuildTargetGroup, false);
+
+                    #if VRC_VR_OCULUS_QUEST
+            VrChatBuildSettings.BuildConfiguration xrBuildConfiguration = VrChatBuildSettings.BuildConfiguration.AndroidOculusQuest;
+            VrChatXRSettingsHelper.ConfigureXRSettings(EditorUserBuildSettings.selectedBuildTargetGroup, xrBuildConfiguration);
+                    #elif VRC_MOBILE
+            VrChatBuildSettings.BuildConfiguration xrBuildConfiguration = VrChatBuildSettings.BuildConfiguration.AndroidMonoscopic;
+            VrChatXRSettingsHelper.ConfigureXRSettings(EditorUserBuildSettings.selectedBuildTargetGroup, xrBuildConfiguration);
+                    #endif
+                #endif
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-
-            PlatformSwitcher.RefreshRequiredPackages(EditorUserBuildSettings.selectedBuildTargetGroup);
             #else
-        // SDK
+            // SDK
 
-        // default to steam runtime in sdk (shouldn't matter)
-        SetVRSDKs(EditorUserBuildSettings.selectedBuildTargetGroup, new string[] { "None", "OpenVR", "Oculus" });
+            // default to steam runtime in sdk (shouldn't matter)
+            SetVRSDKs(EditorUserBuildSettings.selectedBuildTargetGroup, new string[] { "None", "OpenVR", "Oculus" });
 
-        VRC.Core.AnalyticsSDK.Initialize(VRC.Core.SDKClientUtilities.GetSDKVersionDate());
+            VRC.Core.AnalyticsSDK.Initialize(VRC.Core.SDKClientUtilities.GetSDKVersionDate());
             #endif
 
             #if VRC_CLIENT
@@ -702,7 +713,7 @@ namespace VRC.Editor
 
             // We'll use this flag to determine if we need to save the asset.
             bool isDirty = false;
-            
+
             //get the current value of the property
                 //- don't touch it if it matches the new value
                 //- otherwise set the property's value to the new value
@@ -721,42 +732,42 @@ namespace VRC.Editor
                 deferredReflections.enumValueIndex = 1;
                 isDirty = true;
             }
-            
+
             SerializedProperty screenSpaceShadows = graphicsManager.FindProperty("m_ScreenSpaceShadows.m_Mode");
             if (screenSpaceShadows.enumValueIndex != 1)
             {
                 screenSpaceShadows.enumValueIndex = 1;
                 isDirty = true;
             }
-            
+
             SerializedProperty legacyDeferred = graphicsManager.FindProperty("m_LegacyDeferred.m_Mode");
             if (legacyDeferred.enumValueIndex != 1)
             {
                 legacyDeferred.enumValueIndex = 1;
                 isDirty = true;
             }
-            
+
             SerializedProperty depthNormals = graphicsManager.FindProperty("m_DepthNormals.m_Mode");
             if (depthNormals.enumValueIndex != 1)
             {
                 depthNormals.enumValueIndex = 1;
                 isDirty = true;
             }
-            
+
             SerializedProperty motionVectors = graphicsManager.FindProperty("m_MotionVectors.m_Mode");
             if (motionVectors.enumValueIndex != 1)
             {
                 motionVectors.enumValueIndex = 1;
                 isDirty = true;
             }
-            
+
             SerializedProperty lightHalo = graphicsManager.FindProperty("m_LightHalo.m_Mode");
             if (lightHalo.enumValueIndex != 1)
             {
                 lightHalo.enumValueIndex = 1;
                 isDirty = true;
             }
-            
+
             SerializedProperty lensFlare = graphicsManager.FindProperty("m_LensFlare.m_Mode");
             if (lensFlare.enumValueIndex != 1)
             {
@@ -1058,20 +1069,24 @@ namespace VRC.Editor
 
         private static void SetPlayerSettings()
         {
+            List<string> il2CppArgs = new List<string>();
+            List<string> compilerArgs = new List<string>();
+            List<string> linkerArgs = new List<string>();
+
             // asset bundles MUST be built with settings that are compatible with VRC client
             #if VRC_OVERRIDE_COLORSPACE_GAMMA
-        PlayerSettings.colorSpace = ColorSpace.Gamma;
+                PlayerSettings.colorSpace = ColorSpace.Gamma;
             #else
-            PlayerSettings.colorSpace = ColorSpace.Linear;
+                PlayerSettings.colorSpace = ColorSpace.Linear;
             #endif
 
             #if !VRC_CLIENT // In client rely on platform-switcher
-        if (!EditorApplication.isPlaying)
-        {
-            #pragma warning disable 618
-            PlayerSettings.SetVirtualRealitySupported(EditorUserBuildSettings.selectedBuildTargetGroup, true);
-            #pragma warning restore 618
-        }
+                if (!EditorApplication.isPlaying)
+                {
+                #pragma warning disable 618
+                    PlayerSettings.SetVirtualRealitySupported(EditorUserBuildSettings.selectedBuildTargetGroup, true);
+                #pragma warning restore 618
+                }
             #endif
 
             PlayerSettings.graphicsJobs = true;
@@ -1079,48 +1094,113 @@ namespace VRC.Editor
             PlayerSettings.gpuSkinning = true;
 
             #if UNITY_2019_3_OR_NEWER
-            PlayerSettings.gcIncremental = true;
+                PlayerSettings.gcIncremental = true;
             #endif
 
             #if VRC_VR_WAVE
-        PlayerSettings.stereoRenderingPath = StereoRenderingPath.MultiPass;     // Need to use Multi-pass on Wave SDK otherwise mirrors break
+                PlayerSettings.stereoRenderingPath = StereoRenderingPath.MultiPass;     // Need to use Multi-pass on Wave SDK otherwise mirrors break
             #else
-            PlayerSettings.stereoRenderingPath = StereoRenderingPath.SinglePass;
+                PlayerSettings.stereoRenderingPath = StereoRenderingPath.SinglePass;
             #endif
 
             #if UNITY_2018_4_OR_NEWER && !UNITY_2019_3_OR_NEWER
-        PlayerSettings.scriptingRuntimeVersion = ScriptingRuntimeVersion.Latest;
+                PlayerSettings.scriptingRuntimeVersion = ScriptingRuntimeVersion.Latest;
+            #endif
+
+            #if ENABLE_LTO_BUILD
+                // On Desktop, LTO is enabled by Master builds automatically
+                PlayerSettings.SetIl2CppCompilerConfiguration(EditorUserBuildSettings.selectedBuildTargetGroup, Il2CppCompilerConfiguration.Master);
+            #else
+                PlayerSettings.SetIl2CppCompilerConfiguration(EditorUserBuildSettings.selectedBuildTargetGroup, Il2CppCompilerConfiguration.Release);
             #endif
 
             #if UNITY_ANDROID
-            PlayerSettings.Android.forceSDCardPermission = true; // Need access to SD card for saving images
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-
-            if(PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.ARM64))
-            {
-                // Since we need different IL2CPP args we can't build ARM64 with other Architectures.
+                PlayerSettings.Android.forceSDCardPermission = true; // Need access to SD card for saving images
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-                PlayerSettings.SetAdditionalIl2CppArgs("");
-            }
-            else
-            {
-                PlayerSettings.SetAdditionalIl2CppArgs("--linker-flags=\"-long-plt\"");
-            }
 
-            #if UNITY_2019_3_OR_NEWER
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
-            #else
-        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+                // #if !VRC_MOBILE
+                    // Unique for each -march=native:
+                    // Quest 1: -target-feature +v8a -fallow-half-arguments-and-returns
+                    // Quest 2: -target-feature +v8.2a -fallow-half-arguments-and-returns
+                    // Quest Pro: -target-feature +v8.2a
+
+                    // TODO: Quest 1 will be deprecated as of October 2023, so we can change to -march=armv8.2-a
+                    // compilerArgs.Add(-Xclang=-target-feature");
+                    // compilerArgs.Add(-Xclang=+v8.2a");
+                // #endif // !VRC_MOBILE
+
+                #if ENABLE_LTO_BUILD
+                    // On Android, LTO must be enabled manually
+                    // These flags are provided by unity's default build configuration in addition to LTO
+                    // Build flags must be provided at link-time, so we have to list them out manually
+                    compilerArgs.Add("-flto=thin");
+                    compilerArgs.Add("-ffp-contract=on");
+                    compilerArgs.Add("-fno-signed-char");
+                    compilerArgs.Add("-DNDEBUG");
+                    compilerArgs.Add("-fexceptions");
+                    compilerArgs.Add("-fno-limit-debug-info");
+                    compilerArgs.Add("-fdata-sections");
+                    compilerArgs.Add("-ffunction-sections");
+                    compilerArgs.Add("-Wa,--noexecstack");
+                    compilerArgs.Add("-fno-rtti");
+                    compilerArgs.Add("-fno-strict-aliasing");
+                    compilerArgs.Add("-fvisibility=hidden");
+                    compilerArgs.Add("-fvisibility-inlines-hidden");
+                    compilerArgs.Add("-fno-strict-overflow");
+                    compilerArgs.Add("-fno-addrsig");
+                    compilerArgs.Add("-fPIC");
+                    compilerArgs.Add("-target aarch64-linux-android21");
+                    compilerArgs.Add("-D__ANDROID_API__=21");
+                    compilerArgs.Add("-march=armv8-a");
+                    compilerArgs.Add("-Wno-unused-value");
+                    // Aggressive dead code stripping
+                    compilerArgs.Add("-Wl,--gc-sections");
+                    compilerArgs.Add("-Wl,--as-needed");
+                    // Generic optimizations
+                    linkerArgs.Add("-lto-O2");
+                    linkerArgs.AddRange(compilerArgs);
+                    compilerArgs.Add("-Os");
+                #endif // ENABLE_LTO_BUILD
+
+                if(PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.ARM64))
+                {
+                    // Since we need different IL2CPP args we can't build ARM64 with other Architectures.
+                    PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                } else {
+                    linkerArgs.Add("-long-plt");
+                }
+
+                #if UNITY_2019_3_OR_NEWER
+                    #if VRC_MOBILE
+                        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)31;
+                        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
+                    #else
+                        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
+                        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
+                    #endif
+                #else
+                    PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+                    PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
+                #endif
+
+                #if VRC_VR_OCULUS
+                    #pragma warning disable CS0618
+                        PlayerSettings.VROculus.v2Signing = true;
+                    #pragma warning restore CS0618
+                #endif
+            #endif // UNITY_ANDROID
+
+            #if UNITY_2021_3_OR_NEWER
+                // IL2CPP struggles with generics in unity 2021 and will not generate some code the UdonBehaviour needs
+                // A blog post is available for more information here:
+                // https://blog.unity.com/engine-platform/il2cpp-full-generic-sharing-in-unity-2022-1-beta
+                // increasing this setting will cause longer builds
+                il2CppAdditionalArgs.Add("--generic-virtual-method-iterations=2");
             #endif
 
-            #if VRC_VR_OCULUS
-#pragma warning disable CS0618
-            PlayerSettings.VROculus.v2Signing = true;
-#pragma warning restore CS0618
-            #endif
-            #else
-        PlayerSettings.SetAdditionalIl2CppArgs("");
-            #endif
+            il2CppArgs.Add($"--compiler-flags=\"{string.Join(" ", compilerArgs)}\"");
+            il2CppArgs.Add($"--linker-flags=\"{string.Join(" ", linkerArgs)}\"");
+            PlayerSettings.SetAdditionalIl2CppArgs(string.Join(" ", il2CppArgs));
 
             SetActiveSDKDefines();
 

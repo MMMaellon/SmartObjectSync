@@ -82,11 +82,11 @@ namespace MMMaellon
         }
         public abstract void CalcParentTransform();
         
-        public Vector3 CalcPos()
+        public virtual Vector3 CalcPos()
         {
             return Quaternion.Inverse(parentRot) * (transform.position - parentPos);
         }
-        public Quaternion CalcRot()
+        public virtual Quaternion CalcRot()
         {
             return Quaternion.Inverse(parentRot) * transform.rotation;
         }

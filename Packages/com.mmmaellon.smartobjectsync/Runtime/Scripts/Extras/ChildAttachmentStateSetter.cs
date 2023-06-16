@@ -45,7 +45,7 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 return;
             }
-            if (collision.gameObject.transform)
+            if (child.IsActiveState() && collision.gameObject.transform == child.parentTransform)
             {
                 //we're already attached
                 return;
@@ -74,7 +74,7 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 return;
             }
-            if (other.transform == child.parentTransform)
+            if (child.IsActiveState() && other.transform == child.parentTransform)
             {
                 //we're already attached
                 return;

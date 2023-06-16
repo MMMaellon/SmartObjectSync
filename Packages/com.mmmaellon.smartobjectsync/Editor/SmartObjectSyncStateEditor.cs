@@ -51,6 +51,10 @@ namespace MMMaellon
             {
                 SetupSmartObjectSync(sync);
             }
+            foreach (SmartObjectSyncExtra.JointAttachmentState joint in GameObject.FindObjectsOfType<SmartObjectSyncExtra.JointAttachmentState>())
+            {
+                SmartObjectSyncExtra.JointAttachmentState.SetupJointAttachmentState(joint);
+            }
             return true;
         }
     }

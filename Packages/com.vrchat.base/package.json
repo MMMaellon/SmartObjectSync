@@ -1,18 +1,18 @@
 {
-  "name": "com.vrchat.base",
-  "displayName": "VRChat SDK - Base",
-  "version": "3.2.0",
-  "unity": "2019.4",
-  "description": "Base for VRChat SDK",
-  "vrchatVersion": "2022.1.1",
-  "author": {
-    "name": "VRChat",
-    "email": "developer@vrchat.com",
-    "url": "https://github.com/vrchat/packages"
-  },
-  "dependencies": {
-    "com.unity.burst": "1.4.11",
-    "com.unity.mathematics": "1.2.5",
-    "com.unity.nuget.newtonsoft-json": "2.0.2"
-  }
+	"name" : "com.vrchat.base",
+	"displayName" : "VRChat SDK - Base",
+	"version" : "3.2.1",
+	"unity" : "2019.4",
+	"description" : "Base for VRChat SDK",
+	"vrchatVersion" : "2022.1.1",
+	"author" : {
+		"name" : "VRChat",
+		"email" : "developer@vrchat.com",
+		"url" : "https://github.com/vrchat/packages"
+	},
+	"dependencies" : {
+		"com.unity.burst" : "1.4.11",
+		"com.unity.mathematics" : "1.2.5",
+		"com.unity.nuget.newtonsoft-json" : "3.0.2"
+	}
 }

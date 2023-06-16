@@ -1,33 +1,33 @@
 {
-  "name": "com.vrchat.worlds",
-  "displayName": "VRChat SDK - Worlds",
-  "version": "3.2.0",
-  "unity": "2019.4",
-  "description": "Tools for creating interactive VRChat worlds using Udon",
-  "dependencies": {
-    "com.unity.cinemachine": "2.8.0",
-    "com.unity.postprocessing": "3.1.1",
-    "com.unity.textmeshpro": "2.1.6"
-  },
-  "vpmDependencies": {
-    "com.vrchat.base": "3.2.0"
-  },
-  "author": {
-    "name": "VRChat",
-    "email": "developer@vrchat.com",
-    "url": "https://github.com/vrchat/packages"
-  },
-  "legacyFolders": {
-    "Assets\\VRCSDK": "",
-    "Assets\\Udon": "",
-    "Assets\\VRChat Examples": "",
-    "Packages\\com.vrchat.vrcsdk3": ""
-  },
-  "samples": [
-    {
-      "displayName": "UdonExampleScene",
-      "description": "Basic Udon Examples for Learning",
-      "path": "Samples/UdonExampleScene"
-    }
-  ]
+	"name" : "com.vrchat.worlds",
+	"displayName" : "VRChat SDK - Worlds",
+	"version" : "3.2.1",
+	"unity" : "2019.4",
+	"description" : "Tools for creating interactive VRChat worlds using Udon",
+	"dependencies" : {
+		"com.unity.cinemachine" : "2.8.0",
+		"com.unity.postprocessing" : "3.1.1",
+		"com.unity.textmeshpro" : "2.1.6"
+	},
+	"vpmDependencies" : {
+		"com.vrchat.base" : "^3.2.1"
+	},
+	"author" : {
+		"name" : "VRChat",
+		"email" : "developer@vrchat.com",
+		"url" : "https://github.com/vrchat/packages"
+	},
+	"legacyFolders" : {
+		"Assets\\VRCSDK" : "",
+		"Assets\\Udon" : "",
+		"Assets\\VRChat Examples" : "",
+		"Packages\\com.vrchat.vrcsdk3" : ""
+	},
+	"samples" : [
+		{
+			"displayName" : "UdonExampleScene",
+			"description" : "Basic Udon Examples for Learning",
+			"path" : "Samples/UdonExampleScene"
+		}
+	]
 }
