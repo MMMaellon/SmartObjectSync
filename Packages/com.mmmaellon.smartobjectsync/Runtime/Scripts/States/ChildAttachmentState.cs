@@ -47,11 +47,6 @@ namespace MMMaellon
                     {
                         if (Utilities.IsValid(transform.parent))
                         {
-                            if (sync.IsLocalOwner())
-                            {
-                                sync.pos = Vector3.zero;
-                                sync.rot = Quaternion.identity;
-                            }
                             sync.startPos = transform.localPosition;
                             sync.startRot = transform.localRotation;
                         }
@@ -81,6 +76,8 @@ namespace MMMaellon
                 sync.rigid.detectCollisions = false;
             }
             sync.rigid.isKinematic = true;
+            
+            
             if (!Utilities.IsValid(parentTransform))
             {
                 if (sync.IsLocalOwner())
@@ -112,8 +109,8 @@ namespace MMMaellon
 
         public override void OnSmartObjectSerialize()
         {
-            sync.pos = Vector3.zero;
-            sync.rot = Quaternion.identity;
+            sync.pos = transform.localPosition;
+            sync.rot = transform.localRotation;
         }
 
         public override void OnInterpolationStart()

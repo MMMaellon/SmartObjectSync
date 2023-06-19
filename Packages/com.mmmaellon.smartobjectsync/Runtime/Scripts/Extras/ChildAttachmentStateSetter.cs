@@ -27,7 +27,7 @@ namespace MMMaellon.SmartObjectSyncExtra
             child.sync.AddListener(this);
             if (startInState && child.sync.IsLocalOwner())
             {
-                child.Attach(targetParent);
+                Attach();
             }
         }
 
@@ -54,7 +54,7 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 if (collider == collision.collider)
                 {
-                    child.Attach(targetParent);
+                    Attach();
                     return;
                 }
             }
@@ -83,7 +83,7 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 if (collider == other)
                 {
-                    child.Attach(targetParent);
+                    Attach();
                     return;
                 }
             }
@@ -104,9 +104,16 @@ namespace MMMaellon.SmartObjectSyncExtra
                 firstOwner = false;
                 if (startInState && Utilities.IsValid(newOwner) && newOwner.isLocal)
                 {
-                    child.Attach(targetParent);
+                    Attach();
                 }
             }
+        }
+
+        public void Attach()
+        {
+            child.Attach(targetParent);
+            child.sync.pos = Vector3.zero;
+            child.sync.rot = Quaternion.identity;
         }
     }
 }
