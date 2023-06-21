@@ -16,6 +16,7 @@ namespace MMMaellon.SmartObjectSyncExtra
 
         public bool startKinematic = true;
         public bool kinematicOnRespawn = true;
+        public bool stopKinematicOnParticleCollision = true;
         void Start()
         {
             sync = GetComponent<SmartObjectSync>();
@@ -52,6 +53,18 @@ namespace MMMaellon.SmartObjectSyncExtra
         public override void OnChangeOwner(SmartObjectSync sync, VRCPlayerApi oldOwner, VRCPlayerApi newOwner)
         {
 
+        }
+        public void OnParticleCollision(GameObject other)
+        {
+            if (!sync.IsLocalOwner() || !stopKinematicOnParticleCollision)
+            {
+                return;
+            }
+            if (kinematic)
+            {
+                sync.rigid.isKinematic = false;
+                kinematic = false;
+            }
         }
     }
 }
