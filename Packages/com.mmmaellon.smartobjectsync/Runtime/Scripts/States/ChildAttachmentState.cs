@@ -14,7 +14,7 @@ namespace MMMaellon
         [Tooltip("How the child should move when attaching itself to the parent, local to the parent's transform. If this is all zeros then the child just lerps smoothly in place. If this is is (0,0,1), then the child will lerp smoothly to (0,0,1) and then slide along the z axis into place")]
         public Vector3 attachmentVector = Vector3.zero;
         public bool returnToStartingParentOnExit = true;
-        public bool disableAutoSerialization = false;
+        public bool automaticallySetTransforms = true;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
 
         [System.NonSerialized, FieldChangeCallback(nameof(parentTransform))]
@@ -110,7 +110,7 @@ namespace MMMaellon
 
         public override void OnSmartObjectSerialize()
         {
-            if (!disableAutoSerialization)
+            if (automaticallySetTransforms)
             {
                 sync.pos = transform.localPosition;
                 sync.rot = transform.localRotation;

@@ -15,6 +15,8 @@ namespace MMMaellon
         {
             
         }
+        public UdonBehaviour[] respawnEventListeners;
+        public string respawnEventName;
         public bool ignorePhysicsEvents = true;
         public float respawnCooldown = 30f;
         [System.NonSerialized]
@@ -57,6 +59,13 @@ namespace MMMaellon
             if (lastSleepTime > 0 && lastSleepTime + respawnCooldown - 0.01f < Time.realtimeSinceStartup)//0.01f for safety against floating point errors
             {
                 sync.Respawn();
+                foreach (UdonBehaviour udon in respawnEventListeners)
+                {
+                    if (Utilities.IsValid(udon))
+                    {
+                        udon.SendCustomEvent(respawnEventName);
+                    }
+                }
             }
         }
     }

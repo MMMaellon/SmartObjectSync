@@ -112,8 +112,11 @@ namespace MMMaellon.SmartObjectSyncExtra
         public void Attach()
         {
             child.Attach(targetParent);
-            child.sync.pos = Vector3.zero;
-            child.sync.rot = Quaternion.identity;
+            if (!child.automaticallySetTransforms)
+            {
+                child.sync.pos = Vector3.zero;
+                child.sync.rot = Quaternion.identity;
+            }
         }
     }
 }
