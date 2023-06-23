@@ -540,6 +540,10 @@ namespace MMMaellon
         {
             return Utilities.IsValid(owner) && owner.isLocal;
         }
+        public bool IsOwnerLocal()
+        {
+            return Utilities.IsValid(owner) && owner.isLocal;
+        }
         public bool IsHeld()
         {
             return state == STATE_LEFT_HAND_HELD || state == STATE_RIGHT_HAND_HELD || state == STATE_NO_HAND_HELD;
