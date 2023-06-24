@@ -75,6 +75,10 @@ namespace MMMaellon
         string typeName;
         public override void OnChangeState(SmartObjectSync s, int oldState, int newState)
         {
+            if (Time.timeSinceLevelLoad < 5f)//delay to prevent the spam you get at load in
+            {
+                return;
+            }
             if (lastSound + cooldown > Time.timeSinceLevelLoad || newState == SmartObjectSync.STATE_SLEEPING)
             {
                 return;

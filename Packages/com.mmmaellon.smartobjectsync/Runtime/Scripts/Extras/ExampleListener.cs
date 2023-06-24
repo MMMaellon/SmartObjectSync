@@ -22,6 +22,10 @@ namespace MMMaellon
         float lastStateChange = -1001f;
         public override void OnChangeState(SmartObjectSync sync, int oldState, int newState)
         {
+            if (Time.timeSinceLevelLoad < 5f)//delay to prevent the spam you get at load in
+            {
+                return;
+            }
             transform.position = sync.transform.position;
             if (cooldown > 0f && lastStateChange + cooldown > Time.timeSinceLevelLoad)
             {
