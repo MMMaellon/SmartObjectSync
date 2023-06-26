@@ -34,7 +34,7 @@
       "dependencies": {}
     },
     "com.vrchat.clientsim": {
-      "version": "1.2.5",
+      "version": "1.2.6",
       "dependencies": {
         "com.vrchat.worlds": "^3.1.x"
       }
