@@ -383,6 +383,7 @@ namespace MMMaellon
         public int lastState;
         [System.NonSerialized]
         public int stateChangeCounter = 0;//counts how many times we change state
+        bool teleportFlagSet = false;
         public int state
         {
             get => _state;
@@ -804,6 +805,10 @@ namespace MMMaellon
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
+            if (!IsLocalOwner())
+            {
+                TakeOwnership(false);
+            }
             pos = newPos;
             rot = newRot;
             vel = newVel;
@@ -922,7 +927,7 @@ namespace MMMaellon
             if (IsLocalOwner())
             {
                 //check if we're in a state where physics matters
-                if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
+                if (!IsAttachedToPlayer() && state < STATE_CUSTOM && TeleportSynced())
                 {
                     state = STATE_INTERPOLATING;
                 }
@@ -944,6 +949,11 @@ namespace MMMaellon
             }
         }
 
+        public bool TeleportSynced()
+        {
+            return (state != STATE_TELEPORTING || !teleportFlagSet);
+        }
+
         public void OnCollisionExit(Collision other)
         {
             if (rigid.isKinematic)
@@ -954,7 +964,7 @@ namespace MMMaellon
             if (IsLocalOwner())
             {
                 //check if we're in a state where physics matters
-                if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
+                if (!IsAttachedToPlayer() && state < STATE_CUSTOM && TeleportSynced())
                 {
                     state = STATE_FALLING;
                 }
@@ -975,7 +985,7 @@ namespace MMMaellon
             if (IsLocalOwner())
             {
                 //check if we're in a state where physics matters
-                if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
+                if (!IsAttachedToPlayer() && state < STATE_CUSTOM && TeleportSynced())
                 {
                     state = STATE_INTERPOLATING;
                 }
@@ -993,7 +1003,7 @@ namespace MMMaellon
                     if (Utilities.IsValid(otherSync) && otherSync.IsLocalOwner() && otherSync.takeOwnershipOfOtherObjectsOnCollision)
                     {
                         TakeOwnership(true);
-                        if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
+                        if (!IsAttachedToPlayer() && state < STATE_CUSTOM && TeleportSynced())
                         {
                             state = STATE_INTERPOLATING;
                         }
@@ -1619,6 +1629,7 @@ namespace MMMaellon
         {
             if (IsLocalOwner())
             {
+                teleportFlagSet = true;
                 if (worldSpaceTeleport)
                 {
                     transform.position = pos;
@@ -1670,6 +1681,7 @@ namespace MMMaellon
         }
         public void teleport_OnSmartObjectSerialize()
         {
+            teleportFlagSet = false;
             if (worldSpaceTeleport)
             {
                 pos = transform.position;
