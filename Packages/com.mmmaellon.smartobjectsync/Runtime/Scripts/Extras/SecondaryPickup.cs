@@ -126,13 +126,13 @@ namespace MMMaellon
             {
                 if (primaryPickup.pickup.IsHeld)
                 {
-                    sync.pickup.pickupable = !sync.pickup.IsHeld;
+                    sync.pickup.pickupable = true;
                 }
                 else
                 {
+                    sync.pickup.pickupable = false;
                     if (sync.pickup.IsHeld)
                     {
-                        sync.pickup.pickupable = false;
                         sync.pickup.Drop();
                     }
                 }
@@ -346,7 +346,8 @@ namespace MMMaellon
             if (angle < -180)
             {
                 angle += 360;
-            } else if (angle > 180)
+            }
+            else if (angle > 180)
             {
                 angle -= 360;
             }
