@@ -86,16 +86,16 @@ namespace MMMaellon
         public bool allowAttachOnPickupUseDown = true;
         public bool allowAttachOnRightStickDown = false;
 
-        [UdonSynced(UdonSyncMode.None)]
+        [UdonSynced]
         public int playerId = 0;
 
-        [UdonSynced(UdonSyncMode.None)]
+        [UdonSynced]
         public int bone = -1001;
 
-        [UdonSynced(UdonSyncMode.None)]
+        [UdonSynced]
         public Vector3 localPosition = Vector3.zero;
 
-        [UdonSynced(UdonSyncMode.None)]
+        [UdonSynced]
         public Quaternion localRotation = Quaternion.identity;
 
         public bool allowAttachToSelf = true;

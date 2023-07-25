@@ -1535,7 +1535,7 @@ namespace MMMaellon
         [System.NonSerialized] public float lastSleep = -1001f;
         public void sleep_OnInterpolationStart()
         {
-            if (worldSpaceSleep && !rigid.isKinematic)
+            if (worldSpaceSleep)
             {
                 startPos = transform.position;
                 startRot = transform.rotation;
@@ -1558,7 +1558,7 @@ namespace MMMaellon
             }
             if (interpolation < 1.0f)
             {
-                if (worldSpaceSleep && !rigid.isKinematic)
+                if (worldSpaceSleep)
                 {
                     transform.position = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
                     transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
@@ -1573,7 +1573,7 @@ namespace MMMaellon
             }
             else if (!reduceJitterDuringSleep || ObjectMovedDuringSleep())
             {
-                if (worldSpaceSleep && !rigid.isKinematic)
+                if (worldSpaceSleep)
                 {
                     transform.position = pos;
                     transform.rotation = rot;
@@ -1602,7 +1602,7 @@ namespace MMMaellon
 
         public void sleep_OnSmartObjectSerialize()
         {
-            if (worldSpaceSleep && !rigid.isKinematic)
+            if (worldSpaceSleep)
             {
                 pos = transform.position;
                 rot = transform.rotation;
@@ -1634,7 +1634,7 @@ namespace MMMaellon
                 {
                     transform.position = pos;
                     transform.rotation = rot;
-                    if (rigid && !rigid.isKinematic)
+                    if (!rigid.isKinematic)
                     {
                         rigid.velocity = vel;
                         rigid.angularVelocity = spin;
@@ -1644,7 +1644,7 @@ namespace MMMaellon
                 {
                     transform.localPosition = pos;
                     transform.localRotation = rot;
-                    if (rigid && !rigid.isKinematic)
+                    if (!rigid.isKinematic)
                     {
                         rigid.velocity = transform.TransformVector(vel);
                         rigid.angularVelocity = transform.TransformVector(spin);
@@ -1660,7 +1660,7 @@ namespace MMMaellon
                 {
                     transform.position = pos;
                     transform.rotation = rot;
-                    if (rigid && !rigid.isKinematic)
+                    if (!rigid.isKinematic)
                     {
                         rigid.velocity = vel;
                         rigid.angularVelocity = spin;
@@ -1670,7 +1670,7 @@ namespace MMMaellon
                 {
                     transform.localPosition = pos;
                     transform.localRotation = rot;
-                    if (rigid && !rigid.isKinematic)
+                    if (!rigid.isKinematic)
                     {
                         rigid.velocity = transform.TransformVector(vel);
                         rigid.angularVelocity = transform.TransformVector(spin);
@@ -1686,7 +1686,7 @@ namespace MMMaellon
             {
                 pos = transform.position;
                 rot = transform.rotation;
-                if (rigid && !rigid.isKinematic)
+                if (!rigid.isKinematic)
                 {
                     vel = rigid.velocity;
                     spin = rigid.angularVelocity;
@@ -1696,7 +1696,7 @@ namespace MMMaellon
             {
                 pos = transform.localPosition;
                 rot = transform.localRotation;
-                if (rigid && !rigid.isKinematic)
+                if (!rigid.isKinematic)
                 {
                     vel = transform.InverseTransformVector(rigid.velocity);
                     spin = transform.InverseTransformVector(rigid.angularVelocity);

@@ -9,7 +9,7 @@ namespace MMMaellon
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class ObjectPickupTool : UdonSharpBehaviour
     {
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(closed))]
+        [System.NonSerialized, UdonSynced, FieldChangeCallback(nameof(closed))]
         public bool _closed;
         
         public bool closed{

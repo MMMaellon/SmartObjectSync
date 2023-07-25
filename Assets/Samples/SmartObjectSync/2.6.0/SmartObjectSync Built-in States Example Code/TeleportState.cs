@@ -56,7 +56,7 @@ namespace MMMaellon
             {
                 transform.position = sync.pos;
                 transform.rotation = sync.rot;
-                if (sync.rigid && !sync.rigid.isKinematic)
+                if (!sync.rigid.isKinematic)
                 {
                     sync.rigid.velocity = sync.vel;
                     sync.rigid.rotation = sync.rot;
@@ -78,7 +78,7 @@ namespace MMMaellon
             {
                 transform.position = sync.pos;
                 transform.rotation = sync.rot;
-                if (sync.rigid && !sync.rigid.isKinematic)
+                if (!sync.rigid.isKinematic)
                 {
                     sync.rigid.velocity = sync.vel;
                     sync.rigid.rotation = sync.rot;

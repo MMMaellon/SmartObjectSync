@@ -11,7 +11,8 @@ namespace MMMaellon
         public bool attachOnCollision = true;
         public LayerMask stickyCollisionLayers;
         public bool attachOnPickupUseDown = false;
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
+        [System.NonSerialized, UdonSynced, FieldChangeCallback(nameof(parentTransformName))]
+        string _parentTransformName = "";
 
         [System.NonSerialized]
         public Transform _parentTransform = null;
@@ -39,6 +40,10 @@ namespace MMMaellon
                 {
                     Physics.IgnoreCollision(rigidCollider, parentCollider, true);
                 }
+                if (sync.IsOwnerLocal())
+                {
+                    RequestSerialization();
+                }
             }
         }
 
@@ -51,11 +56,16 @@ namespace MMMaellon
                 {
                     _parentTransformName = "";
                     parentTransform = null;
+                    if (sync.IsLocalOwner() && IsActiveState())
+                    {
+                        ExitState();
+                    }
+                    return;
                 }
                 GameObject parentObj = GameObject.Find(value);
                 if (Utilities.IsValid(parentObj))
                 {
-                    StickyAttachmentState otherSticky = parentObj.GetComponent<StickyAttachmentState>();
+                    // StickyAttachmentState otherSticky = parentObj.GetComponent<StickyAttachmentState>();
                     // while (otherSticky != null && otherSticky.sync && otherSticky.sync.customState == otherSticky && otherSticky.parentTransform != null)
                     // {
                     //     parentObj = otherSticky.gameObject;
@@ -74,10 +84,11 @@ namespace MMMaellon
                     }
                 } else
                 {
+                    _parentTransformName = "";
                     parentTransform = null;
-                    if (sync.IsLocalOwner() && !IsActiveState())
+                    if (sync.IsLocalOwner() && IsActiveState())
                     {
-                        EnterState();
+                        ExitState();
                     }
                 }
             }
@@ -168,6 +179,7 @@ namespace MMMaellon
 
         public override void OnExitState()
         {
+            _parentTransformName = "";
             parentTransform = null;
         }
 

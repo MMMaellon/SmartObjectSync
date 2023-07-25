@@ -26,6 +26,10 @@ namespace MMMaellon
             {
                 _parentTransform = value;
                 transform.SetParent(_parentTransform, true);
+                if (sync.IsOwnerLocal())
+                {
+                    RequestSerialization();
+                }
             }
         }
         public string parentTransformName

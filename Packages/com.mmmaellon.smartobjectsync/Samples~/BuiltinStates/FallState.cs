@@ -83,7 +83,7 @@ namespace MMMaellon
                 return;
             }
             
-            if (sync.rigid && !sync.rigid.isKinematic && sync.rigid.useGravity)
+            if (!sync.rigid.isKinematic && sync.rigid.useGravity)
             {
                 transform.position = sync.HermiteInterpolatePosition(startPos, startVel, sync.pos, startVel + Physics.gravity * sync.lagTime, interpolation);
                 transform.rotation = sync.HermiteInterpolateRotation(startRot, startSpin, sync.rot, startSpin, interpolation);
@@ -119,7 +119,7 @@ namespace MMMaellon
         {
             sync.pos = transform.position;
             sync.rot = transform.rotation;
-            if (sync.rigid && !sync.rigid.isKinematic)
+            if (!sync.rigid.isKinematic)
             {
                 sync.vel = sync.rigid.velocity;
                 sync.spin = sync.rigid.angularVelocity;

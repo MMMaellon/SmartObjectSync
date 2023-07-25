@@ -117,7 +117,7 @@ namespace MMMaellon
             sync._print("OnSmartObjectSerialize");
             sync.pos = transform.position;
             sync.rot = transform.rotation;
-            if (sync.rigid && !sync.rigid.isKinematic)
+            if (!sync.rigid.isKinematic)
             {
                 sync.vel = sync.rigid.velocity;
                 sync.spin = sync.rigid.angularVelocity;
