@@ -1,7 +1,7 @@
 {
     "name": "com.mmmaellon.smartobjectsync",
     "displayName": "SmartObjectSync",
-    "version": "3.3.10",
+    "version": "3.3.11",
     "description": "A drop-in replacement for VRC_ObjectSync that allows for better syncing of objects in VRChat",
     "url": "https://github.com/MMMaellon/SmartObjectSync.git",
     "dependencies": {},
