@@ -65,7 +65,7 @@ namespace MMMaellon
                 serializedSync.ApplyModifiedProperties();
                 SetupStates(sync);
                 if (sync.printDebugMessages)
-                    _print(sync, "Auto Setup Complete!\n" + sync.pickup == null ? "No VRC_Pickup component found" : "VRC_Pickup component found\n" + sync.rigid == null ? "No Rigidbody component found" : "Rigidbody component found");
+                    _print(sync, "Auto Setup Complete!\n" + (sync.pickup == null ? "No VRC_Pickup component found" : "VRC_Pickup component found\n" + (sync.rigid == null ? "No Rigidbody component found" : "Rigidbody component found")));
             }
             else
             {
