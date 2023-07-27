@@ -14,7 +14,7 @@ namespace MMMaellon
         public SmartObjectSync[] pieces;
         public AudioSource breakSound;
         public float resetTimer = 30f;
-        [UdonSynced]
+        [UdonSynced, FieldChangeCallback(nameof(broken))]
         public bool _broken = false;
         public bool broken{
             get => _broken;
@@ -53,7 +53,7 @@ namespace MMMaellon
                     lastBroken = Time.timeSinceLevelLoad;
                     if (resetTimer > 0)
                     {
-                        SendCustomEventDelayedSeconds(nameof(lastBroken), resetTimer);
+                        SendCustomEventDelayedSeconds(nameof(FixCheck), resetTimer);
                     }
                 } else
                 {
@@ -108,7 +108,7 @@ namespace MMMaellon
         float lastBroken = -1001f;
         public void FixCheck()
         {
-            if (Networking.LocalPlayer.IsOwner(gameObject) && lastBroken > 0 && lastBroken + resetTimer - 0.1f < Time.timeSinceLevelLoad || !broken)
+            if (Networking.LocalPlayer.IsOwner(gameObject) && lastBroken > 0 && lastBroken + resetTimer - 0.1f < Time.timeSinceLevelLoad && broken)
             {
                 Fix();
             }

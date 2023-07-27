@@ -113,7 +113,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
@@ -356,7 +356,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
@@ -568,7 +568,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
@@ -818,7 +818,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
@@ -1128,7 +1128,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
@@ -1340,7 +1340,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
@@ -1558,7 +1558,7 @@ MonoBehaviour:
   syncParticleCollisions: 0
   respawnHeight: -100
   printDebugMessages: 0
-  worldSpaceTeleport: 0
+  worldSpaceTeleport: 1
   worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
@@ -2049,7 +2049,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
@@ -2261,7 +2261,7 @@ MonoBehaviour:
   respawnHeight: -100
   printDebugMessages: 0
   worldSpaceTeleport: 0
-  worldSpaceSleep: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
   kinematicWhileHeld: 0
   nonKinematicPickupJitterPreventionTime: 0
