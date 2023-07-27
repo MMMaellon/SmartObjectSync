@@ -1,0 +1,2359 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1126 &-5929840739161358758
+PackedAssets:
+  m_File: 1
+  m_ShortPath: BuildPlayer-TestWorld.sharedAssets
+  m_Overhead: 119013
+  m_Contents:
+  - fileID: 1
+    classID: 150
+    packedSize: 97
+    offset: 119696
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: 
+  - fileID: 2
+    classID: 142
+    packedSize: 208
+    offset: 119800
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: 
+  - fileID: 3
+    classID: 21
+    packedSize: 892
+    offset: 120008
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 4
+    classID: 21
+    packedSize: 892
+    offset: 120904
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 5
+    classID: 21
+    packedSize: 892
+    offset: 121800
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 6
+    classID: 21
+    packedSize: 892
+    offset: 122696
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 7
+    classID: 21
+    packedSize: 892
+    offset: 123592
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 8
+    classID: 21
+    packedSize: 892
+    offset: 124488
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 9
+    classID: 21
+    packedSize: 888
+    offset: 125384
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 10
+    classID: 21
+    packedSize: 896
+    offset: 126272
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 11
+    classID: 21
+    packedSize: 892
+    offset: 127168
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 12
+    classID: 21
+    packedSize: 892
+    offset: 128064
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 13
+    classID: 21
+    packedSize: 892
+    offset: 128960
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 14
+    classID: 21
+    packedSize: 892
+    offset: 129856
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 15
+    classID: 21
+    packedSize: 892
+    offset: 130752
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 16
+    classID: 21
+    packedSize: 892
+    offset: 131648
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 17
+    classID: 21
+    packedSize: 888
+    offset: 132544
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 18
+    classID: 21
+    packedSize: 896
+    offset: 133432
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 19
+    classID: 21
+    packedSize: 892
+    offset: 134328
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 20
+    classID: 21
+    packedSize: 892
+    offset: 135224
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 21
+    classID: 21
+    packedSize: 892
+    offset: 136120
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 22
+    classID: 21
+    packedSize: 1052
+    offset: 137016
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 23
+    classID: 21
+    packedSize: 252
+    offset: 138072
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 24
+    classID: 21
+    packedSize: 528
+    offset: 138328
+    sourceAssetGUID: aea74683020fcff4abb38223524c81bf
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/ExampleYogganBall/FireParticle.mat
+  - fileID: 25
+    classID: 21
+    packedSize: 904
+    offset: 138856
+    sourceAssetGUID: f62a9466e4e27784c9ad03b4d05f5a25
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/ExampleYogganBall/Firey.mat
+  - fileID: 26
+    classID: 21
+    packedSize: 524
+    offset: 139760
+    sourceAssetGUID: 866feb3427295964cb4d5414b0a117d7
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/ExampleYogganBall/Square.mat
+  - fileID: 27
+    classID: 21
+    packedSize: 932
+    offset: 140288
+    sourceAssetGUID: ae11b376374a64546870005937dacd2f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/textures/Sushi Shiny.mat
+  - fileID: 28
+    classID: 21
+    packedSize: 892
+    offset: 141224
+    sourceAssetGUID: 199b42872039dd24a85e72796645ce6c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/textures/Sushi.mat
+  - fileID: 29
+    classID: 21
+    packedSize: 940
+    offset: 142120
+    sourceAssetGUID: c588de1bd0ae27543958b38850e54921
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault1/assault1.mat
+  - fileID: 30
+    classID: 21
+    packedSize: 940
+    offset: 143064
+    sourceAssetGUID: 35a5af17f562eb044a809af0526a562f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault2/assault2.mat
+  - fileID: 31
+    classID: 21
+    packedSize: 904
+    offset: 144008
+    sourceAssetGUID: 9a50065a1e4866b42946175d9a5f86b6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault3/assault3.mat
+  - fileID: 32
+    classID: 21
+    packedSize: 904
+    offset: 144912
+    sourceAssetGUID: a3de5fdd82f571f4eb16a3c2530b4303
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault4/assault4.mat
+  - fileID: 33
+    classID: 21
+    packedSize: 904
+    offset: 145816
+    sourceAssetGUID: 94e64d41f68240c41aabd3ef8e0368e5
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol1/pistol1.mat
+  - fileID: 34
+    classID: 21
+    packedSize: 904
+    offset: 146720
+    sourceAssetGUID: 7c16b6e19b642c247ba765631635ff9e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol2/pistol2.mat
+  - fileID: 35
+    classID: 21
+    packedSize: 904
+    offset: 147624
+    sourceAssetGUID: 41be456e0ecbed04dba9c27c3add980c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol3/pistol3.mat
+  - fileID: 36
+    classID: 21
+    packedSize: 904
+    offset: 148528
+    sourceAssetGUID: afdf30d8614b11d41a6337e2484e3570
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol4/pistol4.mat
+  - fileID: 37
+    classID: 21
+    packedSize: 904
+    offset: 149432
+    sourceAssetGUID: 0c24ff3f078566f4d9d83ee8bd6a3f72
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun1/shotgun1.mat
+  - fileID: 38
+    classID: 21
+    packedSize: 912
+    offset: 150336
+    sourceAssetGUID: 052eb9367e604ac428a8b8c83f4584da
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun2/shotgun2.mat
+  - fileID: 39
+    classID: 21
+    packedSize: 900
+    offset: 151248
+    sourceAssetGUID: 42ff7de5af3ca404cbf8813deacd8dbb
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg1/smg1.mat
+  - fileID: 40
+    classID: 21
+    packedSize: 900
+    offset: 152152
+    sourceAssetGUID: d05b83a5733b4ba469d3c1a5891d6f88
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg2/smg2.mat
+  - fileID: 41
+    classID: 21
+    packedSize: 904
+    offset: 153056
+    sourceAssetGUID: b2dfdf44d328a59449b16f2b9d82492c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper1/sniper1.mat
+  - fileID: 42
+    classID: 21
+    packedSize: 904
+    offset: 153960
+    sourceAssetGUID: 533eaf1384eb72d41bbf8a25b870c0f7
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper2/sniper2.mat
+  - fileID: 43
+    classID: 21
+    packedSize: 948
+    offset: 154864
+    sourceAssetGUID: 2a4361e9b2c49f14bba9a101420effac
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Transparent.mat
+  - fileID: 44
+    classID: 21
+    packedSize: 892
+    offset: 155816
+    sourceAssetGUID: 8fc60b75946acdf4cbf112d0e7e2bee7
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/UVGrid.mat
+  - fileID: 45
+    classID: 21
+    packedSize: 908
+    offset: 156712
+    sourceAssetGUID: 68be9f0f6e5adbd44a76bf6bf69fda7b
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Materials/BrightButton.mat
+  - fileID: 46
+    classID: 21
+    packedSize: 936
+    offset: 157624
+    sourceAssetGUID: eae9c11350249284e8400a100179e0b2
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Materials/prototype_blue_grid.mat
+  - fileID: 47
+    classID: 21
+    packedSize: 1208
+    offset: 158560
+    sourceAssetGUID: 76ff537c8e1a84345868e6aeee938ab3
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Materials/prototype_navy_grid.mat
+  - fileID: 48
+    classID: 21
+    packedSize: 1208
+    offset: 159768
+    sourceAssetGUID: 8c19a618a0bd9844583b91dca0875a34
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Materials/prototype_pink_grid.mat
+  - fileID: 49
+    classID: 21
+    packedSize: 1212
+    offset: 160976
+    sourceAssetGUID: fed4e78bda2b3de45954637fee164b8c
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Materials/prototype_pink_smooth.mat
+  - fileID: 50
+    classID: 21
+    packedSize: 936
+    offset: 162192
+    sourceAssetGUID: 5aa95b3fa56e28f43a84e301c3d19e08
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Materials/prototype_white_grid.mat
+  - fileID: 51
+    classID: 21
+    packedSize: 1212
+    offset: 163128
+    sourceAssetGUID: 82096aab38f01cb40a1cbf8629a810ba
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Materials/prototype_yellow_grid.mat
+  - fileID: 52
+    classID: 21
+    packedSize: 892
+    offset: 164344
+    sourceAssetGUID: 4e872ec796d64d540aa9016e6f4528cb
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Samples/GraphicsBlitExampleScene/SampleSceneAssets/Floor.mat
+  - fileID: 53
+    classID: 21
+    packedSize: 892
+    offset: 165240
+    sourceAssetGUID: e3769e73b10dfc1498cf1136e66de63a
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Samples/UdonExampleScene/Materials/CubeMat1.mat
+  - fileID: 54
+    classID: 21
+    packedSize: 892
+    offset: 166136
+    sourceAssetGUID: 99f7ea0146bcbb64d97a8468253bb347
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Samples/UdonExampleScene/Materials/CubeMat2.mat
+  - fileID: 55
+    classID: 21
+    packedSize: 900
+    offset: 167032
+    sourceAssetGUID: fd20e45036ef323459e8286e9c23c02c
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Samples/UdonExampleScene/SampleAssetsSet/Materials/GridFloor_udon.mat
+  - fileID: 56
+    classID: 21
+    packedSize: 136
+    offset: 167936
+    sourceAssetGUID: e3265ab4bf004d28a9537516768c1c75
+    buildTimeAssetPath: Assets/TextMesh Pro/Fonts/LiberationSans.ttf
+  - fileID: 57
+    classID: 21
+    packedSize: 2004
+    offset: 168072
+    sourceAssetGUID: 2e498d1c8094910479dc3e1b768306a4
+    buildTimeAssetPath: Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
+      SDF - Fallback.asset
+  - fileID: 58
+    classID: 21
+    packedSize: 956
+    offset: 170080
+    sourceAssetGUID: 8f586378b4e144a9851e7b34d9b748ee
+    buildTimeAssetPath: Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
+      SDF.asset
+  - fileID: 59
+    classID: 21
+    packedSize: 892
+    offset: 171040
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 60
+    classID: 21
+    packedSize: 892
+    offset: 171936
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 61
+    classID: 21
+    packedSize: 892
+    offset: 172832
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 62
+    classID: 21
+    packedSize: 892
+    offset: 173728
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 63
+    classID: 21
+    packedSize: 892
+    offset: 174624
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 64
+    classID: 21
+    packedSize: 892
+    offset: 175520
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 65
+    classID: 21
+    packedSize: 892
+    offset: 176416
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 66
+    classID: 21
+    packedSize: 892
+    offset: 177312
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 67
+    classID: 21
+    packedSize: 888
+    offset: 178208
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 68
+    classID: 21
+    packedSize: 892
+    offset: 179096
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 69
+    classID: 21
+    packedSize: 888
+    offset: 179992
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 70
+    classID: 21
+    packedSize: 888
+    offset: 180880
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 71
+    classID: 21
+    packedSize: 892
+    offset: 181768
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 72
+    classID: 21
+    packedSize: 896
+    offset: 182664
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 73
+    classID: 21
+    packedSize: 892
+    offset: 183560
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 74
+    classID: 28
+    packedSize: 21956
+    offset: 184456
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 75
+    classID: 28
+    packedSize: 174880
+    offset: 206416
+    sourceAssetGUID: 038eb48381ec565479da030ca8038cfe
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Cheese.png
+  - fileID: 76
+    classID: 28
+    packedSize: 174880
+    offset: 381296
+    sourceAssetGUID: 0444c4ef6c923a8449f634bb64a2c56c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Halloumi.png
+  - fileID: 77
+    classID: 28
+    packedSize: 174880
+    offset: 556176
+    sourceAssetGUID: 06a793493c507694db4d1a761b28aa0a
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Cucumber.png
+  - fileID: 78
+    classID: 28
+    packedSize: 2796328
+    offset: 731056
+    sourceAssetGUID: 0d6b1249a62d53f4e8900c84722db1f8
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol1/pistol1_diffuse.png
+  - fileID: 79
+    classID: 28
+    packedSize: 349656
+    offset: 3527384
+    sourceAssetGUID: 0f7be0997dc6b3b4fb5edd3b8c22f72e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Mushroom.png
+  - fileID: 80
+    classID: 28
+    packedSize: 174880
+    offset: 3877040
+    sourceAssetGUID: 13aaba6249b95ef469d9abaef3b2e290
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Sausage.png
+  - fileID: 81
+    classID: 28
+    packedSize: 43808
+    offset: 4051920
+    sourceAssetGUID: 16e9f35e9848118459164781550bc9c5
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Olives.png
+  - fileID: 82
+    classID: 28
+    packedSize: 174880
+    offset: 4095728
+    sourceAssetGUID: 170eb2422b2538d4fb3bd2ca2e85fab5
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Bread.png
+  - fileID: 83
+    classID: 28
+    packedSize: 2796328
+    offset: 4270608
+    sourceAssetGUID: 1ec9fe2fb7e61d24dbd51506576aa912
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol3/pistol3_diffuse.png
+  - fileID: 84
+    classID: 28
+    packedSize: 174880
+    offset: 7066936
+    sourceAssetGUID: 1fa4378eed42c79459ec2781599f8f3c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Tomato.png
+  - fileID: 85
+    classID: 28
+    packedSize: 5592544
+    offset: 7241816
+    sourceAssetGUID: 246651ca5a975ad4998634d0c534516b
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault3/assault3_normal.png
+  - fileID: 86
+    classID: 28
+    packedSize: 174884
+    offset: 12834360
+    sourceAssetGUID: 2f7d5dcd2ffd40546919e7c39d1600b5
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/BBQ Sauce.png
+  - fileID: 87
+    classID: 28
+    packedSize: 43804
+    offset: 13009248
+    sourceAssetGUID: 334c2f95cafd6b64bb135ccfffcabaf3
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Ribs.png
+  - fileID: 88
+    classID: 28
+    packedSize: 699180
+    offset: 13053056
+    sourceAssetGUID: 33a18574a1737ab42a75137c3b83c9be
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Textures/prototype_white_dff.png
+  - fileID: 89
+    classID: 28
+    packedSize: 5592544
+    offset: 13752240
+    sourceAssetGUID: 34ba857ac0ec86642b16ca7d9553e349
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun1/shotgun1_normal.png
+  - fileID: 90
+    classID: 28
+    packedSize: 43808
+    offset: 19344784
+    sourceAssetGUID: 39c095354f81697419ee9dcbcfce6f1c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Onion.png
+  - fileID: 91
+    classID: 28
+    packedSize: 699180
+    offset: 19388592
+    sourceAssetGUID: 3cae02495b88d2d4fbf19382b7993691
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Textures/prototype_blue_dff.png
+  - fileID: 92
+    classID: 28
+    packedSize: 174880
+    offset: 20087776
+    sourceAssetGUID: 4183ae5132a53e34e80d7f8c4db4bc33
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Bacon.png
+  - fileID: 93
+    classID: 28
+    packedSize: 2796328
+    offset: 20262656
+    sourceAssetGUID: 482cc8b3849e01e479e258dc2b8405b6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault4/assault4_diffuse.png
+  - fileID: 94
+    classID: 28
+    packedSize: 174880
+    offset: 23058984
+    sourceAssetGUID: 49bff1591a93fc841a4908ab163711b0
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Patty.png
+  - fileID: 95
+    classID: 28
+    packedSize: 2796328
+    offset: 23233864
+    sourceAssetGUID: 4bc3804b3d89750428df34b00abe88d4
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol2/pistol2_diffuse.png
+  - fileID: 96
+    classID: 28
+    packedSize: 349656
+    offset: 26030192
+    sourceAssetGUID: 4e5c89a0ba389a7449e95e37d17a6cec
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Avocado.png
+  - fileID: 97
+    classID: 28
+    packedSize: 2796328
+    offset: 26379848
+    sourceAssetGUID: 56cbec784c34691408510d822d647cef
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol4/pistol4_diffuse.png
+  - fileID: 98
+    classID: 28
+    packedSize: 812
+    offset: 29176176
+    sourceAssetGUID: 580615edf5e29d245af58fc5fe2b06ac
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Textures/SwatchPinkDAlbedo.png
+  - fileID: 99
+    classID: 28
+    packedSize: 174884
+    offset: 29176992
+    sourceAssetGUID: 5b0e82b5b8a80ad41947bf786c45a26f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Pineapple.png
+  - fileID: 100
+    classID: 28
+    packedSize: 5592544
+    offset: 29351880
+    sourceAssetGUID: 5f6903b3f56ca67429e215115a6321c0
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper1/sniper1_normal.png
+  - fileID: 101
+    classID: 28
+    packedSize: 5592544
+    offset: 34944424
+    sourceAssetGUID: 662ac7af64edac14388027a3cc79fe57
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol4/pistol4_normal.png
+  - fileID: 102
+    classID: 28
+    packedSize: 174880
+    offset: 40536968
+    sourceAssetGUID: 6ab6055d339cf8b4796dc05ba1bbb685
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Salami.png
+  - fileID: 103
+    classID: 28
+    packedSize: 3840
+    offset: 40711848
+    sourceAssetGUID: 6ca5daa3415451940921fa7e2c3db9e8
+    buildTimeAssetPath: Packages/com.unity.timeline/Editor/StyleSheets/Images/Shared/TimelineGroupBackground.png
+  - fileID: 104
+    classID: 28
+    packedSize: 2097264
+    offset: 40715688
+    sourceAssetGUID: 7274816d1b008604384326cffc88cbab
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper2/sniper2_diffuse.png
+  - fileID: 105
+    classID: 28
+    packedSize: 1398256
+    offset: 42812952
+    sourceAssetGUID: 7876f041e6bc4844fb3c43aa8a36a175
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/textures/Enric_Gil_Iriberri_SushiTexture.png
+  - fileID: 106
+    classID: 28
+    packedSize: 808
+    offset: 44211208
+    sourceAssetGUID: 86e4aa9207c9e2740b6ace599d659c05
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Textures/SwatchNavyAlbedo.png
+  - fileID: 107
+    classID: 28
+    packedSize: 174880
+    offset: 44212016
+    sourceAssetGUID: 88c8bb29e9257324695dafa1cf0b54dd
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Shrimp.png
+  - fileID: 108
+    classID: 28
+    packedSize: 2796328
+    offset: 44386896
+    sourceAssetGUID: 89fc40a82916a0c449b689ff792cbaba
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault1/assault1_diffuse.png
+  - fileID: 109
+    classID: 28
+    packedSize: 699184
+    offset: 47183224
+    sourceAssetGUID: 8e6c0cf1b05cad640b19905425d0f47b
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/flat,1000x1000,075,f.u4.jpg
+  - fileID: 110
+    classID: 28
+    packedSize: 174880
+    offset: 47882408
+    sourceAssetGUID: 9200ea62c0327444f9a28fa5bfff3f6e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Chicken.png
+  - fileID: 111
+    classID: 28
+    packedSize: 2796328
+    offset: 48057288
+    sourceAssetGUID: 97916b008521df7409ff55d6033c520c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper1/sniper1_diffuse.png
+  - fileID: 112
+    classID: 28
+    packedSize: 174880
+    offset: 50853616
+    sourceAssetGUID: 9cc679cdd30b22c4a8da23751286a85a
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Waffle.png
+  - fileID: 113
+    classID: 28
+    packedSize: 43808
+    offset: 51028496
+    sourceAssetGUID: 9d034eec3121ae043a6cb1d8430f9123
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Fries.png
+  - fileID: 114
+    classID: 28
+    packedSize: 43808
+    offset: 51072304
+    sourceAssetGUID: 9d1896d9bf69e5e4b8e4ffaf0872c99f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Butter.png
+  - fileID: 115
+    classID: 28
+    packedSize: 174880
+    offset: 51116112
+    sourceAssetGUID: 9e66a7770a4a39c4ea4276099de777e8
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Lettuce.png
+  - fileID: 116
+    classID: 28
+    packedSize: 2796324
+    offset: 51290992
+    sourceAssetGUID: 9ef818aed15542049ae0db5b3892e764
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg1/smg1_diffuse.png
+  - fileID: 117
+    classID: 28
+    packedSize: 5592544
+    offset: 54087320
+    sourceAssetGUID: 9faebeb1b9df87d4d845ea9e89fa5a20
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol3/pistol3_normal.png
+  - fileID: 118
+    classID: 28
+    packedSize: 699172
+    offset: 59679864
+    sourceAssetGUID: a196fd6788131ec459bfb26012466fc1
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Textures/GridEmissive.png
+  - fileID: 119
+    classID: 28
+    packedSize: 5592544
+    offset: 60379040
+    sourceAssetGUID: a21b6f6faa594df4fa1cb1794a16a4b3
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol1/pistol1_normal.png
+  - fileID: 120
+    classID: 28
+    packedSize: 2796328
+    offset: 65971584
+    sourceAssetGUID: a5d9ebfb627548d41ba3a8ec12550ce5
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault3/assault3_diffuse.png
+  - fileID: 121
+    classID: 28
+    packedSize: 5592544
+    offset: 68767912
+    sourceAssetGUID: a76206909af6a3f4a9a63824a9908939
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun2/shotgun2_normal.png
+  - fileID: 122
+    classID: 28
+    packedSize: 349652
+    offset: 74360456
+    sourceAssetGUID: b14b58875acf8e941b02ee5b974add39
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Ham.png
+  - fileID: 123
+    classID: 28
+    packedSize: 699176
+    offset: 74710112
+    sourceAssetGUID: b2c2c1a52cdb75943958a408093dee04
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Samples/UdonExampleScene/SampleAssetsSet/Textures/GridFloor_udon.png
+  - fileID: 124
+    classID: 28
+    packedSize: 812
+    offset: 75409288
+    sourceAssetGUID: b4646ae63b0bcca40b1bdde3b87e01bf
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Textures/SwatchYellowAlbedo.png
+  - fileID: 125
+    classID: 28
+    packedSize: 174880
+    offset: 75410104
+    sourceAssetGUID: b5bd9ce905f9bad41a08d4c32505b1c5
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Salmon.png
+  - fileID: 126
+    classID: 28
+    packedSize: 5592544
+    offset: 75584984
+    sourceAssetGUID: b5ce058bdf628bb4bb3304265b2ab7f6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault1/assault1_normal.png
+  - fileID: 127
+    classID: 28
+    packedSize: 174880
+    offset: 81177528
+    sourceAssetGUID: b9986aba40ea2c245bd0b4d72cb734cd
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Ketchup.png
+  - fileID: 128
+    classID: 28
+    packedSize: 174884
+    offset: 81352408
+    sourceAssetGUID: bd8d6a7168274ef4c8c3bc82d4762b65
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Qiiwi Slice.png
+  - fileID: 129
+    classID: 28
+    packedSize: 43808
+    offset: 81527296
+    sourceAssetGUID: c1737b6e537259940ade7cb23392986c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Pepper.png
+  - fileID: 130
+    classID: 28
+    packedSize: 5592544
+    offset: 81571104
+    sourceAssetGUID: c575c41cb696525499503e0d1142dd63
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol2/pistol2_normal.png
+  - fileID: 131
+    classID: 28
+    packedSize: 2796324
+    offset: 87163648
+    sourceAssetGUID: caafdf2f2d129814f8694a90a23683d1
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg2/smg2_diffuse.png
+  - fileID: 132
+    classID: 28
+    packedSize: 174880
+    offset: 89959976
+    sourceAssetGUID: cd9df449799496c4c96a5cdc2abf60db
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Roast.png
+  - fileID: 133
+    classID: 28
+    packedSize: 5592540
+    offset: 90134856
+    sourceAssetGUID: ce09599548bdf6549976b65ac6648c89
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg1/smg1_normal.png
+  - fileID: 134
+    classID: 28
+    packedSize: 174876
+    offset: 95727400
+    sourceAssetGUID: ce8a444be2b28df4a8f59601e065fdd3
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Egg.png
+  - fileID: 135
+    classID: 28
+    packedSize: 349656
+    offset: 95902280
+    sourceAssetGUID: d3326e170800901429cb5c234b803fb6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Mustard.png
+  - fileID: 136
+    classID: 28
+    packedSize: 5592540
+    offset: 96251936
+    sourceAssetGUID: d4458d5a783bd964196b77be1b5986be
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg2/smg2_normal.png
+  - fileID: 137
+    classID: 28
+    packedSize: 5592544
+    offset: 101844480
+    sourceAssetGUID: d5baff63e2303fd46998bc9b9fc03166
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault4/assault4_normal.png
+  - fileID: 138
+    classID: 28
+    packedSize: 174876
+    offset: 107437024
+    sourceAssetGUID: d923ab9ce5871474fa4fc157c3868abf
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Mayo.png
+  - fileID: 139
+    classID: 28
+    packedSize: 174880
+    offset: 107611904
+    sourceAssetGUID: db5ee45a78a291b4e964d0d43b63e806
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Pickles.png
+  - fileID: 140
+    classID: 28
+    packedSize: 2796328
+    offset: 107786784
+    sourceAssetGUID: e09185ed5b07b374a88f54491b40380d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun2/shotgun2_diffuse.png
+  - fileID: 141
+    classID: 28
+    packedSize: 108
+    offset: 110583112
+    sourceAssetGUID: e3265ab4bf004d28a9537516768c1c75
+    buildTimeAssetPath: Assets/TextMesh Pro/Fonts/LiberationSans.ttf
+  - fileID: 142
+    classID: 28
+    packedSize: 1398312
+    offset: 110583224
+    sourceAssetGUID: e68fd8bf7f3c6a745a3291110d4fb264
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/ExampleYogganBall/point-wave-noise-texture-abstract-dot-background-technological-cyberspace-background_1217-5274.jpg
+  - fileID: 143
+    classID: 28
+    packedSize: 174876
+    offset: 111981536
+    sourceAssetGUID: e71c4dd87b85f5a48a6172c5d957d87d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Fish.png
+  - fileID: 144
+    classID: 28
+    packedSize: 2796328
+    offset: 112156416
+    sourceAssetGUID: e781dc70aeb60d44f9dd7a4a02cfae58
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun1/shotgun1_diffuse.png
+  - fileID: 145
+    classID: 28
+    packedSize: 5592544
+    offset: 114952744
+    sourceAssetGUID: f2324300a85345a47a56a442d393c41b
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper2/sniper2_normal.png
+  - fileID: 146
+    classID: 28
+    packedSize: 174884
+    offset: 120545288
+    sourceAssetGUID: f5c43c78a4cb6f444aa5ea95bc5423ff
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/textures/Meat Feast.png
+  - fileID: 147
+    classID: 28
+    packedSize: 5592544
+    offset: 120720176
+    sourceAssetGUID: f682931156928fc4e960b020752b0c9a
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault2/assault2_normal.png
+  - fileID: 148
+    classID: 28
+    packedSize: 2796328
+    offset: 126312720
+    sourceAssetGUID: f699987dc2b8fa147bed02b5fb7dd2c2
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault2/assault2_diffuse.png
+  - fileID: 149
+    classID: 28
+    packedSize: 120
+    offset: 129109048
+    sourceAssetGUID: 2e498d1c8094910479dc3e1b768306a4
+    buildTimeAssetPath: Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
+      SDF - Fallback.asset
+  - fileID: 150
+    classID: 28
+    packedSize: 1048696
+    offset: 129109168
+    sourceAssetGUID: 8f586378b4e144a9851e7b34d9b748ee
+    buildTimeAssetPath: Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
+      SDF.asset
+  - fileID: 151
+    classID: 43
+    packedSize: 35804
+    offset: 130157864
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 152
+    classID: 43
+    packedSize: 35804
+    offset: 130193672
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 153
+    classID: 43
+    packedSize: 8708
+    offset: 130229480
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 154
+    classID: 43
+    packedSize: 110200
+    offset: 130238192
+    sourceAssetGUID: e525d5c90c0df01498dca09570cfb5ec
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault3/assault3.fbx
+  - fileID: 155
+    classID: 43
+    packedSize: 5012
+    offset: 130348392
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 156
+    classID: 43
+    packedSize: 14300
+    offset: 130353408
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 157
+    classID: 43
+    packedSize: 14300
+    offset: 130367712
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 158
+    classID: 43
+    packedSize: 23856
+    offset: 130382016
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 159
+    classID: 43
+    packedSize: 78780
+    offset: 130405872
+    sourceAssetGUID: 8f9696fb6017be144a307b6586855ac0
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol2/pistol2.fbx
+  - fileID: 160
+    classID: 43
+    packedSize: 23152
+    offset: 130484656
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 161
+    classID: 43
+    packedSize: 14300
+    offset: 130507808
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 162
+    classID: 43
+    packedSize: 27624
+    offset: 130522112
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 163
+    classID: 43
+    packedSize: 16080
+    offset: 130549736
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 164
+    classID: 43
+    packedSize: 15512
+    offset: 130565816
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 165
+    classID: 43
+    packedSize: 65280
+    offset: 130581328
+    sourceAssetGUID: a957639d15248134a9be03d5ae4fed7f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg2/smg2.fbx
+  - fileID: 166
+    classID: 43
+    packedSize: 9428
+    offset: 130646608
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 167
+    classID: 43
+    packedSize: 104408
+    offset: 130656040
+    sourceAssetGUID: c8573db8e30e916479a705831bd5040c
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper2/sniper2.fbx
+  - fileID: 168
+    classID: 43
+    packedSize: 9624
+    offset: 130760448
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 169
+    classID: 43
+    packedSize: 15512
+    offset: 130770072
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 170
+    classID: 43
+    packedSize: 23856
+    offset: 130785584
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 171
+    classID: 43
+    packedSize: 1410012
+    offset: 130809440
+    sourceAssetGUID: 2cf10fa706c7a4d42b5927d8e730f4e2
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/smg1/smg1.fbx
+  - fileID: 172
+    classID: 43
+    packedSize: 13108
+    offset: 132219456
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 173
+    classID: 43
+    packedSize: 101000
+    offset: 132232568
+    sourceAssetGUID: ffb3f5f9531da764c906b0baf3285c62
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault4/assault4.fbx
+  - fileID: 174
+    classID: 43
+    packedSize: 5012
+    offset: 132333568
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 175
+    classID: 43
+    packedSize: 134500
+    offset: 132338584
+    sourceAssetGUID: 60d91f925d8c1e442bb6596dfb94ffff
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/sniper1/sniper1.fbx
+  - fileID: 176
+    classID: 43
+    packedSize: 11848
+    offset: 132473088
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 177
+    classID: 43
+    packedSize: 88184
+    offset: 132484936
+    sourceAssetGUID: 6bea03a7115c5d748b18a7573d0d4d2b
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault2/assault2.fbx
+  - fileID: 178
+    classID: 43
+    packedSize: 13868
+    offset: 132573120
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 179
+    classID: 43
+    packedSize: 75008
+    offset: 132586992
+    sourceAssetGUID: 8b36fb41929fc22429f0083d817b8040
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun2/shotgun2.fbx
+  - fileID: 180
+    classID: 43
+    packedSize: 15512
+    offset: 132662000
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 181
+    classID: 43
+    packedSize: 9428
+    offset: 132677512
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 182
+    classID: 43
+    packedSize: 13816
+    offset: 132686944
+    sourceAssetGUID: 6919be550d1e60d4d9685e2d1e34efb9
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/FBX.FBX
+  - fileID: 183
+    classID: 43
+    packedSize: 23856
+    offset: 132700760
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 184
+    classID: 43
+    packedSize: 14228
+    offset: 132724616
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 185
+    classID: 43
+    packedSize: 19076
+    offset: 132738848
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 186
+    classID: 43
+    packedSize: 23856
+    offset: 132757928
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 187
+    classID: 43
+    packedSize: 7052
+    offset: 132781784
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 188
+    classID: 43
+    packedSize: 33788
+    offset: 132788840
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 189
+    classID: 43
+    packedSize: 19076
+    offset: 132822632
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 190
+    classID: 43
+    packedSize: 33604
+    offset: 132841712
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 191
+    classID: 43
+    packedSize: 14300
+    offset: 132875320
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 192
+    classID: 43
+    packedSize: 66888
+    offset: 132889624
+    sourceAssetGUID: 4df3ce82db8e66645afd54ab1d5b0262
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol1/pistol1.fbx
+  - fileID: 193
+    classID: 43
+    packedSize: 14300
+    offset: 132956512
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 194
+    classID: 43
+    packedSize: 14372
+    offset: 132970816
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 195
+    classID: 43
+    packedSize: 80948
+    offset: 132985192
+    sourceAssetGUID: 33269b2b610f4c245a712795c1927939
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/assault1/assault1.fbx
+  - fileID: 196
+    classID: 43
+    packedSize: 53368
+    offset: 133066144
+    sourceAssetGUID: 00718395eefb6084bb25555f962f25c0
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Prototyping/Models/prototype_coin_01x01x01.fbx
+  - fileID: 197
+    classID: 43
+    packedSize: 14300
+    offset: 133119512
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 198
+    classID: 43
+    packedSize: 66924
+    offset: 133133816
+    sourceAssetGUID: 726e329e1719c8f42949342e6a5b42e3
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol3/pistol3.fbx
+  - fileID: 199
+    classID: 43
+    packedSize: 27324
+    offset: 133200744
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 200
+    classID: 43
+    packedSize: 23856
+    offset: 133228072
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 201
+    classID: 43
+    packedSize: 11112
+    offset: 133251928
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 202
+    classID: 43
+    packedSize: 15512
+    offset: 133263040
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 203
+    classID: 43
+    packedSize: 12820
+    offset: 133278552
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 204
+    classID: 43
+    packedSize: 35804
+    offset: 133291376
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 205
+    classID: 43
+    packedSize: 11288
+    offset: 133327184
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 206
+    classID: 43
+    packedSize: 35800
+    offset: 133338472
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 207
+    classID: 43
+    packedSize: 15512
+    offset: 133374272
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 208
+    classID: 43
+    packedSize: 1312876
+    offset: 133389784
+    sourceAssetGUID: 6919be550d1e60d4d9685e2d1e34efb9
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/FBX.FBX
+  - fileID: 209
+    classID: 43
+    packedSize: 14300
+    offset: 134702664
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 210
+    classID: 43
+    packedSize: 82032
+    offset: 134716968
+    sourceAssetGUID: f62f7dc06bd890d4aab43b8fd635fe02
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/shotgun1/shotgun1.fbx
+  - fileID: 211
+    classID: 43
+    packedSize: 82208
+    offset: 134799000
+    sourceAssetGUID: ca1c64f7c147fb0479f9ef03e264a372
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Low Poly Guns/Models/Guns/pistol4/pistol4.fbx
+  - fileID: 212
+    classID: 43
+    packedSize: 20868
+    offset: 134881208
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 213
+    classID: 43
+    packedSize: 14228
+    offset: 134902080
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 214
+    classID: 43
+    packedSize: 5016
+    offset: 134916312
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 215
+    classID: 43
+    packedSize: 32004
+    offset: 134921328
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 216
+    classID: 43
+    packedSize: 19940
+    offset: 134953336
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 217
+    classID: 43
+    packedSize: 43984
+    offset: 134973280
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 218
+    classID: 43
+    packedSize: 14300
+    offset: 135017264
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 219
+    classID: 43
+    packedSize: 17640
+    offset: 135031568
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 220
+    classID: 43
+    packedSize: 14300
+    offset: 135049208
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 221
+    classID: 43
+    packedSize: 19076
+    offset: 135063512
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 222
+    classID: 43
+    packedSize: 13336
+    offset: 135082592
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 223
+    classID: 43
+    packedSize: 14296
+    offset: 135095928
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 224
+    classID: 43
+    packedSize: 15512
+    offset: 135110224
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 225
+    classID: 43
+    packedSize: 6932
+    offset: 135125736
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 226
+    classID: 43
+    packedSize: 15512
+    offset: 135132672
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 227
+    classID: 43
+    packedSize: 5012
+    offset: 135148184
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 228
+    classID: 43
+    packedSize: 5012
+    offset: 135153200
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 229
+    classID: 43
+    packedSize: 15512
+    offset: 135158216
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 230
+    classID: 43
+    packedSize: 23856
+    offset: 135173728
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 231
+    classID: 43
+    packedSize: 42620
+    offset: 135197584
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 232
+    classID: 43
+    packedSize: 12180
+    offset: 135240208
+    sourceAssetGUID: 48dc481369e575641923ebc98745090d
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/sandwich-assembly/source/maya2sketchfab.fbx
+  - fileID: 233
+    classID: 43
+    packedSize: 19072
+    offset: 135252392
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 234
+    classID: 43
+    packedSize: 19076
+    offset: 135271464
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 235
+    classID: 43
+    packedSize: 19076
+    offset: 135290544
+    sourceAssetGUID: 56b9acc6c171ebb45b9094f8d085f08e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/source/sushi.blend
+  - fileID: 236
+    classID: 48
+    packedSize: 23380
+    offset: 135309624
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 237
+    classID: 48
+    packedSize: 217092
+    offset: 135333008
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 238
+    classID: 48
+    packedSize: 648508
+    offset: 135550104
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 239
+    classID: 48
+    packedSize: 13452
+    offset: 136198616
+    sourceAssetGUID: 0000000000000000f000000000000000
+    buildTimeAssetPath: Resources/unity_builtin_extra
+  - fileID: 240
+    classID: 48
+    packedSize: 4984
+    offset: 136212072
+    sourceAssetGUID: 8b39b95ac85682040beff730e0cfc77a
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Shaders/Mobile/VRChat-Mobile-Particle-Alpha.shader
+  - fileID: 241
+    classID: 48
+    packedSize: 4976
+    offset: 136217056
+    sourceAssetGUID: 9200bec112b65ec4fbbbd33fa89c20f4
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Sample Assets/Shaders/Mobile/VRChat-Mobile-Particle-Add.shader
+  - fileID: 242
+    classID: 48
+    packedSize: 32252
+    offset: 136222032
+    sourceAssetGUID: fe393ace9b354375a9cb14cdbbc28be4
+    buildTimeAssetPath: Assets/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader
+  - fileID: 243
+    classID: 74
+    packedSize: 2508
+    offset: 136254288
+    sourceAssetGUID: 7c23407b11502f342ab2bea7af2f103f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/ChopsticksClosed.anim
+  - fileID: 244
+    classID: 74
+    packedSize: 2508
+    offset: 136256800
+    sourceAssetGUID: 77bc600698aee9e4588401a0d805b524
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/ChopsticksOpen.anim
+  - fileID: 245
+    classID: 83
+    packedSize: 152
+    offset: 136259312
+    sourceAssetGUID: 324269ffaf9b9d14ab86ec8c4c71fea6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/389590__jofae__swing-woosh.wav
+  - fileID: 246
+    classID: 83
+    packedSize: 148
+    offset: 136259464
+    sourceAssetGUID: 5e816448246f86c4cb035729f3ad55d4
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/260614__kwahmah_02__pop.wav
+  - fileID: 247
+    classID: 83
+    packedSize: 152
+    offset: 136259616
+    sourceAssetGUID: 742d6fa201ad54940a80a3bd35cac3ab
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/634690__adhdreaming__lil-pip.wav
+  - fileID: 248
+    classID: 83
+    packedSize: 160
+    offset: 136259768
+    sourceAssetGUID: 7be9fe459f2b89f4ca86c6b4999aee5e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/265675__stereo-surgeon__synth-stab-1.wav
+  - fileID: 249
+    classID: 83
+    packedSize: 160
+    offset: 136259928
+    sourceAssetGUID: 81875a8bd45d10b43a461c6d8b10d5c6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/232135__yottasounds__splat-005(2).wav
+  - fileID: 250
+    classID: 83
+    packedSize: 172
+    offset: 136260088
+    sourceAssetGUID: a3a24d46e0e924e4daab4f4228f1243f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/566685__windwalk_entertainment__tap-on-shoulder.wav
+  - fileID: 251
+    classID: 83
+    packedSize: 160
+    offset: 136260264
+    sourceAssetGUID: ab9b9cff8cb826049bb17480997e95d2
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/516243__wyronroberth__grab-havest-01.mp3
+  - fileID: 252
+    classID: 83
+    packedSize: 168
+    offset: 136260424
+    sourceAssetGUID: b52f0968658659a40abbc1c2863863e0
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/572095__kablazik_samples__kb_kick_metallic.wav
+  - fileID: 253
+    classID: 83
+    packedSize: 156
+    offset: 136260592
+    sourceAssetGUID: f038aaa05b2564c4a90f55c9dacfa411
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/118513__thefsoundman__punch_02.wav
+  - fileID: 254
+    classID: 91
+    packedSize: 1000
+    offset: 136260752
+    sourceAssetGUID: 83dacdba7d5f8aa4a84dec22cf464c33
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Food/Chopsticks.controller
+  - fileID: 255
+    classID: 115
+    packedSize: 100
+    offset: 118416
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Runtime/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 256
+    classID: 115
+    packedSize: 96
+    offset: 118520
+    sourceAssetGUID: 4ecd63eff847044b68db9453ce219299
+    buildTimeAssetPath: Packages/com.vrchat.base/Runtime/VRCSDK/Plugins/VRCCore-Editor.dll
+  - fileID: 257
+    classID: 115
+    packedSize: 116
+    offset: 118616
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Runtime/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 258
+    classID: 115
+    packedSize: 108
+    offset: 118736
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Runtime/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 259
+    classID: 115
+    packedSize: 96
+    offset: 118848
+    sourceAssetGUID: 0cd44c1031e13a943bb63640046fad76
+    buildTimeAssetPath: Packages/com.unity.ugui/Runtime/UI/Core/Layout/CanvasScaler.cs
+  - fileID: 260
+    classID: 115
+    packedSize: 88
+    offset: 118944
+    sourceAssetGUID: 45115577ef41a5b4ca741ed302693907
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Runtime/Udon/UdonBehaviour.cs
+  - fileID: 261
+    classID: 115
+    packedSize: 128
+    offset: 119032
+    sourceAssetGUID: 4f231c4fb786f3946a6b90b886c48677
+    buildTimeAssetPath: Packages/com.unity.ugui/Runtime/EventSystem/InputModules/StandaloneInputModule.cs
+  - fileID: 262
+    classID: 115
+    packedSize: 100
+    offset: 119160
+    sourceAssetGUID: 71c1514a6bd24e1e882cebbe1904ce04
+    buildTimeAssetPath: Packages/com.unity.textmeshpro/Scripts/Runtime/TMP_FontAsset.cs
+  - fileID: 263
+    classID: 115
+    packedSize: 104
+    offset: 119264
+    sourceAssetGUID: 76c392e42b5098c458856cdf6ecaaaa1
+    buildTimeAssetPath: Packages/com.unity.ugui/Runtime/EventSystem/EventSystem.cs
+  - fileID: 264
+    classID: 115
+    packedSize: 128
+    offset: 119368
+    sourceAssetGUID: bf61d954ecb803046953c666facfb904
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Runtime/Udon/ProgramSources/SerializedUdonProgramAsset.cs
+  - fileID: 265
+    classID: 115
+    packedSize: 100
+    offset: 119496
+    sourceAssetGUID: f4688fdb7df04437aeb418b961361dc5
+    buildTimeAssetPath: Packages/com.unity.textmeshpro/Scripts/Runtime/TextMeshProUGUI.cs
+  - fileID: 266
+    classID: 115
+    packedSize: 92
+    offset: 119600
+    sourceAssetGUID: 661092b4961be7145bfbe56e1e62337b
+    buildTimeAssetPath: Packages/com.vrchat.worlds/Runtime/VRCSDK/Plugins/VRCSDK3.dll
+  - fileID: 267
+    classID: 128
+    packedSize: 352462
+    offset: 136261752
+    sourceAssetGUID: e3265ab4bf004d28a9537516768c1c75
+    buildTimeAssetPath: Assets/TextMesh Pro/Fonts/LiberationSans.ttf
+  - fileID: 268
+    classID: 134
+    packedSize: 36
+    offset: 136614216
+    sourceAssetGUID: 0efcdbeb462dfa846a71b1700a0a8954
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/AirHockey/BouncySlidey.physicMaterial
+  - fileID: 269
+    classID: 134
+    packedSize: 36
+    offset: 136614256
+    sourceAssetGUID: fbbcadeafccdad0459571df20d7048a4
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/AirHockey/SuperBouncy.physicMaterial
+  - fileID: 270
+    classID: 134
+    packedSize: 32
+    offset: 136614296
+    sourceAssetGUID: 2ff6fb5ed04b03f42bb0196e59a76d2f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/Bouncy.physicMaterial
+  - fileID: 271
+    classID: 114
+    packedSize: 188040
+    offset: 136614328
+    sourceAssetGUID: 5998466d14485574fb7be42197faf3d3
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/0a890b2a8fe23fa4b99855fa4b78f7a9.asset
+  - fileID: 272
+    classID: 114
+    packedSize: 132324
+    offset: 136802368
+    sourceAssetGUID: 0d3283731f9658b43b2be426c44c7a09
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/0af790b5dd4802a4d92f27a24d69586c.asset
+  - fileID: 273
+    classID: 114
+    packedSize: 166380
+    offset: 136934696
+    sourceAssetGUID: 77876a77aa1fe944ab4420483e5de0c1
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/0e1b6d248e8e5a942aad03fad74a8002.asset
+  - fileID: 274
+    classID: 114
+    packedSize: 187852
+    offset: 137101080
+    sourceAssetGUID: f59d2f58eba0e77468b5d35bfbd9d8e5
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/11471e052abe01345ba753705b1a7317.asset
+  - fileID: 275
+    classID: 114
+    packedSize: 22588
+    offset: 137288936
+    sourceAssetGUID: 0226c44731921004087ecb84f6a39cce
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/192b811f89d3c214cb8f645bd4d5e143.asset
+  - fileID: 276
+    classID: 114
+    packedSize: 74572
+    offset: 137311528
+    sourceAssetGUID: 868222056ff79974ca90c0f1ea660b00
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/2f494a6f398723d40849677ff75a9d42.asset
+  - fileID: 277
+    classID: 114
+    packedSize: 11920
+    offset: 137386104
+    sourceAssetGUID: 4c89d3ceabdc69348a0c4cb4f1ba919e
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/4386fd53e13a78e4ab43f8375dd72b06.asset
+  - fileID: 278
+    classID: 114
+    packedSize: 144664
+    offset: 137398024
+    sourceAssetGUID: 510d5eadca1785d4fad0121558faf504
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/490d3b2e2072e184081b676228e7256a.asset
+  - fileID: 279
+    classID: 114
+    packedSize: 749184
+    offset: 137542688
+    sourceAssetGUID: 44fcd4ea9e09ce343929eddaa0b27baa
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/5590289dbbc8c9e4383d1d53c095e59c.asset
+  - fileID: 280
+    classID: 114
+    packedSize: 170048
+    offset: 138291872
+    sourceAssetGUID: 230ef4b329bf2fc43ba3a66002285960
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/69d856c20ea9bf74ab7ab877ae64a00c.asset
+  - fileID: 281
+    classID: 114
+    packedSize: 96096
+    offset: 138461920
+    sourceAssetGUID: 836f496d0fd3aae4ea2d9fdc2ad89afa
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/6c0c11fa4cc76fa48acf12399228c001.asset
+  - fileID: 282
+    classID: 114
+    packedSize: 36044
+    offset: 138558016
+    sourceAssetGUID: b1932104f42cd0f438d0ddf64eabcee2
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/718083a0b789eba4b85600788130410b.asset
+  - fileID: 283
+    classID: 114
+    packedSize: 21596
+    offset: 138594064
+    sourceAssetGUID: b3e624c766cc9c345973e73e4e87a80e
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/75f3b7bb830f4324a8b2f49814f3493a.asset
+  - fileID: 284
+    classID: 114
+    packedSize: 188708
+    offset: 138615664
+    sourceAssetGUID: 89709cbc250aaf5499c29fbc2d4d68a5
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/7857cd74f7f87db47a09d8f2a4dfa22d.asset
+  - fileID: 285
+    classID: 114
+    packedSize: 20560
+    offset: 138804376
+    sourceAssetGUID: 6476ca46cae090b4abead0e94113583a
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/805aeae5a10a8aa46a0ce077cd905783.asset
+  - fileID: 286
+    classID: 114
+    packedSize: 152592
+    offset: 138824936
+    sourceAssetGUID: 659621a4f99eab840b1b4c7b612cf048
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/8cd7c9d1241c0164ab2de71c1de282ec.asset
+  - fileID: 287
+    classID: 114
+    packedSize: 116616
+    offset: 138977528
+    sourceAssetGUID: aacab0a159b60264e95f00e20f8f189d
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/9274e9b22d09b7046a86a002f3cce30b.asset
+  - fileID: 288
+    classID: 114
+    packedSize: 272344
+    offset: 139094144
+    sourceAssetGUID: be4a9a7a7463f7f499443dc013858d97
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/a4621846ceac3fb41bc8b7e73301cadd.asset
+  - fileID: 289
+    classID: 114
+    packedSize: 264376
+    offset: 139366488
+    sourceAssetGUID: a26a5fd7cd495c049b09be5678134345
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/aa80eb9526dbb1d49a4d559064079f71.asset
+  - fileID: 290
+    classID: 114
+    packedSize: 47420
+    offset: 139630864
+    sourceAssetGUID: 63ca095bb8b8bed42a279a5bec2d50a5
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/addb15b30ba29d94e83ad99be5661f8b.asset
+  - fileID: 291
+    classID: 114
+    packedSize: 66740
+    offset: 139678288
+    sourceAssetGUID: ad09971097c4a19459e8ed5517334291
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/b6850f2ec0f087f4d8aa9bd943fb9bec.asset
+  - fileID: 292
+    classID: 114
+    packedSize: 15040
+    offset: 139745032
+    sourceAssetGUID: e925fc38b0c97e3408b030e78ac991c0
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/b7bc596091d3f9244a6159bc79bd9688.asset
+  - fileID: 293
+    classID: 114
+    packedSize: 105348
+    offset: 139760072
+    sourceAssetGUID: 82cd81a7cee68c941b1c92a2dcc18194
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/bb5a8ddfe90173544b7d7e85c72ff070.asset
+  - fileID: 294
+    classID: 114
+    packedSize: 11980
+    offset: 139865424
+    sourceAssetGUID: 7b1c1b27c0df08e40b176b56c9ec365f
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/c3f98cd284746464c90a0d5ce12d9c58.asset
+  - fileID: 295
+    classID: 114
+    packedSize: 101588
+    offset: 139877408
+    sourceAssetGUID: ae1ecda8b25c2314c83870c5ddac36af
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/c7f9fc5cb81b131479775fa09db6b935.asset
+  - fileID: 296
+    classID: 114
+    packedSize: 17068
+    offset: 139979000
+    sourceAssetGUID: d56f48495f840984f879607d699d8a0e
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/c8df303ceb45ae84f85a11591f741734.asset
+  - fileID: 297
+    classID: 114
+    packedSize: 62700
+    offset: 139996072
+    sourceAssetGUID: 1155f28e88861dd4ebfc924eafefbfcc
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/cff887b5e10fe4b4fbec9a5b842e37c5.asset
+  - fileID: 298
+    classID: 114
+    packedSize: 272484
+    offset: 140058776
+    sourceAssetGUID: 7f4d62a7660f8c94fbd8dcc00543bbbe
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/e05da05c679963a43b011180fff8bf4c.asset
+  - fileID: 299
+    classID: 114
+    packedSize: 56240
+    offset: 140331264
+    sourceAssetGUID: cba57b2db7d1a1641b00b8a03c7efbbc
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/e363dac47a5f2984ca205633d91b8430.asset
+  - fileID: 300
+    classID: 114
+    packedSize: 18988
+    offset: 140387504
+    sourceAssetGUID: b1d7c05250585fe4c8f50297372b146a
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/ed0cdd4fbfe7e9845a0cb19d9308b40a.asset
+  - fileID: 301
+    classID: 114
+    packedSize: 751768
+    offset: 140406496
+    sourceAssetGUID: 98d09e85632eb2c4ba84737d3272631b
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/f12ac4565c476404da88c7f28db020cb.asset
+  - fileID: 302
+    classID: 114
+    packedSize: 59640
+    offset: 141158264
+    sourceAssetGUID: b2fd4c411c7c4504ab8ad94cc9a497f3
+    buildTimeAssetPath: Assets/SerializedUdonPrograms/f480daff21a5bd84486ec71d7e098fd5.asset
+  - fileID: 303
+    classID: 114
+    packedSize: 1152
+    offset: 141217904
+    sourceAssetGUID: 2e498d1c8094910479dc3e1b768306a4
+    buildTimeAssetPath: Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
+      SDF - Fallback.asset
+  - fileID: 304
+    classID: 114
+    packedSize: 27760
+    offset: 141219056
+    sourceAssetGUID: 8f586378b4e144a9851e7b34d9b748ee
+    buildTimeAssetPath: Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
+      SDF.asset
+--- !u!1126 &-1517166066418747158
+PackedAssets:
+  m_File: 2
+  m_ShortPath: BuildPlayer-TestWorld.resource
+  m_Overhead: 0
+  m_Contents:
+  - fileID: 0
+    classID: 83
+    packedSize: 1120
+    offset: 0
+    sourceAssetGUID: 742d6fa201ad54940a80a3bd35cac3ab
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/634690__adhdreaming__lil-pip.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 6528
+    offset: 0
+    sourceAssetGUID: ab9b9cff8cb826049bb17480997e95d2
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/516243__wyronroberth__grab-havest-01.mp3
+  - fileID: 0
+    classID: 83
+    packedSize: 6592
+    offset: 0
+    sourceAssetGUID: 5e816448246f86c4cb035729f3ad55d4
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/260614__kwahmah_02__pop.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 11040
+    offset: 0
+    sourceAssetGUID: a3a24d46e0e924e4daab4f4228f1243f
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/566685__windwalk_entertainment__tap-on-shoulder.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 11520
+    offset: 0
+    sourceAssetGUID: 81875a8bd45d10b43a461c6d8b10d5c6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/232135__yottasounds__splat-005(2).wav
+  - fileID: 0
+    classID: 83
+    packedSize: 14240
+    offset: 0
+    sourceAssetGUID: f038aaa05b2564c4a90f55c9dacfa411
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/118513__thefsoundman__punch_02.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 16800
+    offset: 0
+    sourceAssetGUID: 324269ffaf9b9d14ab86ec8c4c71fea6
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/389590__jofae__swing-woosh.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 23872
+    offset: 0
+    sourceAssetGUID: b52f0968658659a40abbc1c2863863e0
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/572095__kablazik_samples__kb_kick_metallic.wav
+  - fileID: 0
+    classID: 83
+    packedSize: 87392
+    offset: 0
+    sourceAssetGUID: 7be9fe459f2b89f4ca86c6b4999aee5e
+    buildTimeAssetPath: Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync Example
+      Scene/Resources/265675__stereo-surgeon__synth-stab-1.wav
+--- !u!668709126 &-674685263727579649
+BuiltAssetBundleInfoSet:
+  bundleInfos:
+  - bundleName: scene-standalonewindows64-testworld.vrcw
+    bundleArchiveFile: 3
+    packagedFileIndices: 000000000100000002000000
+  - bundleName: OptimizedPickupSync
+    bundleArchiveFile: 6
+    packagedFileIndices: 05000000
+--- !u!641289076 &-113389310994202158
+AudioBuildInfo:
+  m_IsAudioDisabled: 0
+  m_AudioClipCount: 9
+  m_AudioMixerCount: 0
+--- !u!1125 &1
+BuildReport:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LastBuild
+  m_Summary:
+    buildStartTime:
+      serializedVersion: 2
+      ticks: 638258502222689208
+    buildGUID: 00000000000000000000000000000000
+    platformName: Win64
+    platformGroupName: Standalone
+    options: 16
+    assetBundleOptions: 32
+    outputPath: C:/Users/MMMAEL~1/AppData/Local/Temp/DefaultCompany/OptimizedPickupSync/scene-standalonewindows64-testworld.vrcw
+    crc: 451131487
+    totalSize: 42545666
+    totalTimeTicks: 0
+    totalErrors: 6
+    totalWarnings: 0
+    buildType: 1
+    buildResult: 1
+  m_Files:
+  - path: D:/Archive/OptimizedPickupSync/scene-standalonewindows64-testworld.vrcw/BuildPlayer-TestWorld
+    role: Scene
+    id: 0
+    totalSize: 15483704
+  - path: D:/Archive/OptimizedPickupSync/scene-standalonewindows64-testworld.vrcw/BuildPlayer-TestWorld.sharedAssets
+    role: SharedAssets
+    id: 1
+    totalSize: 141246816
+  - path: D:/Archive/OptimizedPickupSync/scene-standalonewindows64-testworld.vrcw/BuildPlayer-TestWorld.resource
+    role: StreamingResourceFile
+    id: 2
+    totalSize: 179104
+  - path: D:/Archive/OptimizedPickupSync/scene-standalonewindows64-testworld.vrcw
+    role: AssetBundle
+    id: 3
+    totalSize: 42541605
+  - path: D:/Archive/OptimizedPickupSync/scene-standalonewindows64-testworld.vrcw.manifest
+    role: AssetBundleTextManifest
+    id: 4
+    totalSize: 2839
+  - path: D:/Archive/OptimizedPickupSync/OptimizedPickupSync/CAB-632963b91e768251f91b5f16da875a9c
+    role: ResourcesFile
+    id: 5
+    totalSize: 4308
+  - path: D:/Archive/OptimizedPickupSync/OptimizedPickupSync
+    role: ManifestAssetBundle
+    id: 6
+    totalSize: 1055
+  - path: D:/Archive/OptimizedPickupSync/OptimizedPickupSync.manifest
+    role: AssetBundleTextManifest
+    id: 7
+    totalSize: 167
+  m_BuildSteps:
+  - stepName: Build Asset Bundles
+    durationTicks: 371641118
+    depth: 0
+    messages: []
+  - stepName: Calculate asset bundles to be built
+    durationTicks: 138204
+    depth: 1
+    messages: []
+  - stepName: Compile scripts
+    durationTicks: 34533103
+    depth: 1
+    messages: []
+  - stepName: Build player
+    durationTicks: 290937570
+    depth: 1
+    messages:
+    - type: 3
+      content: HTTPFormUseage:UrlEncoded
+  - stepName: Prepare assets for target platform
+    durationTicks: 1034774
+    depth: 2
+    messages: []
+  - stepName: Building scenes
+    durationTicks: 83198572
+    depth: 2
+    messages: []
+  - stepName: Building scene Assets/Samples/SmartObjectSync/2.6.0/SmartObjectSync
+      Example Scene/TestWorld.unity
+    durationTicks: 83182169
+    depth: 3
+    messages:
+    - type: 0
+      content: Can't remove SmartObjectSync (Script) because KinematicUntilDropped
+        (Script) depends on it
+    - type: 0
+      content: Can't remove ChildAttachmentState (Script) because ChildAttachmentStateSetter
+        (Script) depends on it
+    - type: 0
+      content: Can't remove SmartObjectSync (Script) because PaperFloat (Script)
+        depends on it
+    - type: 0
+      content: Can't remove SmartObjectSync (Script) because SecondaryPickup (Script)
+        depends on it
+    - type: 0
+      content: Can't remove SmartObjectSync (Script) because KinematicUntilDropped
+        (Script) depends on it
+    - type: 0
+      content: Can't remove JointAttachmentState (Script) because JointAttachmentStateSetter
+        (Script) depends on it
+  - stepName: Writing asset files
+    durationTicks: 4610606
+    depth: 2
+    messages: []
+  - stepName: Packaging assets - archive:/BuildPlayer-TestWorld/BuildPlayer-TestWorld.sharedAssets
+    durationTicks: 4555042
+    depth: 3
+    messages: []
+  - stepName: Creating compressed player package
+    durationTicks: 182548753
+    depth: 2
+    messages: []
+  - stepName: Postprocess built player
+    durationTicks: 168006
+    depth: 2
+    messages: []
+  m_Appendices:
+  - {fileID: -674685263727579649}
+  - {fileID: -5929840739161358758}
+  - {fileID: -1517166066418747158}
+  - {fileID: 4112933814435535230}
+  - {fileID: -113389310994202158}
+  - {fileID: 7004555560090005819}
+--- !u!382020655 &4112933814435535230
+PluginBuildInfo:
+  m_RuntimePlugins:
+  - Unity.Burst.Unsafe
+  - VRC.SDK3.Dynamics.PhysBone
+  - OVRPlugin
+  - YamlDotNet
+  - WatsonTcp
+  - System.Threading.Tasks.Extensions
+  - VRC.Udon.ClientBindings
+  - openvr_api
+  - portmidi
+  - VRC.Udon.VRCWrapperModules
+  - VRCSDK3
+  - VRC.Udon.VM
+  - Serilog
+  - nunit.framework
+  - SemanticVersioning
+  - librsync.net
+  - VRC.Udon.Common
+  - VRC.SDK3.Dynamics.Contact
+  - Collections.Pooled
+  - System.Collections.Immutable
+  - System.Numerics.Vectors
+  - SDKBase-Legacy
+  - System.Buffers
+  - VRC.Dynamics
+  - VRC.Udon.Wrapper
+  - Serilog.Sinks.File
+  - VRC.Udon.Security
+  - clipper_library
+  - VRC.Collections
+  - VRCSDKBase
+  - System.Runtime.CompilerServices.Unsafe
+  - vrc_image_loader
+  - libvrc_image_loader
+  - Newtonsoft.Json
+  - libopenvr_api
+  - Blake2Sharp
+  - System.Memory
+  - System.Text.Encoding.CodePages
+  - VRCCore-Editor
+  - VRC.Utility
+  - AudioPluginOculusSpatializer
+  m_EditorPlugins:
+  - ICSharpCode.SharpZipLib
+  - VRCSDK3-Editor
+  - Microsoft.CodeAnalysis
+  - VRC.Udon.VRCTypeResolverModules
+  - AppleEventIntegration
+  - liblz4Plastic
+  - Unity.Plastic.Newtonsoft.Json
+  - unityplastic
+  - VRC.Udon.Compiler
+  - System.Reflection.Metadata
+  - Microsoft.CodeAnalysis.CSharp
+  - VRC.Udon.UAssembly
+  - vpm-core-lib
+  - VRC.Udon.Graph
+  - UnityEditor.VR
+  - 0Harmony
+  - VRC.SDK3.Dynamics.PhysBone.Editor
+  - VRCSDKBase-Editor
+  - VRC.SDK3.Dynamics.Contact.Editor
+  - VRC.Udon.VRCGraphModules
+  - log4netPlastic
+  - VRC.Udon.EditorBindings
+  - zlib64Plastic
+  - Unity.Plastic.Antlr3.Runtime
+  - Serilog.Sinks.Unity3D
+  - lz4x64Plastic
+--- !u!1126 &7004555560090005819
+PackedAssets:
+  m_File: 5
+  m_ShortPath: CAB-632963b91e768251f91b5f16da875a9c
+  m_Overhead: 4096
+  m_Contents:
+  - fileID: 1
+    classID: 142
+    packedSize: 104
+    offset: 4096
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: AssetBundle Object
+  - fileID: 2
+    classID: 290
+    packedSize: 108
+    offset: 4200
+    sourceAssetGUID: 00000000000000000000000000000000
+    buildTimeAssetPath: 'Built-in AssetBundleManifest: AssetBundleManifest'
