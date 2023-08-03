@@ -22,6 +22,7 @@ namespace MMMaellon
 
         //Advanced settings
         SerializedProperty m_printDebugMessages;
+        SerializedProperty m_performanceModeCollisions;
         SerializedProperty m_forceContinuousSpeculative;
         SerializedProperty m_kinematicWhileHeld;
         SerializedProperty m_nonKinematicPickupJitterPreventionTime;
@@ -33,6 +34,7 @@ namespace MMMaellon
         void OnEnable()
         {
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
+            m_performanceModeCollisions = serializedObject.FindProperty("performanceModeCollisions");
             m_forceContinuousSpeculative = serializedObject.FindProperty("forceContinuousSpeculative");
             m_kinematicWhileHeld = serializedObject.FindProperty("kinematicWhileHeld");
             m_nonKinematicPickupJitterPreventionTime = serializedObject.FindProperty("nonKinematicPickupJitterPreventionTime");
@@ -240,7 +242,12 @@ namespace MMMaellon
             foldoutOpen = EditorGUILayout.BeginFoldoutHeaderGroup(foldoutOpen, "Advanced Settings");
             if (foldoutOpen)
             {
+                if (GUILayout.Button(new GUIContent("Force Setup")))
+                {
+                    SetupSelectedSmartObjectSyncs();
+                }
                 EditorGUILayout.PropertyField(m_printDebugMessages);
+                EditorGUILayout.PropertyField(m_performanceModeCollisions);
                 EditorGUILayout.PropertyField(m_forceContinuousSpeculative);
                 EditorGUILayout.PropertyField(m_kinematicWhileHeld);
                 EditorGUILayout.PropertyField(m_nonKinematicPickupJitterPreventionTime);
@@ -248,10 +255,6 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_worldSpaceTeleport);
                 EditorGUILayout.PropertyField(m_worldSpaceSleep);
                 EditorGUILayout.PropertyField(m_preventStealWhileAttachedToPlayer);
-                if (GUILayout.Button(new GUIContent("Force Setup")))
-                {
-                    SetupSelectedSmartObjectSyncs();
-                }
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -275,6 +278,8 @@ namespace MMMaellon
 
         [HideInInspector]
         public bool printDebugMessages = false;
+        [HideInInspector]
+        public bool performanceModeCollisions = true;
         [HideInInspector, Tooltip("By default, calling respawn will make the object reset it's local object space transforms.")]
         public bool worldSpaceTeleport = false;
         [HideInInspector, Tooltip("By default, everything is in world space. Uncheck if the relationship between this object and it's parent is more important than it and the world.")]
@@ -921,12 +926,15 @@ namespace MMMaellon
 
         //Collision Events
         SmartObjectSync otherSync;
+        float lastCollision = -1001;
         public void OnCollisionEnter(Collision other)
         {
-            if (rigid.isKinematic)
+            if (rigid.isKinematic || (performanceModeCollisions && lastCollision + Time.deltaTime < Time.timeSinceLevelLoad))
             {
                 return;
             }
+
+            lastCollision = Time.timeSinceLevelLoad;
 
             if (IsLocalOwner())
             {
@@ -960,10 +968,12 @@ namespace MMMaellon
 
         public void OnCollisionExit(Collision other)
         {
-            if (rigid.isKinematic)
+            if (rigid.isKinematic || (performanceModeCollisions && lastCollision + Time.deltaTime < Time.timeSinceLevelLoad))
             {
                 return;
             }
+
+            lastCollision = Time.timeSinceLevelLoad;
 
             if (IsLocalOwner())
             {
