@@ -248,6 +248,10 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_worldSpaceTeleport);
                 EditorGUILayout.PropertyField(m_worldSpaceSleep);
                 EditorGUILayout.PropertyField(m_preventStealWhileAttachedToPlayer);
+                if (GUILayout.Button(new GUIContent("Force Setup")))
+                {
+                    SetupSelectedSmartObjectSyncs();
+                }
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
