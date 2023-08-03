@@ -11,18 +11,26 @@ namespace MMMaellon
     {
         public SmartObjectSync wholeObject;
         public Transform piecesParent;
+        public GameObject breakObject;
         public SmartObjectSync[] pieces;
         public AudioSource breakSound;
         public float resetTimer = 30f;
         [UdonSynced, FieldChangeCallback(nameof(broken))]
         public bool _broken = false;
-        public bool broken{
+        public bool broken
+        {
             get => _broken;
             set
             {
+                wholeObject.gameObject.SetActive(!value);
+                if (Utilities.IsValid(breakObject))
+                {
+                    breakObject.transform.position = wholeObject.transform.position;
+                    breakObject.transform.rotation = wholeObject.transform.rotation;
+                    breakObject.SetActive(value);
+                }
                 if (value)
                 {
-                    wholeObject.gameObject.SetActive(false);
                     piecesParent.transform.position = wholeObject.transform.position;
                     piecesParent.transform.rotation = wholeObject.transform.rotation;
                     foreach (SmartObjectSync sync in pieces)
@@ -35,7 +43,8 @@ namespace MMMaellon
                             {
                                 sync.TakeOwnership(false);
                                 sync.Respawn();
-                            } else
+                            }
+                            else
                             {
                                 sync.transform.localPosition = sync.spawnPos;
                                 sync.transform.localRotation = sync.spawnRot;
@@ -55,13 +64,14 @@ namespace MMMaellon
                     {
                         SendCustomEventDelayedSeconds(nameof(FixCheck), resetTimer);
                     }
-                } else
+                }
+                else
                 {
-                    wholeObject.gameObject.SetActive(true);
                     if (wholeObject.IsLocalOwner())
                     {
                         wholeObject.Respawn();
-                    } else if (_broken != value)
+                    }
+                    else if (_broken != value)
                     {
                         wholeObject.StartInterpolation();
                     }
