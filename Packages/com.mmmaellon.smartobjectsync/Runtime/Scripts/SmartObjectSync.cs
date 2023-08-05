@@ -966,14 +966,15 @@ namespace MMMaellon
             return (state != STATE_TELEPORTING || !teleportFlagSet);
         }
 
+        float lastCollisionExit = -1001;
         public void OnCollisionExit(Collision other)
         {
-            if (rigid.isKinematic || (performanceModeCollisions && lastCollision + Time.deltaTime < Time.timeSinceLevelLoad))
+            if (rigid.isKinematic || (performanceModeCollisions && lastCollisionExit + Time.deltaTime > Time.timeSinceLevelLoad))
             {
                 return;
             }
 
-            lastCollision = Time.timeSinceLevelLoad;
+            lastCollisionExit = Time.timeSinceLevelLoad;
 
             if (IsLocalOwner())
             {
