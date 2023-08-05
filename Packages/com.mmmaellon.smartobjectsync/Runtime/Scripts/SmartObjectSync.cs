@@ -929,7 +929,7 @@ namespace MMMaellon
         float lastCollision = -1001;
         public void OnCollisionEnter(Collision other)
         {
-            if (rigid.isKinematic || (performanceModeCollisions && lastCollision + Time.deltaTime < Time.timeSinceLevelLoad))
+            if (rigid.isKinematic || (performanceModeCollisions && lastCollision + Time.deltaTime > Time.timeSinceLevelLoad))
             {
                 return;
             }

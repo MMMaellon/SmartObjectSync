@@ -57,6 +57,8 @@ namespace MMMaellon
                     }
                     if (Utilities.IsValid(breakSound))
                     {
+                        breakSound.transform.position = wholeObject.transform.position;
+                        breakSound.transform.rotation = wholeObject.transform.rotation;
                         breakSound.Play();
                     }
                     lastBroken = Time.timeSinceLevelLoad;
