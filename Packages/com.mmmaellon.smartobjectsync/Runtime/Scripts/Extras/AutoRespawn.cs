@@ -23,7 +23,7 @@ namespace MMMaellon
         private float lastSleepTime = 0f;
         public override void OnChangeState(SmartObjectSync s, int oldState, int newState)
         {
-            if (s != sync || !sync.IsLocalOwner())
+            if (s != sync)
             {
                 return;
             }
@@ -34,12 +34,20 @@ namespace MMMaellon
                     lastSleepTime = Time.realtimeSinceStartup;
                     SendCustomEventDelayedSeconds(nameof(Respawn), respawnCooldown);
                 }
+                else
+                {
+                    lastSleepTime = Time.realtimeSinceStartup;
+                }
             } else if (ignorePhysicsEvents && (newState == SmartObjectSync.STATE_FALLING || newState == SmartObjectSync.STATE_INTERPOLATING || newState == SmartObjectSync.STATE_TELEPORTING))
             {
                 if (lastSleepTime < 0)
                 {
                     lastSleepTime = Time.realtimeSinceStartup;
                     SendCustomEventDelayedSeconds(nameof(Respawn), respawnCooldown);
+                }
+                else
+                {
+                    lastSleepTime = Time.realtimeSinceStartup;
                 }
             }
             else
@@ -56,15 +64,26 @@ namespace MMMaellon
 
         public void Respawn()
         {
-            if (lastSleepTime > 0 && lastSleepTime + respawnCooldown - 0.01f < Time.realtimeSinceStartup)//0.01f for safety against floating point errors
+            if (!sync.IsLocalOwner())
             {
-                sync.Respawn();
-                foreach (UdonBehaviour udon in respawnEventListeners)
+                return;
+            }
+            if (lastSleepTime > 0)
+            {
+                if (lastSleepTime + respawnCooldown - 0.01f < Time.realtimeSinceStartup)//0.01f for safety against floating point errors
                 {
-                    if (Utilities.IsValid(udon))
+                    sync.Respawn();
+                    foreach (UdonBehaviour udon in respawnEventListeners)
                     {
-                        udon.SendCustomEvent(respawnEventName);
+                        if (Utilities.IsValid(udon))
+                        {
+                            udon.SendCustomEvent(respawnEventName);
+                        }
                     }
+                }
+                else
+                {
+                    SendCustomEventDelayedSeconds(nameof(Respawn), lastSleepTime + respawnCooldown - Time.realtimeSinceStartup);
                 }
             }
         }
