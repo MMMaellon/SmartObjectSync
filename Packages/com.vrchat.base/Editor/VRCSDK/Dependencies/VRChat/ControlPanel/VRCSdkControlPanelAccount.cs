@@ -2,6 +2,8 @@
 using UnityEditor;
 using VRC.Core;
 using System.Text.RegularExpressions;
+using UnityEngine.UIElements;
+using VRC.SDKBase;
 using VRC.SDKBase.Editor;
 
 public enum TwoFactorType
@@ -10,6 +12,8 @@ public enum TwoFactorType
     TOTP,
     Email,
 }
+
+// This file handles the Account tab of the SDK Panel
 
 public partial class VRCSdkControlPanel : EditorWindow
 {
@@ -49,6 +53,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     static string username { get; set; } = null;
     static string password { get; set; } = null;
 
+    public static ApiServerEnvironment ApiEnvironment => serverEnvironment; 
     static ApiServerEnvironment serverEnvironment
     {
         get
@@ -93,7 +98,13 @@ public partial class VRCSdkControlPanel : EditorWindow
             return;
 
         if (!APIUser.IsLoggedIn && ApiCredentials.Load())
-            APIUser.InitialFetchCurrentUser((c) => AnalyticsSDK.LoggedInUserChanged(c.Model as APIUser), null);
+            APIUser.InitialFetchCurrentUser((c) =>
+            {
+                window.rootVisualElement.Q<IMGUIContainer>().MarkDirtyRepaint();
+                var apiUser = c.Model as APIUser;
+                AnalyticsSDK.LoggedInUserChanged(apiUser);
+                ApiUserPlatforms.Fetch(apiUser.id, null, null);
+            }, null);
 
         clientInstallPath = SDKClientUtilities.GetSavedVRCInstallPath();
         if (string.IsNullOrEmpty(clientInstallPath))
@@ -125,50 +136,57 @@ public partial class VRCSdkControlPanel : EditorWindow
 
     static bool OnAccountGUI()
     {
-        const int ACCOUNT_LOGIN_BORDER_SPACING = 20;
-
-        EditorGUILayout.Separator();
-        EditorGUILayout.Separator();
-        EditorGUILayout.Separator();
-        EditorGUILayout.Separator();
-
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.Space(ACCOUNT_LOGIN_BORDER_SPACING);
-        GUILayout.BeginVertical("Account", "window", GUILayout.Height(150), GUILayout.Width(340));
-
-        if (signingIn)
+        using (new GUILayout.HorizontalScope())
         {
-            EditorGUILayout.LabelField("Signing in as " + username + ".");
+            GUILayout.FlexibleSpace();
+            var newSigningIn = AccountWindowGUI();
+            GUILayout.FlexibleSpace();
+            return newSigningIn;
         }
-        else if (APIUser.IsLoggedIn)
+    }
+
+    static bool AccountWindowGUI()
+    {
+        using (new EditorGUILayout.VerticalScope(accountWindowStyle, GUILayout.Height(150), GUILayout.Width(340)))
         {
-            if (Status != "Connected")
-                EditorGUILayout.LabelField(Status);
-
-            OnCreatorStatusGUI();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("");
-
-            if (GUILayout.Button("Logout"))
+            EditorGUILayout.LabelField("Account", centeredLabelStyle);
+            if (signingIn)
             {
-                storedUsername = username = null;
-                storedPassword = password = null;
-
-                VRC.Tools.ClearCookies();
-                APIUser.Logout();
-                ClearContent();
+                if (twoFactorAuthenticationEntryType == TwoFactorType.None)
+                {
+                    EditorGUILayout.LabelField("Signing in as " + username + ".");
+                }
+                OnTwoFactorAuthenticationGUI(twoFactorAuthenticationEntryType);
+                return !signingIn;
             }
-            GUILayout.EndHorizontal();
-        }
-        else
-        {
+
+            if (APIUser.IsLoggedIn)
+            {
+                if (Status != "Connected")
+                {
+                    EditorGUILayout.LabelField(Status);
+                }
+
+                OnCreatorStatusGUI();
+                
+                if (GUILayout.Button("Logout"))
+                {
+                    storedUsername = username = null;
+                    storedPassword = password = null;
+
+                    VRC.Tools.ClearCookies();
+                    APIUser.Logout();
+                    ClearContent();
+                    VRC_EditorTools.GetClearClientMethod().Invoke(null, null);
+                }
+                return !signingIn;
+            }
+            
             InitAccount();
 
             ApiServerEnvironment newEnv = ApiServerEnvironment.Release;
-                if (VRCSettings.DisplayAdvancedSettings)
-                    newEnv = (ApiServerEnvironment)EditorGUILayout.EnumPopup("Use API", serverEnvironment);
+            if (VRCSettings.DisplayAdvancedSettings)
+                newEnv = (ApiServerEnvironment)EditorGUILayout.EnumPopup("Use API", serverEnvironment);
             if (serverEnvironment != newEnv)
                 serverEnvironment = newEnv;
 
@@ -176,19 +194,17 @@ public partial class VRCSdkControlPanel : EditorWindow
             password = EditorGUILayout.PasswordField("Password", password);
 
             if (GUILayout.Button("Sign In"))
+            {
                 SignIn(true);
+            }
+
             if (GUILayout.Button("Sign up"))
+            {
                 Application.OpenURL("https://vrchat.com/register");
+            }
+            
+            return !signingIn;
         }
-
-        OnTwoFactorAuthenticationGUI(twoFactorAuthenticationEntryType);
-
-        GUILayout.EndVertical();
-        GUILayout.Space(ACCOUNT_LOGIN_BORDER_SPACING);
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-
-        return !signingIn;
     }
 
     static void OnCreatorStatusGUI()
@@ -527,6 +543,9 @@ public partial class VRCSdkControlPanel : EditorWindow
                         VRCSdkControlPanel.ShowContentPublishPermissionsDialog();
                     }
                 }
+
+                // Fetch platforms that the user can publish to
+                ApiUserPlatforms.Fetch(user.id, null, null);
             },
             delegate (ApiModelContainer<APIUser> c)
             {
@@ -537,6 +556,7 @@ public partial class VRCSdkControlPanel : EditorWindow
             },
             delegate (ApiModelContainer<API2FA> c)
             {
+                window.rootVisualElement.Q<IMGUIContainer>().MarkDirtyRepaint();
                 if (c.Cookies.ContainsKey("auth"))
                     ApiCredentials.Set(username, username, "vrchat", c.Cookies["auth"]);
                 API2FA model2FA = c.Model as API2FA;

@@ -14,6 +14,7 @@ namespace VRCSDK2
 {
 #if UNITY_EDITOR
 
+    [Obsolete("Runtime uploads are deprecated. Use methods provided by the VRC.SDKBase.Editor.Api.VRCApi class for uploads")]
     public class RuntimeAPICreation : MonoBehaviour
     {
         public VRC.Core.PipelineManager pipelineManager;

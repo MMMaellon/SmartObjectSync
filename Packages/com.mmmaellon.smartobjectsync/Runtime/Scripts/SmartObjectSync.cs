@@ -628,6 +628,7 @@ namespace MMMaellon
         int randomCount = 0;
         public void Start()
         {
+            _pickupable = Utilities.IsValid(pickup) && pickup.pickupable;
             randomSeed = Random.Range(0, 10);
             if (forceContinuousSpeculative)
             {
@@ -822,6 +823,51 @@ namespace MMMaellon
             rot = newRot;
             vel = newVel;
             spin = newSpin;
+            state = STATE_TELEPORTING;
+        }
+        public void TeleportToWorldSpace(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
+        {
+            if (!IsLocalOwner())
+            {
+                TakeOwnership(false);
+            }
+            if (worldSpaceTeleport)
+            {
+                pos = newPos;
+                rot = newRot;
+                vel = newVel;
+                spin = newSpin;
+            }
+            else
+            {
+                pos = Quaternion.Inverse(parentRot) * (newPos - parentPos);
+                rot = Quaternion.Inverse(parentRot) * newRot;
+                vel = transform.InverseTransformVector(newVel);
+                spin = transform.InverseTransformVector(newSpin);
+            }
+            state = STATE_TELEPORTING;
+        }
+
+        public void TeleportToLocalSpace(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
+        {
+            if (!IsLocalOwner())
+            {
+                TakeOwnership(false);
+            }
+            if (worldSpaceTeleport)
+            {
+                pos = parentPos + parentRot * newPos;
+                rot = parentRot * newRot;
+                vel = transform.TransformPoint(newVel);
+                spin = transform.TransformPoint(newSpin);
+            }
+            else
+            {
+                pos = newPos;
+                rot = newRot;
+                vel = newVel;
+                spin = newSpin;
+            }
             state = STATE_TELEPORTING;
         }
 
@@ -1186,7 +1232,7 @@ namespace MMMaellon
                         //do nothing
                         if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
                         {
-                            pickup.pickupable = IsLocalOwner();
+                            pickup.pickupable = IsLocalOwner() && pickupable;
                         }
                         return;
                     }
@@ -1254,7 +1300,7 @@ namespace MMMaellon
                         //do nothing
                         if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
                         {
-                            pickup.pickupable = true;
+                            pickup.pickupable = pickupable;
                         }
                         return;
                     }
@@ -1270,7 +1316,7 @@ namespace MMMaellon
                             SetVelocityFromLastTransform();
                             if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
                             {
-                                pickup.pickupable = true;
+                                pickup.pickupable = pickupable;
                             }
                         }
                         else if (customState)
@@ -2003,7 +2049,33 @@ namespace MMMaellon
             return Vector3.Distance(CalcPos(), pos) > positionResyncThreshold || Quaternion.Dot(CalcRot(), rot) < rotationResyncThreshold;//arbitrary values to account for pickups wiggling a little in your hand
         }
 
-        [System.NonSerialized] public bool lastPickupable = false;
+        [System.NonSerialized] public bool _pickupable = true;
+        public bool pickupable
+        {
+            get => _pickupable;
+            set
+            {
+                _pickupable = value;
+                if (Utilities.IsValid(pickup))
+                {
+                    if (IsHeld())
+                    {
+                        if (IsLocalOwner())
+                        {
+                            pickup.pickupable = value && allowTheftFromSelf;
+                        }
+                        else
+                        {
+                            pickup.pickupable = value && !pickup.DisallowTheft;
+                        }
+                    } else if (IsAttachedToPlayer())
+                    {
+                        pickup.pickupable = value && (!preventStealWhileAttachedToPlayer || IsLocalOwner());
+                    }
+                    pickup.pickupable = value;
+                }
+            }
+        }
         [System.NonSerialized] public bool lastKinematic = false;
         public void preventPickupJitter()
         {
@@ -2061,16 +2133,15 @@ namespace MMMaellon
         //Same as the Left Hand Held State, but for right hands
         public void genericHand_OnEnterState()
         {
-            if (pickup)
+            if (Utilities.IsValid(pickup))
             {
-                lastPickupable = pickup.pickupable;
                 if (IsLocalOwner())
                 {
-                    pickup.pickupable = lastPickupable && allowTheftFromSelf;
+                    pickup.pickupable = pickupable && allowTheftFromSelf;
                 }
                 else
                 {
-                    pickup.pickupable = lastPickupable && !pickup.DisallowTheft;
+                    pickup.pickupable = pickupable && !pickup.DisallowTheft;
                 }
             }
 
@@ -2101,9 +2172,9 @@ namespace MMMaellon
 
         public void genericHand_OnExitState()
         {
-            if (pickup)
+            if (Utilities.IsValid(pickup))
             {
-                pickup.pickupable = lastPickupable;
+                pickup.pickupable = pickupable;
             }
             if (kinematicWhileHeld && rigid.isKinematic)
             {
@@ -2153,7 +2224,7 @@ namespace MMMaellon
 
             if (preventStealWhileAttachedToPlayer && Utilities.IsValid(pickup))
             {
-                pickup.pickupable = IsLocalOwner();
+                pickup.pickupable = IsLocalOwner() && pickupable;
             }
         }
         public void bone_OnInterpolationStart()

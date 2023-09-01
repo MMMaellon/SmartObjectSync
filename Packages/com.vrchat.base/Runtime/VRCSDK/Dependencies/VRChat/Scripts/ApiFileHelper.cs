@@ -10,14 +10,15 @@ using System.Text.RegularExpressions;
 
 namespace VRC.Core
 {
+    [Obsolete("Use the new VRCApi class from VRC.SDKBase.Editor.Api")]
     public class ApiFileHelper : MonoBehaviour
     {
-        private readonly int kMultipartUploadChunkSize = 100 * 1024 * 1024; // 100 MB
-        private readonly int SERVER_PROCESSING_WAIT_TIMEOUT_CHUNK_SIZE = 50 * 1024 * 1024;
-        private readonly float SERVER_PROCESSING_WAIT_TIMEOUT_PER_CHUNK_SIZE = 120.0f;
-        private readonly float SERVER_PROCESSING_MAX_WAIT_TIMEOUT = 600.0f;
-        private readonly float SERVER_PROCESSING_INITIAL_RETRY_TIME = 2.0f;
-        private readonly float SERVER_PROCESSING_MAX_RETRY_TIME = 10.0f;
+        private static readonly int kMultipartUploadChunkSize = 100 * 1024 * 1024; // 100 MB
+        private static readonly int SERVER_PROCESSING_WAIT_TIMEOUT_CHUNK_SIZE = 50 * 1024 * 1024;
+        private static readonly float SERVER_PROCESSING_WAIT_TIMEOUT_PER_CHUNK_SIZE = 120.0f;
+        private static readonly float SERVER_PROCESSING_MAX_WAIT_TIMEOUT = 600.0f;
+        private static readonly float SERVER_PROCESSING_INITIAL_RETRY_TIME = 2.0f;
+        private static readonly float SERVER_PROCESSING_MAX_RETRY_TIME = 10.0f;
 
         private static bool EnableDeltaCompression = false;
 
@@ -82,6 +83,7 @@ namespace VRC.Core
             return GetMimeTypeFromExtension(Path.GetExtension(filename)) == "application/gzip";
         }
 
+        [Obsolete("Use the new VRCApi class from VRC.SDKBase.Editor.Api")]
         public IEnumerator UploadFile(string filename, string existingFileId, string friendlyName,
             OnFileOpSuccess onSuccess, OnFileOpError onError, OnFileOpProgress onProgress, FileOpCancelQuery cancelQuery)
         {
@@ -968,7 +970,7 @@ namespace VRC.Core
 
             Success(onSuccess, apiFile, "Upload complete!");
         }
-
+        
         private static void LogApiFileStatus(ApiFile apiFile, bool checkDelta, bool logSuccess = false)
         {
             if (apiFile == null || !apiFile.IsInitialized)
@@ -994,6 +996,7 @@ namespace VRC.Core
             }
         }
 
+        [Obsolete]
         public IEnumerator CreateFileSignatureInternal(string filename, string outputSignatureFilename, Action onSuccess, Action<string> onError)
         {
             VRC.Core.Logger.Log("CreateFileSignature: " + filename + " => " + outputSignatureFilename, DebugLevel.All);
@@ -1094,6 +1097,7 @@ namespace VRC.Core
                 onSuccess();
         }
 
+        [Obsolete]
         public IEnumerator CreateFileDeltaInternal(string newFilename, string existingFileSignaturePath, string outputDeltaFilename, Action onSuccess, Action<string> onError)
         {
             Debug.Log("CreateFileDelta: " + newFilename + " (delta) " + existingFileSignaturePath + " => " + outputDeltaFilename);
@@ -1193,8 +1197,8 @@ namespace VRC.Core
             if (onSuccess != null)
                 onSuccess();
         }
-
-        protected static void Success(OnFileOpSuccess onSuccess, ApiFile apiFile, string message)
+        
+        private static void Success(OnFileOpSuccess onSuccess, ApiFile apiFile, string message)
         {
             if (apiFile == null)
                 apiFile = new ApiFile();
@@ -1203,8 +1207,8 @@ namespace VRC.Core
             if (onSuccess != null)
                 onSuccess(apiFile, message);
         }
-
-        protected static void Error(OnFileOpError onError, ApiFile apiFile, string error, string moreInfo = "")
+        
+        private static void Error(OnFileOpError onError, ApiFile apiFile, string error, string moreInfo = "")
         {
             if (apiFile == null)
                 apiFile = new ApiFile();
@@ -1213,8 +1217,8 @@ namespace VRC.Core
             if (onError != null)
                 onError(apiFile, error);
         }
-
-        protected static void Progress(OnFileOpProgress onProgress, ApiFile apiFile, string status, string subStatus = "", float pct = 0.0f)
+        
+        private static void Progress(OnFileOpProgress onProgress, ApiFile apiFile, string status, string subStatus = "", float pct = 0.0f)
         {
             if (apiFile == null)
                 apiFile = new ApiFile();
@@ -1222,8 +1226,8 @@ namespace VRC.Core
             if (onProgress != null)
                 onProgress(apiFile, status, subStatus, pct);
         }
-
-        protected static bool CheckCancelled(FileOpCancelQuery cancelQuery, OnFileOpError onError, ApiFile apiFile)
+        
+        private static bool CheckCancelled(FileOpCancelQuery cancelQuery, OnFileOpError onError, ApiFile apiFile)
         {
             if (apiFile == null)
             {
@@ -1241,13 +1245,13 @@ namespace VRC.Core
 
             return false;
         }
-
-        protected static void CleanupTempFiles(string subFolderName)
+        
+        private static void CleanupTempFiles(string subFolderName)
         {
             Instance.StartCoroutine(Instance.CleanupTempFilesInternal(subFolderName));
         }
-
-        protected IEnumerator CleanupTempFilesInternal(string subFolderName)
+        
+        private IEnumerator CleanupTempFilesInternal(string subFolderName)
         {
             if (!string.IsNullOrEmpty(subFolderName))
             {
@@ -1285,8 +1289,8 @@ namespace VRC.Core
                 }
             }
         }
-
-        private float GetServerProcessingWaitTimeoutForDataSize(int size)
+        
+        private static float GetServerProcessingWaitTimeoutForDataSize(int size)
         {
             float timeoutMultiplier = Mathf.Ceil((float)size / (float)SERVER_PROCESSING_WAIT_TIMEOUT_CHUNK_SIZE);
             return Mathf.Clamp(timeoutMultiplier * SERVER_PROCESSING_WAIT_TIMEOUT_PER_CHUNK_SIZE, SERVER_PROCESSING_WAIT_TIMEOUT_PER_CHUNK_SIZE, SERVER_PROCESSING_MAX_WAIT_TIMEOUT);

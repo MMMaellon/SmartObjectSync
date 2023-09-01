@@ -17,6 +17,7 @@ using UnityEditor;
 namespace VRCSDK2
 {
 #if UNITY_EDITOR
+    [Obsolete("Runtime uploads are deprecated. Use methods provided by the VRC.SDKBase.Editor.Api.VRCApi class for uploads")]
     public class RuntimeWorldCreation : RuntimeAPICreation
     {
         public GameObject waitingPanel;
@@ -644,24 +645,6 @@ namespace VRCSDK2
 
         protected override void DisplayUpdateCompletedDialog(string contentUrl = null)
         {
-#if UNITY_EDITOR
-#if COMMUNITY_LABS_SDK
-            if (null != contentUrl)
-            {
-                CheckWorldStatus(pipelineManager.blueprintId, delegate ()
-                {
-                    ContentUploadedDialog window = (ContentUploadedDialog)EditorWindow.GetWindow(typeof(ContentUploadedDialog), true, "VRCSDK", true);
-                    window.setContentURL(contentUrl);
-                    window.Show();
-                    // refresh UI based on uploaded world
-                    GetUserUploadInformationAndSetupUI(pipelineManager.blueprintId);
-                }
-                );
-            }
-            else
-#endif
-                base.DisplayUpdateCompletedDialog(contentUrl);
-#endif
         }
 
         private void OpenCommunityLabsDocumentation()

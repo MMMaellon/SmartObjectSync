@@ -1,59 +1,62 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
-using VRC;
 using VRC.Core;
-using VRC.SDKBase;
 
-public partial class VRCSdkControlPanel : EditorWindow
+/// This file handles the links inside VRChat SDK top bar menu
+
+namespace VRC.SDKBase.Editor
 {
-    [MenuItem("VRChat SDK/Help/Developer FAQ")]
-    public static void ShowDeveloperFAQ()
+    public static class VRCSdkControlPanelHelp
     {
-        if (!ConfigManager.RemoteConfig.IsInitialized())
+        public const string AVATAR_OPTIMIZATION_TIPS_URL = "https://creators.vrchat.com/avatars/avatar-optimizing-tips";
+        public const string AVATAR_RIG_REQUIREMENTS_URL = "https://creators.vrchat.com/avatars/rig-requirements";
+        
+        [MenuItem("VRChat SDK/Help/Developer FAQ")]
+        public static void ShowDeveloperFAQ()
         {
-            ConfigManager.RemoteConfig.Init(() => ShowDeveloperFAQ());
-            return;
+            if (!ConfigManager.RemoteConfig.IsInitialized())
+            {
+                ConfigManager.RemoteConfig.Init(() => ShowDeveloperFAQ());
+                return;
+            }
+
+            Application.OpenURL(ConfigManager.RemoteConfig.GetString("sdkDeveloperFaqUrl"));
         }
 
-        Application.OpenURL(ConfigManager.RemoteConfig.GetString("sdkDeveloperFaqUrl"));
-    }
-
-    [MenuItem("VRChat SDK/Help/VRChat Discord")]
-    public static void ShowVRChatDiscord()
-    {
-        if (!ConfigManager.RemoteConfig.IsInitialized())
+        [MenuItem("VRChat SDK/Help/VRChat Discord")]
+        public static void ShowVRChatDiscord()
         {
-            ConfigManager.RemoteConfig.Init(() => ShowVRChatDiscord());
-            return;
+            if (!ConfigManager.RemoteConfig.IsInitialized())
+            {
+                ConfigManager.RemoteConfig.Init(() => ShowVRChatDiscord());
+                return;
+            }
+
+            Application.OpenURL(ConfigManager.RemoteConfig.GetString("sdkDiscordUrl"));
         }
 
-        Application.OpenURL(ConfigManager.RemoteConfig.GetString("sdkDiscordUrl"));
-    }
-
-    [MenuItem("VRChat SDK/Help/Avatar Optimization Tips")]
-    public static void ShowAvatarOptimizationTips()
-    {
-        if (!ConfigManager.RemoteConfig.IsInitialized())
+        [MenuItem("VRChat SDK/Help/Avatar Optimization Tips")]
+        public static void ShowAvatarOptimizationTips()
         {
-            ConfigManager.RemoteConfig.Init(() => ShowAvatarOptimizationTips());
-            return;
+            if (!ConfigManager.RemoteConfig.IsInitialized())
+            {
+                ConfigManager.RemoteConfig.Init(() => ShowAvatarOptimizationTips());
+                return;
+            }
+
+            Application.OpenURL(AVATAR_OPTIMIZATION_TIPS_URL);
         }
 
-        Application.OpenURL(AVATAR_OPTIMIZATION_TIPS_URL);
-    }
-
-    [MenuItem("VRChat SDK/Help/Avatar Rig Requirements")]
-    public static void ShowAvatarRigRequirements()
-    {
-        if (!ConfigManager.RemoteConfig.IsInitialized())
+        [MenuItem("VRChat SDK/Help/Avatar Rig Requirements")]
+        public static void ShowAvatarRigRequirements()
         {
-            ConfigManager.RemoteConfig.Init(() => ShowAvatarRigRequirements());
-            return;
-        }
+            if (!ConfigManager.RemoteConfig.IsInitialized())
+            {
+                ConfigManager.RemoteConfig.Init(() => ShowAvatarRigRequirements());
+                return;
+            }
 
-        Application.OpenURL(AVATAR_RIG_REQUIREMENTS_URL);
+            Application.OpenURL(AVATAR_RIG_REQUIREMENTS_URL);
+        }
     }
-}
+} 

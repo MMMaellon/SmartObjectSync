@@ -639,6 +639,9 @@ namespace VRC.Udon
 
         public void OnDestroy()
         {
+            serializedPublicVariablesBytesString = null;
+            publicVariablesUnityEngineObjects = null;
+
             if(_program == null)
             {
                 return;

@@ -6,7 +6,18 @@ using System.Linq;
 using UnityEditorInternal;
 using System.Reflection;
 using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+using UnityEngine.Rendering;
+using VRC.SDKBase.Editor.Api;
+using File = UnityEngine.Windows.File;
+using Object = UnityEngine.Object;
+#if POST_PROCESSING_INCLUDED
+using UnityEngine.Rendering.PostProcessing;
+#endif
 
+[assembly: InternalsVisibleTo("VRC.SDK3A.Editor")]
+[assembly: InternalsVisibleTo("VRC.SDK3.Editor")]
 namespace VRC.SDKBase
 {
     public static class VRC_EditorTools
@@ -452,6 +463,143 @@ namespace VRC.SDKBase
             for (int idx = 0; idx < property.arraySize; ++idx)
                 property.GetArrayElementAtIndex(idx).intValue = (int)bytes[idx];
         }
+
+        internal static string CropImage(string sourcePath, float width, float height, bool centerCrop = true, bool forceLinear = false, bool forceGamma = false)
+        {
+            var bytes = File.ReadAllBytes(sourcePath);
+            var tex = new Texture2D(2, 2)
+            {
+                wrapMode = TextureWrapMode.Clamp
+            };
+            tex.LoadImage(bytes);
+            var blitShader = Resources.Load<Shader>("CropShader");
+            var blitMat = new Material(blitShader);
+            blitMat.SetFloat("_TargetWidth", width);
+            blitMat.SetFloat("_TargetHeight", height);
+            blitMat.SetInt("_CenterCrop", centerCrop ? 1 : 0);
+            if (forceLinear)
+            {
+                blitMat.SetInt("_ForceLinear", 1);
+            }
+            else if (forceGamma)
+            {
+                blitMat.SetInt("_ForceGamma", 1);
+            }
+            var rt = RenderTexture.GetTemporary((int)width, (int)height);
+            Graphics.Blit(tex, rt, blitMat);
+            RenderTexture.active = rt;
+            var cropped = new Texture2D((int)width, (int)height);
+            cropped.ReadPixels(new Rect(0, 0, (int)width, (int)height), 0, 0);
+            cropped.Apply();
+            RenderTexture.active = null;
+            RenderTexture.ReleaseTemporary(rt);
+            return SaveTemporaryTexture("cropped", cropped);
+        }
+
+        internal static Camera CreateThumbnailCaptureCamera(RenderTexture target, bool useFlatColor, Color clearColor, bool usePostProcessing)
+        {
+            var camObject = new GameObject("TempCamera");
+            var cam = camObject.AddComponent<Camera>();
+            cam.enabled = false;
+            if (SceneView.lastActiveSceneView == null)
+            {
+                Core.Logger.LogError("Failed to get scene view");
+                return null;
+            }
+            var sceneCam = SceneView.lastActiveSceneView.camera;
+            if (sceneCam == null)
+            {
+                Core.Logger.LogError("Failed to get scene camera");
+                return null;
+            }
+
+            cam.nearClipPlane = sceneCam.nearClipPlane;
+            cam.farClipPlane = sceneCam.farClipPlane;
+            camObject.transform.SetPositionAndRotation(sceneCam.transform.position, sceneCam.transform.rotation);
+
+            if (useFlatColor)
+            {
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = clearColor;                
+            }
+
+#if POST_PROCESSING_INCLUDED
+            if (usePostProcessing)
+            {
+                var ppLayer = camObject.AddComponent<PostProcessLayer>();
+                ppLayer.volumeLayer = int.MaxValue;
+                ppLayer.volumeTrigger = camObject.transform;
+            }
+#endif
+            cam.targetTexture = target;
+            return cam;
+        }
+        
+        internal static string CaptureSceneImage(float width, float height, bool useFlatColor, Color clearColor, bool usePostProcessing)
+        {
+            var rt = Resources.Load<RenderTexture>("ThumbnailCapture");
+            var camera = CreateThumbnailCaptureCamera(rt, useFlatColor, clearColor, usePostProcessing);
+            camera.Render();
+            var req = AsyncGPUReadback.Request(rt);
+            AsyncGPUReadback.WaitAllRequests();
+            var data = req.GetData<Color32>();
+            var tex = new Texture2D((int) width, (int) height, TextureFormat.RGBA32, 0, true);
+            // convert to proper color-space
+            tex.SetPixels32(
+                data.ToArray().Select(p => new Color32(
+                    (byte) Mathf.Clamp(Mathf.Pow(p.r/255f, 1.0f/2.2f) * 255, 0, 255), 
+                    (byte) Mathf.Clamp(Mathf.Pow(p.g/255f, 1.0f/2.2f) * 255, 0, 255), 
+                    (byte) Mathf.Clamp(Mathf.Pow(p.b/255f, 1.0f/2.2f) * 255, 0, 255), 
+                    p.a
+                )).ToArray()
+            );
+            tex.Apply(false);
+            var tempPath = SaveTemporaryTexture("captured", tex);
+            Object.DestroyImmediate(camera.gameObject);
+            return tempPath;
+        }
+        
+        internal static string SaveTemporaryTexture(string postfix, Texture2D tex)
+        {
+            var tempPath = Path.GetTempPath();
+            tempPath = Path.Combine(tempPath, GUID.Generate() + "_" + postfix + ".png");
+            File.WriteAllBytes(tempPath, tex.EncodeToPNG());
+            return tempPath;
+        }
+        
+        internal static MethodInfo GetSetPanelIdleMethod()
+        {
+            return typeof(VRCSdkControlPanel).GetMethod("SetPanelIdle", BindingFlags.Instance | BindingFlags.NonPublic);
+        } 
+        
+        internal static MethodInfo GetSetPanelBuildingMethod()
+        {
+            return typeof(VRCSdkControlPanel).GetMethod("SetPanelBuilding", BindingFlags.Instance | BindingFlags.NonPublic);
+        } 
+        
+        internal static MethodInfo GetSetPanelUploadingMethod()
+        {
+            return typeof(VRCSdkControlPanel).GetMethod("SetPanelUploading", BindingFlags.Instance | BindingFlags.NonPublic);
+        }
+
+        internal static MethodInfo GetClearClientMethod()
+        {
+            return typeof(VRCApi).GetMethod("ClearClient", BindingFlags.NonPublic | BindingFlags.Static);
+        }
+
+        internal static void ToggleSdkTabsEnabled(VRCSdkControlPanel panel, bool value)
+        {
+            var tabsProp =
+                typeof(VRCSdkControlPanel).GetProperty("TabsEnabled", BindingFlags.Instance | BindingFlags.NonPublic);
+            tabsProp?.SetValue(panel, value);
+        }
+        
+        internal static void OpenConsoleWindow()
+        {
+            Assembly.GetAssembly(typeof(EditorWindow)).GetType("UnityEditor.ConsoleWindow")
+                .GetMethod("ShowConsoleWindow", BindingFlags.Static | BindingFlags.Public)?.Invoke(null, new object[] { false });
+        }
+
     }
 }
 #endif

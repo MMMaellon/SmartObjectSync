@@ -229,8 +229,6 @@ namespace VRC.Editor
                 VRC.Core.ConfigManager.RemoteConfig.Init();
             }
 
-            ConfigureAssets();
-
             LoadEditorResources();
 
             return true;
@@ -399,7 +397,7 @@ namespace VRC.Editor
             #endif
         }
 
-        private static void EnableBatching(bool enable)
+        internal static void EnableBatching(bool enable)
         {
             PlayerSettings[] playerSettings = Resources.FindObjectsOfTypeAll<PlayerSettings>();
             if(playerSettings == null)
@@ -537,7 +535,7 @@ namespace VRC.Editor
             }
         }
 
-        private static void SetQualitySettings()
+        internal static void SetQualitySettings()
         {
             VRC.Core.Logger.Log("Setting Graphics Settings", VRC.Core.DebugLevel.All);
             const string qualitySettingsAssetPath = "ProjectSettings/QualitySettings.asset";
@@ -693,7 +691,7 @@ namespace VRC.Editor
                 return;
             }
 
-            int defaultQuality = !Application.isMobilePlatform ? 3 : 4;
+            int defaultQuality = !Application.isMobilePlatform ? 2 : 3;
             #if !VRC_CLIENT
         Debug.Log($"A quality setting was changed resetting to the default quality: {_graphicsPresets[defaultQuality]["name"]}.");
             #endif
@@ -704,7 +702,7 @@ namespace VRC.Editor
             AssetDatabase.SaveAssets();
         }
 
-        private static void SetGraphicsSettings()
+        internal static void SetGraphicsSettings()
         {
             VRC.Core.Logger.Log("Setting Graphics Settings", VRC.Core.DebugLevel.All);
 
@@ -1035,7 +1033,7 @@ namespace VRC.Editor
             graphicsManager.ApplyModifiedProperties();
         }
 
-        private static void SetAudioSettings()
+        internal static void SetAudioSettings()
         {
             Object audioManager = AssetDatabase.LoadMainAssetAtPath("ProjectSettings/AudioManager.asset");
             SerializedObject audioManagerSerializedObject = new SerializedObject(audioManager);
@@ -1175,7 +1173,7 @@ namespace VRC.Editor
                         PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)31;
                         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
                     #else
-                        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
+                        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)32;
                         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
                     #endif
                 #else
@@ -1277,13 +1275,6 @@ namespace VRC.Editor
             #endif
         }
 
-        public static void ConfigureAssets(bool forStandaloneBuild = false)
-        {
-            #if VRC_CLIENT
-            VRC.UI.Client.Editor.VRCUIManagerEditorHelpers.ConfigureNewUIAssets(forStandaloneBuild);
-            #endif
-        }
-
         private static void LoadEditorResources()
         {
             AvatarPerformanceStats.Initialize();
@@ -1326,7 +1317,7 @@ namespace VRC.Editor
                 { "name", "Low" },
                 { "pixelLightCount", 4 },
                 { "shadows", 2 },
-                { "shadowResolution", 2 },
+                { "shadowResolution", 1 },
                 { "shadowProjection", 1 },
                 { "shadowCascades", 2 },
                 { "shadowDistance", 75f },
@@ -1375,7 +1366,7 @@ namespace VRC.Editor
                 { "skinWeights", 4 },
                 { "textureQuality", 0 },
                 { "anisotropicTextures", 2 },
-                { "antiAliasing", 4 },
+                { "antiAliasing", 2 },
                 { "softParticles", true },
                 { "softVegetation", true },
                 { "realtimeReflectionProbes", true },
@@ -1400,44 +1391,6 @@ namespace VRC.Editor
             new Dictionary<string, object>
             {
                 { "name", "High" },
-                { "pixelLightCount", 8 },
-                { "shadows", 2 },
-                { "shadowResolution", 3 },
-                { "shadowProjection", 1 },
-                { "shadowCascades", 2 },
-                { "shadowDistance", 75f },
-                { "shadowNearPlaneOffset", 2f },
-                { "shadowCascade2Split", 0.33333334 },
-                { "shadowCascade4Split", new Vector3(0.06666667f, 0.19999999f, 0.46666664f) },
-                { "shadowmaskMode", 0 },
-                { "skinWeights", 4 },
-                { "textureQuality", 0 },
-                { "anisotropicTextures", 2 },
-                { "antiAliasing", 4 },
-                { "softParticles", true },
-                { "softVegetation", true },
-                { "realtimeReflectionProbes", true },
-                { "billboardsFaceCameraPosition", true },
-                { "vSyncCount", 0 },
-                { "lodBias", 2f },
-                { "maximumLODLevel", 0 },
-                { "streamingMipmapsActive", false },
-                { "streamingMipmapsAddAllCameras", true },
-                { "streamingMipmapsMemoryBudget", 512f },
-                { "streamingMipmapsRenderersPerFrame", 512 },
-                { "streamingMipmapsMaxLevelReduction", 2 },
-                { "streamingMipmapsMaxFileIORequests", 1024 },
-                { "particleRaycastBudget", 4096 },
-                { "asyncUploadTimeSlice", 2 },
-                { "asyncUploadBufferSize", 128 },
-                { "asyncUploadPersistentBuffer", true },
-                { "resolutionScalingFixedDPIFactor", 1f },
-                { "customRenderPipeline", null },
-                { "excludedTargetPlatforms", new[] { "Android" } }
-            },
-            new Dictionary<string, object>
-            {
-                { "name", "Ultra" },
                 { "pixelLightCount", 8 },
                 { "shadows", 2 },
                 { "shadowResolution", 3 },

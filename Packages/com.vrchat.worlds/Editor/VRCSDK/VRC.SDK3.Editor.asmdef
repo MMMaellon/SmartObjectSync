@@ -3,7 +3,9 @@
     "references": [
         "VRC.SDK3",
         "VRC.SDKBase.Editor",
-        "VRC.Udon"
+        "VRC.Udon",
+        "VRC.SDKBase",
+        "UniTask"
     ],
     "includePlatforms": [
         "Editor"

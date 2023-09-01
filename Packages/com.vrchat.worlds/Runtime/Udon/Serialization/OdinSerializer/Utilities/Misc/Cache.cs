@@ -219,6 +219,33 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
         }
 
         /// <summary>
+        /// Discards all cached T.
+        /// </summary>
+        public static void Purge()
+        {
+            // Very, very simple spinlock implementation
+            //  this lock will almost never be contested
+            //  and it will never be held for more than
+            //  an instant; therefore, we want to avoid paying
+            //  the lock(object) statement's semaphore
+            //  overhead.
+            while (true)
+            {
+                if (Interlocked.CompareExchange(ref THREAD_LOCK_TOKEN, 1, 0) == 0)
+                {
+                    break;
+                }
+            }
+
+            // We now hold the lock
+            // Clear the free values array
+            Array.Clear(FreeValues, 0, FreeValues.Length);
+
+            // Release the lock
+            THREAD_LOCK_TOKEN = 0;
+        }
+
+        /// <summary>
         /// Performs an implicit conversion from <see cref="Cache{T}"/> to <see cref="T"/>.
         /// </summary>
         /// <param name="cache">The cache to convert.</param>

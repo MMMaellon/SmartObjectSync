@@ -68,7 +68,7 @@ namespace VRC.SDKBase.Validation
             "RealisticEyeMovements.EyeAndHeadAnimator",
             "RealisticEyeMovements.LookTargetController",
         };
-
+        
         public static readonly string[] ComponentTypeWhiteListSdk2 = new string[]
         {
             #if UNITY_STANDALONE
@@ -88,11 +88,12 @@ namespace VRC.SDKBase.Validation
             "VRC.SDK3.VRCTestMarker",
             "VRC.SDK3.Avatars.Components.VRCAvatarDescriptor",
             "VRC.SDK3.Avatars.Components.VRCStation",
+            "VRC.SDK3.Avatars.Components.VRCImpostorSettings",
+            "VRC.SDK3.Avatars.Components.VRCImpostorEnvironment",
             "VRC.SDK3.Dynamics.PhysBone.Components.VRCPhysBone",
             "VRC.SDK3.Dynamics.PhysBone.Components.VRCPhysBoneCollider",
             "VRC.SDK3.Dynamics.Contact.Components.VRCContactSender",
             "VRC.SDK3.Dynamics.Contact.Components.VRCContactReceiver",
-            "VRC.SDKBase.VRC_Slider",
         };
 
         public static readonly string[] ShaderWhiteList = new string[]
@@ -107,5 +108,9 @@ namespace VRC.SDKBase.Validation
             "VRChat/Mobile/Particles/Additive",
             "VRChat/Mobile/Particles/Multiply",
         };
+
+        public const int MAX_AVD_PHYSBONES_PER_AVATAR = 256;
+        public const int MAX_AVD_COLLIDERS_PER_AVATAR = 256;
+        public const int MAX_AVD_CONTACTS_PER_AVATAR = 256;
     }
 }

@@ -12,6 +12,8 @@ using VRC.Udon.ClientBindings.Interfaces;
 using VRC.Udon.Common;
 using VRC.Udon.Common.Enums;
 using VRC.Udon.Common.Interfaces;
+using VRC.Udon.Serialization.OdinSerializer;
+using VRC.Udon.Serialization.OdinSerializer.Utilities;
 using Logger = VRC.Core.Logger;
 using Object = UnityEngine.Object;
 #if ENABLE_PARALLEL_PRELOAD
@@ -576,6 +578,7 @@ namespace VRC.Udon
             }
             finally
             {
+                PurgeSerializationCaches();
                 Logger.Log($"UdonManager.OnSceneLoaded took '{timer.Elapsed.TotalSeconds:N3}'");
             }
         }
@@ -588,7 +591,17 @@ namespace VRC.Udon
 
         private void OnSceneUnloaded(Scene scene)
         {
+            PurgeSerializationCaches();
             _sceneUdonBehaviourDirectories.Remove(scene);
+        }
+        
+        private void PurgeSerializationCaches()
+        {
+            Cache<DeserializationContext>.Purge();
+            Cache<SerializationContext>.Purge();
+            Cache<BinaryDataReader>.Purge();
+            Cache<UnityReferenceResolver>.Purge();
+            Cache<BinaryDataWriter>.Purge();
         }
 
         #endregion

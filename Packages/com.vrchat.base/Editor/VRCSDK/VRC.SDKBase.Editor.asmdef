@@ -2,7 +2,9 @@
     "name": "VRC.SDKBase.Editor",
     "references": [
         "VRC.SDKBase",
-        "VRC.Enums.Validation.Performance"
+        "VRC.Enums.Validation.Performance",
+        "UniTask",
+        "Unity.Postprocessing.Runtime"
     ],
     "includePlatforms": [
         "Editor"
@@ -23,6 +25,11 @@
             "name": "com.vrchat.base",
             "expression": "3.0.0",
             "define": "VRCUPM"
+        },
+        {
+            "name": "com.unity.postprocessing",
+            "expression": "3.0.0",
+            "define": "POST_PROCESSING_INCLUDED"
         }
     ],
     "noEngineReferences": false

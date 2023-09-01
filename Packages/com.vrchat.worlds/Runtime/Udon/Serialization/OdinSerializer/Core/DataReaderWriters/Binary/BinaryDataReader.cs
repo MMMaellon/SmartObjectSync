@@ -31,7 +31,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
     /// Reads data from a stream that has been written by a <see cref="BinaryDataWriter"/>.
     /// </summary>
     /// <seealso cref="BaseDataReader" />
-    public unsafe class BinaryDataReader : BaseDataReader
+    public unsafe class BinaryDataReader : BaseDataReader, Utilities.ICacheNotificationReceiver
     {
         private static readonly Dictionary<Type, Delegate> PrimitiveFromByteMethods = new Dictionary<Type, Delegate>()
         {
@@ -2781,6 +2781,15 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
             this.bufferIndex = 0;
             this.bufferEnd = remainder;
+        }
+
+        public void OnFreed()
+        {
+            Context = null;
+        }
+
+        public void OnClaimed()
+        {
         }
     }
 }

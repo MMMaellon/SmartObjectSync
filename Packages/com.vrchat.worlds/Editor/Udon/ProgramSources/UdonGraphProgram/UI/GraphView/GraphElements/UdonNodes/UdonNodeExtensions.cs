@@ -18,7 +18,7 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView.UdonNodes
 
         private static readonly HashSet<string> InternalEventNames = new HashSet<string>()
         {
-            "_start", "_update", "_lateUpdate", "_fixedUpdate", "onAnimatorIk", "_onAnimatorMove", "_onBecameInvisible", "_onBecameVisible",
+            "_start", "_update", "_lateUpdate", "_fixedUpdate", "onAnimatorIk", "_onAnimatorMove", "_onAvatarChanged", "_onAvatarEyeHeightChanged", "_onBecameInvisible", "_onBecameVisible",
             "_onPlayerCollisionEnter", "_onCollisionEnter", "_onCollisionEnter2D", "_onPlayerCollisionExit", "_onCollisionExit", "_onCollisionExit2D", "_onPlayerCollisionStay", "_onCollisionStay", "_onCollisionStay2D",
             "_onPlayerTriggerEnter", "_onTriggerEnter", "_onTriggerEnter2D", "_onPlayerTriggerExit", "_onTriggerExit", "_onTriggerExit2D", "_onPlayerTriggerStay", "_onTriggerStay", "_onTriggerStay2D", 
             "_onDestroy", "_onDisable", "_onDrawGizmos", "_onDrawGizmosSelected", "_onEnable", "_onJointBreak", "_onJointBreak2D", "_onMouseDown", "_onMouseDrag", "_onMouseEnter", "_onMouseExit", "_onMouseOver", "_onMouseUp", "_onMouseUpAsButton",

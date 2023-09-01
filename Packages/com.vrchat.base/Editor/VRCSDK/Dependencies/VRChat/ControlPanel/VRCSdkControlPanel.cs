@@ -1,12 +1,18 @@
 ﻿using System;
+using System.Linq;
+using JetBrains.Annotations;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using VRC.Core;
 using VRC.Editor;
 using VRC.SDKBase.Editor;
 
+/// This class sets up the basic panel layout and draws the main tabs
+/// Implementation of each tab is handled within other files extending this partial class
+
 [ExecuteInEditMode]
-public partial class VRCSdkControlPanel : EditorWindow
+public partial class VRCSdkControlPanel : EditorWindow, IVRCSdkPanelApi
 {
     public static VRCSdkControlPanel window;
 
@@ -20,7 +26,7 @@ public partial class VRCSdkControlPanel : EditorWindow
             return;
         }
 
-        window = (VRCSdkControlPanel)EditorWindow.GetWindow(typeof(VRCSdkControlPanel));
+        GetWindow(typeof(VRCSdkControlPanel));
         window.titleContent.text = "VRChat SDK";
         window.minSize = new Vector2(SdkWindowWidth + 4, 600);
         window.maxSize = new Vector2(SdkWindowWidth + 4, 2000);
@@ -28,6 +34,13 @@ public partial class VRCSdkControlPanel : EditorWindow
         window.Show();
     }
 
+    public VRCSdkControlPanel()
+    {
+        window = this;
+    }
+
+    #region IMGUI Init
+    
     public static GUIStyle titleGuiStyle;
     public static GUIStyle boxGuiStyle;
     public static GUIStyle infoGuiStyle;
@@ -36,6 +49,10 @@ public partial class VRCSdkControlPanel : EditorWindow
     public static GUIStyle listButtonStyleSelected;
     public static GUIStyle scrollViewSeparatorStyle;
     public static GUIStyle searchBarStyle;
+    public static GUIStyle accountWindowStyle;
+    public static GUIStyle centeredLabelStyle;
+    public static GUIStyle contentDescriptionStyle;
+    public static GUIStyle contentTitleStyle;
 
     void InitializeStyles()
     {
@@ -49,7 +66,10 @@ public partial class VRCSdkControlPanel : EditorWindow
         else
             titleGuiStyle.normal.textColor = Color.black;
 
-        boxGuiStyle = new GUIStyle();
+        boxGuiStyle = new GUIStyle
+        {
+            padding = new RectOffset(5,5,5,5)
+        };
         if (EditorGUIUtility.isProSkin)
         {
             boxGuiStyle.normal.background = CreateBackgroundColorImage(new Color(0.3f, 0.3f, 0.3f));
@@ -62,7 +82,7 @@ public partial class VRCSdkControlPanel : EditorWindow
         }
 
         infoGuiStyle = new GUIStyle();
-        infoGuiStyle.wordWrap = true; ;
+        infoGuiStyle.wordWrap = true;
         if (EditorGUIUtility.isProSkin)
             infoGuiStyle.normal.textColor = Color.white;
         else
@@ -117,113 +137,248 @@ public partial class VRCSdkControlPanel : EditorWindow
         scrollViewSeparatorStyle.margin.top = 1;
 
         searchBarStyle = new GUIStyle("Toolbar");
-        searchBarStyle.fixedWidth = SdkWindowWidth;
+        searchBarStyle.fixedWidth = SdkWindowWidth - 8;
         searchBarStyle.fixedHeight = 23;
         searchBarStyle.padding.top = 3;
 
-    }
+        accountWindowStyle = new GUIStyle("window")
+        {
+            padding = new RectOffset(10, 10, 10, 10),
+            margin = new RectOffset(0,0,30,30)
+        };
 
-    void Init()
+        centeredLabelStyle = new GUIStyle(EditorStyles.boldLabel)
+        {
+            alignment = TextAnchor.UpperCenter,
+            margin = new RectOffset(0,0,0,10)
+        };
+        
+        contentDescriptionStyle = new GUIStyle(EditorStyles.wordWrappedLabel)
+        {
+            wordWrap = true
+        };
+        
+        contentTitleStyle = new GUIStyle(EditorStyles.boldLabel)
+        {
+            wordWrap = true
+        };
+    }
+    
+    #endregion
+
+    private void Init()
     {
         InitializeStyles();
         ResetIssues();
         InitAccount();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         OnEnableAccount();
+        _stylesInitialized = false;
         AssemblyReloadEvents.afterAssemblyReload += BuilderAssemblyReload;
+        OnSdkPanelEnable?.Invoke(this, null);
+        _panelState = SdkPanelState.Idle;
+        OnSdkPanelStateChange?.Invoke(this, _panelState);
+        TabsEnabled = true;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         AssemblyReloadEvents.afterAssemblyReload -= BuilderAssemblyReload;
+        OnSdkPanelDisable?.Invoke(this, null);
+        _panelState = SdkPanelState.Idle;
+        OnSdkPanelStateChange?.Invoke(this, _panelState);
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         AccountDestroy();
     }
 
-    public const int SdkWindowWidth = 518;
-
-    private readonly GUIContent[] _toolbarLabels = new GUIContent[4]
-    {
-        new GUIContent("Authentication"),
-        new GUIContent("Builder"),
-        new GUIContent("Content Manager"),
-        new GUIContent("Settings")
-    };
+    public const int SdkWindowWidth = 512;
 
     private readonly bool[] _toolbarOptionsLoggedIn = new bool[4] {true, true, true, true};
     private readonly bool[] _toolbarOptionsNotLoggedIn = new bool[4] {true, false, false, true};
+    private bool _stylesInitialized;
 
-    void OnGUI()
+    private SdkPanelState _panelState = SdkPanelState.Idle;
+
+    private Button _authenticationTabBtn;
+    private Button _buildTabBtn;
+    private Button _contentManagerTabBtn;
+    private Button _settingsTabBtn;
+    private Button[] _tabButtons;
+    private VisualElement _sdkPanel;
+    private VisualElement _builderPanel;
+    private VisualTreeAsset _builderPanelLayout;
+    private StyleSheet _builderPanelStyles;
+    private float _windowOpenTime;
+
+    private bool _tabsEnabled;
+    internal bool TabsEnabled
+    {
+        get => _tabsEnabled;
+        set
+        {
+            _tabsEnabled = value;
+            if (_tabButtons != null)
+            {
+                foreach (var button in _tabButtons)
+                {
+                    button.SetEnabled(value);
+                }
+            }
+        }
+    }
+
+    private void CreateGUI()
     {
         if (window == null)
         {
             window = (VRCSdkControlPanel)EditorWindow.GetWindow(typeof(VRCSdkControlPanel));
-            InitializeStyles();
         }
+        
+        _windowOpenTime = Time.realtimeSinceStartup;
+        
+        var visualTree = Resources.Load<VisualTreeAsset>("VRCSdkPanelLayout");
+        visualTree.CloneTree(rootVisualElement);
+        var styles = Resources.Load<StyleSheet>("VRCSdkPanelStyles");
+        rootVisualElement.styleSheets.Add(styles);
+        rootVisualElement.AddToClassList(EditorGUIUtility.isProSkin ? "dark" : "light");
 
-        if (_bannerImage == null)
-            _bannerImage = Resources.Load<Texture2D>("SDK_Panel_Banner");
+        _sdkPanel = rootVisualElement.Q("sdk-container");
+        _builderPanel = rootVisualElement.Q("builder-panel");
+        
+        CreateTabs();
+        RenderTabs();
 
-        GUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.BeginVertical();
-
-        GUILayout.Box(_bannerImage);
-
-        if (Application.isPlaying)
+        rootVisualElement.schedule.Execute(() =>
         {
-            GUI.enabled = false;
-            GUILayout.Space(20);
-            EditorGUILayout.LabelField("Unity Application is running ...\nStop it to access the Control Panel", titleGuiStyle, GUILayout.Width(SdkWindowWidth));
-            GUI.enabled = true;
+            var currentPanel = VRCSettings.ActiveWindowPanel;
+            // Check that the tabs are enabled, if not - we must re-render tabs
+            if (APIUser.IsLoggedIn && (!_tabButtons[1].enabledSelf || !_tabButtons[2].enabledSelf))
+            {
+                RenderTabs();
+                return;
+            }
+            // When the user isn't logged in - we only allow Settings and Authentication tabs to be viewed
+            if (APIUser.IsLoggedIn || currentPanel == 0 || currentPanel == 3) return;
+            VRCSettings.ActiveWindowPanel = 0;
+            RenderTabs();
+        }).Every(500);
+
+        var sdkContainer = rootVisualElement.Q("sdk-container");
+        sdkContainer.Add(new IMGUIContainer(() =>
+        {
+            if (!_stylesInitialized)
+            {
+                InitializeStyles();
+                _stylesInitialized = true;
+            }
+        
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginVertical();
+        
+            if (Application.isPlaying)
+            {
+                GUI.enabled = false;
+                GUILayout.Space(20);
+                EditorGUILayout.LabelField("Unity Application is running ...\nStop it to access the Control Panel", titleGuiStyle, GUILayout.Width(SdkWindowWidth));
+                GUI.enabled = true;
+                GUILayout.EndVertical();
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+                return;
+            }
+        
+            EditorGUILayout.Space();
+        
+            EnvConfig.SetActiveSDKDefines();
+            
             GUILayout.EndVertical();
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            return;
+        
+            switch (VRCSettings.ActiveWindowPanel)
+            {
+                case 1:
+                    break;
+                case 2:
+                    ShowContent();
+                    break;
+                case 3:
+                    ShowSettings();
+                    break;
+                case 0:
+                default:
+                    ShowAccount();
+                    break;
+            }
+        }));
+    }
+
+    private void CreateTabs()
+    {
+        _authenticationTabBtn = rootVisualElement.Q<Button>("tab-authentication");
+        _buildTabBtn = rootVisualElement.Q<Button>("tab-builder");
+        _contentManagerTabBtn = rootVisualElement.Q<Button>("tab-content-manager");
+        _settingsTabBtn = rootVisualElement.Q<Button>("tab-settings");
+        
+        _tabButtons = new Button[4]
+        {
+            _authenticationTabBtn,
+            _buildTabBtn,
+            _contentManagerTabBtn,
+            _settingsTabBtn
+        };
+        
+        var currentPanel = VRCSettings.ActiveWindowPanel;
+
+        for (int i = 0; i < _tabButtons.Length; i++)
+        {
+            var btnIndex = i;
+            _tabButtons[i].EnableInClassList("active", currentPanel == btnIndex);
+            _tabButtons[i].SetEnabled(APIUser.IsLoggedIn ? _toolbarOptionsLoggedIn[i] : _toolbarOptionsNotLoggedIn[i]);
+
+            _tabButtons[i].clicked += () =>
+            {
+                if (VRCSettings.ActiveWindowPanel == btnIndex)
+                {
+                    return;
+                }
+                VRCSettings.ActiveWindowPanel = btnIndex;
+                RenderTabs();
+            };
+        }
+    }
+
+    private void RenderTabs()
+    {
+        var currentPanel = VRCSettings.ActiveWindowPanel;
+        
+        for (int i = 0; i < _tabButtons.Length; i++)
+        {
+            _tabButtons[i].EnableInClassList("active", currentPanel == i);
+            if (!TabsEnabled) continue;
+            _tabButtons[i].SetEnabled(APIUser.IsLoggedIn ? _toolbarOptionsLoggedIn[i] : _toolbarOptionsNotLoggedIn[i]);
         }
 
-        EditorGUILayout.Space();
-
-        EnvConfig.SetActiveSDKDefines();
-
-        int showPanel = GUILayout.Toolbar(VRCSettings.ActiveWindowPanel, _toolbarLabels, APIUser.IsLoggedIn ? _toolbarOptionsLoggedIn : _toolbarOptionsNotLoggedIn,  null, GUILayout.Width(SdkWindowWidth));
-
-        // Only show Account or Settings panels if not logged in
-        if (APIUser.IsLoggedIn == false && showPanel != 3)
+        if (currentPanel == 1)
         {
-            showPanel = 0;
+            if (_builderPanel.childCount != 0) return;
+            ShowBuilders();
+            _builderPanel.RemoveFromClassList("d-none");
+            _sdkPanel.AddToClassList("d-none");
         }
-
-        if (showPanel != VRCSettings.ActiveWindowPanel)
+        else if (_builderPanel.childCount == 1)
         {
-            VRCSettings.ActiveWindowPanel = showPanel;
-        }
-
-        GUILayout.EndVertical();
-        GUILayout.FlexibleSpace();
-        GUILayout.EndHorizontal();
-
-        switch (showPanel)
-        {
-            case 1:
-                ShowBuilders();
-                break;
-            case 2:
-                ShowContent();
-                break;
-            case 3:
-                ShowSettings();
-                break;
-            case 0:
-            default:
-                ShowAccount();
-                break;
+            _builderPanel.AddToClassList("d-none");
+            _sdkPanel.RemoveFromClassList("d-none");
+            _builderPanel.Remove(_builderPanel.Children().First());
+            _builderPanel.styleSheets.Remove(_builderPanelStyles);
         }
     }
 
@@ -238,7 +393,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     {
         Reset();
     }
-
+    
     public void Reset()
     {
         ResetIssues();
@@ -260,4 +415,38 @@ public partial class VRCSdkControlPanel : EditorWindow
             Debug.LogException(e);
         }
     }
+    
+    #region Internal API
+
+    [UsedImplicitly]
+    internal void SetPanelIdle()
+    {
+        _panelState = SdkPanelState.Idle;
+        OnSdkPanelStateChange?.Invoke(this, _panelState);   
+    }
+
+    [UsedImplicitly]
+    internal void SetPanelBuilding()
+    {
+        _panelState = SdkPanelState.Building;
+        OnSdkPanelStateChange?.Invoke(this, _panelState);   
+    }
+    
+    [UsedImplicitly]
+    internal void SetPanelUploading()
+    {
+        _panelState = SdkPanelState.Uploading;
+        OnSdkPanelStateChange?.Invoke(this, _panelState);    
+    }
+
+    #endregion
+
+    #region Public API
+    
+    public static event EventHandler OnSdkPanelEnable;
+    public static event EventHandler OnSdkPanelDisable;
+    public static event EventHandler<SdkPanelState> OnSdkPanelStateChange;
+    public SdkPanelState PanelState => _panelState;
+
+    #endregion
 }

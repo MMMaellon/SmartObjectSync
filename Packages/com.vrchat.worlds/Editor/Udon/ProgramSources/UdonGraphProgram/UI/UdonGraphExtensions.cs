@@ -142,6 +142,8 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
                 "Set_Variable",
                 "Set_ReturnValue",
                 "Event_Custom",
+				"Event_OnAvatarChanged",
+                "Event_OnAvatarEyeHeightChanged",
                 "Event_OnDataStorageAdded",
                 "Event_OnDataStorageChanged",
                 "Event_OnDataStorageRemoved",

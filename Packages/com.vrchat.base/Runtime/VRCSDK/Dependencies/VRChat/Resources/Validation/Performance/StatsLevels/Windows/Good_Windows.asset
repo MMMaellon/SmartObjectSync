@@ -46,3 +46,4 @@ MonoBehaviour:
     colliderCount: 8
     collisionCheckCount: 128
   contactCount: 16
+  constraintsCount: 15

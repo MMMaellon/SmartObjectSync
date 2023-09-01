@@ -772,6 +772,14 @@ namespace VRC.SDKBase.Validation.Performance
                 }
                 case AvatarPerformanceCategory.PhysBoneComponentCount:
                 {
+                    //Max limits
+                    if(perfStats.physBone?.componentCount > AvatarValidation.MAX_AVD_PHYSBONES_PER_AVATAR)
+                    {
+                        displayLevel = PerformanceInfoDisplayLevel.Error;
+                        text = $"Phys Bone Components: {perfStats.physBone?.componentCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_PHYSBONES_PER_AVATAR}) of this component type.  Reduce the number of VRCPhysBone components on this avatar.";
+                        break;
+                    }
+
                     switch(rating)
                     {
                         case PerformanceRating.Excellent:
@@ -851,6 +859,14 @@ namespace VRC.SDKBase.Validation.Performance
                 }
                 case AvatarPerformanceCategory.PhysBoneColliderCount:
                 {
+                    //Max limits
+                    if(perfStats.physBone?.colliderCount > AvatarValidation.MAX_AVD_COLLIDERS_PER_AVATAR)
+                    {
+                        displayLevel = PerformanceInfoDisplayLevel.Error;
+                        text = $"Phys Bone Colliders: {perfStats.physBone?.colliderCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_COLLIDERS_PER_AVATAR}) of this component type.  Reduce the number of VRCPhysBoneCollider components on this avatar.";
+                        break;
+                    }
+
                     switch(rating)
                     {
                         case PerformanceRating.Excellent:
@@ -929,6 +945,14 @@ namespace VRC.SDKBase.Validation.Performance
                 }
                 case AvatarPerformanceCategory.ContactCount:
                 {
+                    //Max limits
+                    if(perfStats.contactCount > AvatarValidation.MAX_AVD_CONTACTS_PER_AVATAR)
+                    {
+                        displayLevel = PerformanceInfoDisplayLevel.Error;
+                        text = $"Contact Component Count: {perfStats.contactCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_CONTACTS_PER_AVATAR}) of this component type.  Reduce the number VRCContact components on this avatar.";
+                        break;
+                    }
+
                     switch(rating)
                     {
                         case PerformanceRating.Excellent:

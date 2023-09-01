@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -9,6 +10,7 @@ using VRC.SDK3.Image;
 namespace VRCSDK2
 {
 #if UNITY_EDITOR
+    [Obsolete("Runtime uploads are deprecated. Use methods provided by the VRC.SDKBase.Editor.Api.VRCApi class for uploads")]
     public class RuntimeBlueprintCreation : RuntimeAPICreation
     {
         public GameObject waitingPanel;
