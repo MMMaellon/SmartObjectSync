@@ -2068,11 +2068,15 @@ namespace MMMaellon
                         {
                             pickup.pickupable = value && !pickup.DisallowTheft;
                         }
-                    } else if (IsAttachedToPlayer())
+                    }
+                    else if (IsAttachedToPlayer())
                     {
                         pickup.pickupable = value && (!preventStealWhileAttachedToPlayer || IsLocalOwner());
                     }
-                    pickup.pickupable = value;
+                    else
+                    {
+                        pickup.pickupable = value;
+                    }
                 }
             }
         }

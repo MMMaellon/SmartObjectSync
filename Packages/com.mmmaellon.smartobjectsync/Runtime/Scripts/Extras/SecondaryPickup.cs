@@ -126,11 +126,11 @@ namespace MMMaellon
             {
                 if (primaryPickup.pickup.IsHeld)
                 {
-                    sync.pickup.pickupable = true;
+                    sync.pickupable = true;
                 }
                 else
                 {
-                    sync.pickup.pickupable = false;
+                    sync.pickupable = false;
                     if (sync.pickup.IsHeld)
                     {
                         sync.pickup.Drop();
@@ -139,8 +139,8 @@ namespace MMMaellon
             }
             else if (preventOneHandedSteal)
             {
-                primaryPickup.pickup.pickupable = (sync.pickup.IsHeld || !sync.IsHeld()) && !primaryPickup.IsHeld();
-                sync.pickup.pickupable = (primaryPickup.pickup.IsHeld || !primaryPickup.IsHeld()) && !sync.IsHeld();
+                primaryPickup.pickupable = (sync.pickup.IsHeld || !sync.IsHeld()) && !primaryPickup.IsHeld();
+                sync.pickupable = (primaryPickup.pickup.IsHeld || !primaryPickup.IsHeld()) && !sync.IsHeld();
             }
         }
 
