@@ -11,6 +11,8 @@ namespace MMMaellon
         public AudioSource[] audioSources;
 
         [Header("Default State Sounds")]
+        public float minPitch = 1.0f;
+        public float maxPitch = 1.0f;
         [Range(0.0f, 1.0f)]
         public float respawnVol = 1.0f;
         public AudioClip[] respawnSounds;
@@ -142,6 +144,7 @@ namespace MMMaellon
 
             if (nextClip)
             {
+                audioSource.pitch = Random.Range(minPitch, maxPitch);
                 audioSource.PlayOneShot(nextClip, volumeScale);
                 if (clipEnd < Time.timeSinceLevelLoad)
                 {
