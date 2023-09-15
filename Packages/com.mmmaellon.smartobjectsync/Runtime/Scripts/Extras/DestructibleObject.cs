@@ -33,7 +33,7 @@ namespace MMMaellon
             get => _broken;
             set
             {
-                wholeObject.gameObject.SetActive(!value);
+                wholeObject.gameObject.SetActive(!(value && _destructible));
                 if (Utilities.IsValid(breakObject))
                 {
                     breakObject.transform.position = wholeObject.transform.position;
