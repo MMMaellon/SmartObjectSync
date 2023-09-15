@@ -535,10 +535,17 @@ namespace VRC.SDKBase
             return cam;
         }
         
-        internal static string CaptureSceneImage(float width, float height, bool useFlatColor, Color clearColor, bool usePostProcessing)
+        internal static string CaptureSceneImage(float width, float height, bool useFlatColor, Color clearColor, bool usePostProcessing, Camera customCamera = null)
         {
             var rt = Resources.Load<RenderTexture>("ThumbnailCapture");
-            var camera = CreateThumbnailCaptureCamera(rt, useFlatColor, clearColor, usePostProcessing);
+            if (customCamera != null)
+            {
+                customCamera.targetTexture = rt;
+                var backgroundColor = customCamera.backgroundColor;
+                backgroundColor.a = 1;
+                customCamera.backgroundColor = backgroundColor;
+            }
+            var camera = customCamera != null ? customCamera : CreateThumbnailCaptureCamera(rt, useFlatColor, clearColor, usePostProcessing);
             camera.Render();
             var req = AsyncGPUReadback.Request(rt);
             AsyncGPUReadback.WaitAllRequests();
@@ -555,7 +562,10 @@ namespace VRC.SDKBase
             );
             tex.Apply(false);
             var tempPath = SaveTemporaryTexture("captured", tex);
-            Object.DestroyImmediate(camera.gameObject);
+            if (camera != customCamera)
+            {
+                Object.DestroyImmediate(camera.gameObject);
+            }
             return tempPath;
         }
         

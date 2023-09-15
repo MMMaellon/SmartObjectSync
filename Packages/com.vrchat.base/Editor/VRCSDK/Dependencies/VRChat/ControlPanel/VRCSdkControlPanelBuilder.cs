@@ -553,6 +553,8 @@ public partial class VRCSdkControlPanel : EditorWindow
             await DismissNotification();
         });
 
+        CleanUpPipelineSavers();
+
         _builderPanel.schedule.Execute(() =>
         {
             // scheduled job running when the UI has unmounted
@@ -754,6 +756,17 @@ public partial class VRCSdkControlPanel : EditorWindow
                 selectedBuilder.CreateBuildGUI(buildBlock);
             }
         }).Every(1000);
+    }
+
+    private static void CleanUpPipelineSavers()
+    {
+        #pragma warning disable CS0618 // Disabled obsolete warnings because we're trying to get rid of the pipelineSavers in the scene
+        var pipelineSavers = FindObjectsOfType<PipelineSaver>();
+        foreach (var saver in pipelineSavers)
+        {
+            Undo.DestroyObjectImmediate(saver);
+        }
+        #pragma warning restore CS0618
     }
 
     private bool _notificationShown = false;

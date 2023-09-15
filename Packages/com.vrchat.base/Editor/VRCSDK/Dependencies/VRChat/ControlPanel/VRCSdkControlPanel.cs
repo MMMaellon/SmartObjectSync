@@ -257,6 +257,12 @@ public partial class VRCSdkControlPanel : EditorWindow, IVRCSdkPanelApi
         rootVisualElement.schedule.Execute(() =>
         {
             var currentPanel = VRCSettings.ActiveWindowPanel;
+            if (EditorApplication.isPlaying && currentPanel != 0)
+            {
+                VRCSettings.ActiveWindowPanel = 0;
+                RenderTabs();
+                return;
+            }
             // Check that the tabs are enabled, if not - we must re-render tabs
             if (APIUser.IsLoggedIn && (!_tabButtons[1].enabledSelf || !_tabButtons[2].enabledSelf))
             {
@@ -345,6 +351,7 @@ public partial class VRCSdkControlPanel : EditorWindow, IVRCSdkPanelApi
 
             _tabButtons[i].clicked += () =>
             {
+                if (EditorApplication.isPlaying) return;
                 if (VRCSettings.ActiveWindowPanel == btnIndex)
                 {
                     return;

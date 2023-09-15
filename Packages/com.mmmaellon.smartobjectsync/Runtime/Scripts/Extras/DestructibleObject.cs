@@ -9,6 +9,17 @@ namespace MMMaellon
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
     public class DestructibleObject : UdonSharpBehaviour
     {
+        [FieldChangeCallback(nameof(destructible))]
+        public bool _destructible = true;
+        public bool destructible
+        {
+            get => _destructible;
+            set
+            {
+                _destructible = value;
+                broken = broken;
+            }
+        }
         public SmartObjectSync wholeObject;
         public Transform piecesParent;
         public GameObject breakObject;
@@ -29,7 +40,7 @@ namespace MMMaellon
                     breakObject.transform.rotation = wholeObject.transform.rotation;
                     breakObject.SetActive(value);
                 }
-                if (value)
+                if (value && _destructible)
                 {
                     piecesParent.transform.position = wholeObject.transform.position;
                     piecesParent.transform.rotation = wholeObject.transform.rotation;
@@ -73,7 +84,7 @@ namespace MMMaellon
                     {
                         wholeObject.Respawn();
                     }
-                    else if (_broken != value)
+                    else if (_broken != (value && _destructible))
                     {
                         wholeObject.StartInterpolation();
                     }
@@ -87,7 +98,7 @@ namespace MMMaellon
                     lastBroken = -1001f;
                 }
 
-                _broken = value;
+                _broken = (value && _destructible);
 
                 if (Networking.LocalPlayer.IsOwner(gameObject))
                 {
