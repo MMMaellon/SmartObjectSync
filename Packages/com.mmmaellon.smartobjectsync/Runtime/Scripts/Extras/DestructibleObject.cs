@@ -113,7 +113,7 @@ namespace MMMaellon
 
         public void Break()
         {
-            if (!wholeObject.IsLocalOwner() || broken)
+            if (!wholeObject.IsLocalOwner() || broken || !_destructible)
             {
                 return;
             }
