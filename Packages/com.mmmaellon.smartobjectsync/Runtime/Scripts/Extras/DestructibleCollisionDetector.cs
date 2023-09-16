@@ -12,14 +12,19 @@ namespace MMMaellon
         public float limit = 1;
         public bool allowParticleCollisions = true;
         public bool takeOwnership = true;
+        SmartObjectSync otherSync;
         public void OnCollisionEnter(Collision collision)
         {
             if (collision.impulse.magnitude > limit){
                 if (takeOwnership)
                 {
-                    if (!Utilities.IsValid(collision.collider) || !Networking.LocalPlayer.IsOwner(collision.collider.gameObject))
+                    if (Utilities.IsValid(collision.collider))
                     {
-                        return;
+                        otherSync = collision.collider.GetComponent<SmartObjectSync>();
+                        if (Utilities.IsValid(otherSync) && !otherSync.IsLocalOwner())
+                        {
+                            return;
+                        }
                     }
                     Networking.SetOwner(Networking.LocalPlayer, destructible.gameObject);
                 }
@@ -35,9 +40,13 @@ namespace MMMaellon
             }
             if (takeOwnership)
             {
-                if (!Networking.LocalPlayer.IsOwner(other) && !(Utilities.IsValid(other) && Utilities.IsValid(other.GetComponentInParent<SmartObjectSync>()) && other.GetComponentInParent<SmartObjectSync>().IsLocalOwner()))
+                if (Utilities.IsValid(other))
                 {
-                    return;
+                    otherSync = other.GetComponent<SmartObjectSync>();
+                    if (Utilities.IsValid(otherSync) && !otherSync.IsLocalOwner())
+                    {
+                        return;
+                    }
                 }
                 Networking.SetOwner(Networking.LocalPlayer, destructible.gameObject);
             }
