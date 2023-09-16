@@ -39,7 +39,7 @@ namespace MMMaellon
                 {
                     return;
                 }
-                Networking.LocalPlayer.TakeOwnership(destructible.gameObject);
+                Networking.SetOwner(Networking.LocalPlayer, destructible.gameObject);
             }
             destructible.Break();
         }
