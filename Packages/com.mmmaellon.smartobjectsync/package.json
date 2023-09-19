@@ -12,7 +12,7 @@
         "url": "https://twitter.com/MMMaellon"
     },
     "vpmDependencies": {
-        "com.vrchat.worlds": "^3.2.0",
+        "com.vrchat.worlds": "^3.2.0"
     },
     "legacyFolders": {
         "Assets\\MMMaellon\\SmartObjectSync": ""
