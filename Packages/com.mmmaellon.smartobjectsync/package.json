@@ -12,7 +12,6 @@
         "url": "https://twitter.com/MMMaellon"
     },
     "vpmDependencies": {
-        "com.vrchat.udonsharp": "1.1.X"
     },
     "legacyFolders": {
         "Assets\\MMMaellon\\SmartObjectSync": ""
