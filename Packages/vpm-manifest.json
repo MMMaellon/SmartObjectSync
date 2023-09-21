@@ -40,7 +40,7 @@
       }
     },
     "com.vrchat.core.vpm-resolver": {
-      "version": "0.1.21",
+      "version": "0.1.23",
       "dependencies": {}
     },
     "dev.onevr.vrworldtoolkit": {

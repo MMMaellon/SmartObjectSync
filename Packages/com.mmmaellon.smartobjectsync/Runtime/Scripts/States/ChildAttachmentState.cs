@@ -8,6 +8,11 @@ namespace MMMaellon
 {
     public class ChildAttachmentState : SmartObjectSyncState
     {
+        public bool attachOnCollisionEnter = false;
+        public bool attachOnTriggerEnter = false;
+        public bool attachOnPickupUseDown = false;
+        public bool attachOnDrop = false;
+        public LayerMask collisionLayers;
         public bool disableCollisions = false;
         [Tooltip("Time to wait after detaching before we turn on collisions again")]
         public float collisionCooldown = 0.1f;
@@ -170,6 +175,74 @@ namespace MMMaellon
                 pathBuilder = pathBuilder.parent;
             }
             return tempName;
+        }
+        public void OnCollisionStay(Collision collision)
+        {
+            if (!sync.IsLocalOwner())
+            {
+                return;
+            }
+            if (!Utilities.IsValid(collision) || !Utilities.IsValid(collision.collider) || (((1 << collision.collider.gameObject.layer) | collisionLayers) != collisionLayers))
+            {
+                return;
+            }
+            if (sync.state > SmartObjectSync.STATE_NO_HAND_HELD || sync.state < SmartObjectSync.STATE_SLEEPING)
+            {
+                return;
+            }
+
+            if (!attachOnCollisionEnter && !(attachRequested && !sync.IsHeld()))
+            {
+                return;
+            }
+
+            Attach(collision.collider.transform);
+        }
+
+
+        public void OnTriggerStay(Collider other)
+        {
+            if (!sync.IsLocalOwner())
+            {
+                return;
+            }
+            if (!Utilities.IsValid(other) || (((1 << other.gameObject.layer) | collisionLayers) != collisionLayers)){
+                return;
+            }
+            if (sync.state > SmartObjectSync.STATE_NO_HAND_HELD || sync.state < SmartObjectSync.STATE_SLEEPING)
+            {
+                return;
+            }
+            if (!attachOnTriggerEnter && !(attachRequested && !sync.IsHeld()))
+            {
+                return;
+            }
+            Attach(other.transform);
+        }
+
+        public override void OnDrop()
+        {
+            if (attachOnDrop)
+            {
+                RequestAttach();
+            }
+        }
+        public override void OnPickupUseDown()
+        {
+            if (attachOnPickupUseDown)
+            {
+                RequestAttach();
+            }
+        }
+        public void RequestAttach()
+        {
+            attachRequested = true;
+            SendCustomEventDelayedFrames(nameof(ClearAttachRequest), 2);
+        }
+        bool attachRequested = false;
+        public void ClearAttachRequest()
+        {
+            attachRequested = false;
         }
     }
 }

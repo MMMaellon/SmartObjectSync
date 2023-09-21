@@ -15,7 +15,8 @@ namespace MMMaellon
         SmartObjectSync otherSync;
         public void OnCollisionEnter(Collision collision)
         {
-            if (collision.impulse.magnitude > limit){
+            if (collision.impulse.magnitude > limit)
+            {
                 if (takeOwnership)
                 {
                     if (Utilities.IsValid(collision.collider))
@@ -27,6 +28,7 @@ namespace MMMaellon
                         }
                     }
                     Networking.SetOwner(Networking.LocalPlayer, destructible.gameObject);
+                    destructible.wholeObject.TakeOwnership(false);
                 }
                 destructible.Break();
             }
@@ -49,6 +51,7 @@ namespace MMMaellon
                     }
                 }
                 Networking.SetOwner(Networking.LocalPlayer, destructible.gameObject);
+                destructible.wholeObject.TakeOwnership(false);
             }
             destructible.Break();
         }

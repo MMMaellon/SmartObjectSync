@@ -18,12 +18,13 @@ namespace MMMaellon.SmartObjectSyncExtra
         public Collider[] attachColliders;
         public Transform targetParent;
         float lastDetach = -1001f;
-
-        [System.NonSerialized]
         public ChildAttachmentState child;
         public void Start()
         {
-            child = GetComponent<ChildAttachmentState>();
+            if (!Utilities.IsValid(child))
+            {
+                child = GetComponent<ChildAttachmentState>();
+            }
             child.sync.AddListener(this);
             if (startInState && child.sync.IsLocalOwner())
             {
