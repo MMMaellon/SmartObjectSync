@@ -167,7 +167,7 @@ namespace MMMaellon
                 ExitState();
             }
             parentTransformName = GetFullPath(t);
-            EnterState();
+            base.EnterState();
         }
         public string GetFullPath(Transform target)
         {
