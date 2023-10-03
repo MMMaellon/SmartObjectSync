@@ -18,8 +18,8 @@ namespace MMMaellon
         public float collisionCooldown = 0.1f;
         [Tooltip("How the child should move when attaching itself to the parent, local to the parent's transform. If this is all zeros then the child just lerps smoothly in place. If this is is (0,0,1), then the child will lerp smoothly to (0,0,1) and then slide along the z axis into place")]
         public Vector3 attachmentVector = Vector3.zero;
-        public bool returnToStartingParentOnExit = true;
-        public bool forceNullStartingParent = false;
+        public bool returnToDefaultParentOnExit = true;
+        public bool forceNullDefaultParent = false;
         public bool forceZeroLocalTransforms = true;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
 
@@ -76,7 +76,7 @@ namespace MMMaellon
         bool firstInterpolation = true;
         void Start()
         {
-            if (forceNullStartingParent)
+            if (forceNullDefaultParent)
             {
                 startingParent = null;
             }
@@ -123,7 +123,7 @@ namespace MMMaellon
                 SendCustomEventDelayedSeconds(nameof(EnableCollisions), collisionCooldown);
             }
             sync.rigid.isKinematic = false;
-            if (returnToStartingParentOnExit)
+            if (returnToDefaultParentOnExit)
             {
                 _parentTransformName = GetFullPath(startingParent);
                 parentTransform = startingParent;

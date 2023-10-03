@@ -659,13 +659,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: returnToStartingParentOnExit
+      Data: returnToDefaultParentOnExit
     - Name: $v
       Entry: 7
       Data: 36|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: returnToStartingParentOnExit
+      Data: returnToDefaultParentOnExit
     - Name: <UserType>k__BackingField
       Entry: 9
       Data: 3
@@ -707,13 +707,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: forceNullStartingParent
+      Data: forceNullDefaultParent
     - Name: $v
       Entry: 7
       Data: 38|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: forceNullStartingParent
+      Data: forceNullDefaultParent
     - Name: <UserType>k__BackingField
       Entry: 9
       Data: 3
@@ -755,13 +755,13 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: automaticallySetTransforms
+      Data: forceZeroLocalTransforms
     - Name: $v
       Entry: 7
       Data: 40|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
     - Name: <Name>k__BackingField
       Entry: 1
-      Data: automaticallySetTransforms
+      Data: forceZeroLocalTransforms
     - Name: <UserType>k__BackingField
       Entry: 9
       Data: 3
