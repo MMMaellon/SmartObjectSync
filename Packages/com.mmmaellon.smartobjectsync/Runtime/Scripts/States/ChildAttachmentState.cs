@@ -92,6 +92,7 @@ namespace MMMaellon
         }
         public override void OnEnterState()
         {
+            transform.SetParent(_parentTransform, true);//bug workaround
             firstInterpolation = true;
             if (disableCollisions)
             {
