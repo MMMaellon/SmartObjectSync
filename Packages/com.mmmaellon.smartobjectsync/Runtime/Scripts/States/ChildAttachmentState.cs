@@ -78,6 +78,10 @@ namespace MMMaellon
             startingParent = transform.parent;
             parentTransformName = GetFullPath(startingParent);
         }
+        public override void EnterState()
+        {
+            Attach(transform.parent);
+        }
         public override void OnEnterState()
         {
             firstInterpolation = true;

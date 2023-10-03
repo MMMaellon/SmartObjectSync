@@ -27,7 +27,7 @@ namespace MMMaellon
         [HideInInspector]
         public SmartObjectSync sync;
 
-        public void EnterState()
+        public virtual void EnterState()
         {
             if (Utilities.IsValid(sync))
             {
@@ -38,7 +38,7 @@ namespace MMMaellon
                 sync.state = (stateID + SmartObjectSync.STATE_CUSTOM);
             }
         }
-        public void ExitState()
+        public virtual void ExitState()
         {
             if (sync)
             {
