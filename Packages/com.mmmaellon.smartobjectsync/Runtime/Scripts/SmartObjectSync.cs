@@ -830,11 +830,13 @@ namespace MMMaellon
             _print("Respawn");
             TakeOwnership(false);
 
-            TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
-                
             if (Utilities.IsValid(startingState))
             {
                 startingState.EnterState();
+            }
+            else
+            {
+                TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
             }
         }
 
@@ -2368,6 +2370,20 @@ namespace MMMaellon
                 i++;
             }
             listeners = newListeners;
+        }
+        public void TogglePickupable()
+        {
+            pickupable = !pickupable;
+        }
+
+        public void DisablePickupable()
+        {
+            pickupable = false;
+        }
+
+        public void EnablePickupable()
+        {
+            pickupable = true;
         }
     }
 }
