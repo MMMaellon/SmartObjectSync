@@ -12,18 +12,13 @@ public class ObjectWhitelist : UdonSharpBehaviour
     public UdonBehaviour[] interactsToMakeUninteractable;
     public string[] whiteListedUsernames;
     string localUsername;
+    public bool checkWhitelistAtStart = true;
     public void Start()
     {
-        localUsername = Networking.LocalPlayer.displayName;
-        foreach (string username in whiteListedUsernames)
+        if (checkWhitelistAtStart)
         {
-            if (username == localUsername)
-            {
-                EnableObjects();
-                return;
-            }
+            CheckWhitelist();
         }
-        DisableObjects();
     }
     public void EnableObjects()
     {
@@ -50,6 +45,19 @@ public class ObjectWhitelist : UdonSharpBehaviour
         }
     }
     SmartObjectSync sync;
+    public void CheckWhitelist()
+    {
+        localUsername = Networking.LocalPlayer.displayName;
+        foreach (string username in whiteListedUsernames)
+        {
+            if (username == localUsername)
+            {
+                EnableObjects();
+                return;
+            }
+        }
+        DisableObjects();
+    }
     public void DisableObjects()
     {
         foreach (GameObject obj in objectsToDisable)
