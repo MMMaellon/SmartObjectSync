@@ -657,9 +657,18 @@ namespace MMMaellon
             //used to decide if we simulate a bounce in the falling state
             fallSpeed = lagTime <= 0 ? 0 : Physics.gravity.magnitude * lagTime;
             startRan = true;
-            if (Utilities.IsValid(startingState) && IsLocalOwner())
-            {
-                startingState.EnterState();
+            if (Utilities.IsValid(startingState)){
+                if (startingState.sync == this)
+                {
+                    if (IsLocalOwner())
+                    {
+                        startingState.EnterState();
+                    }
+                }
+                else
+                {
+                    startingState = null;
+                }
             }
         }
         [System.NonSerialized]
