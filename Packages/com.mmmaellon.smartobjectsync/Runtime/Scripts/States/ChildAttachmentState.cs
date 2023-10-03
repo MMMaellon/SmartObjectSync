@@ -84,7 +84,7 @@ namespace MMMaellon
             {
                 startingParent = transform.parent;
             }
-            parentTransformName = GetFullPath(startingParent);
+            // parentTransformName = GetFullPath(startingParent);
         }
         public override void EnterState()
         {
@@ -132,6 +132,10 @@ namespace MMMaellon
 
         public void EnableCollisions()
         {
+            if (IsActiveState())
+            {
+                return;
+            }
             sync.rigid.detectCollisions = true;
         }
 
