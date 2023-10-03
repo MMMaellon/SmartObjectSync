@@ -20,7 +20,7 @@ namespace MMMaellon
         public Vector3 attachmentVector = Vector3.zero;
         public bool returnToStartingParentOnExit = true;
         public bool forceNullStartingParent = false;
-        public bool automaticallySetTransforms = true;
+        public bool forceZeroLocalTransforms = true;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
 
         [System.NonSerialized, FieldChangeCallback(nameof(parentTransform))]
@@ -108,6 +108,12 @@ namespace MMMaellon
                 }
                 return;
             }
+            
+            if (forceZeroLocalTransforms)
+            {
+                sync.pos = Vector3.zero;
+                sync.rot = Quaternion.identity;
+            }
         }
 
         public override void OnExitState()
@@ -131,7 +137,12 @@ namespace MMMaellon
 
         public override void OnSmartObjectSerialize()
         {
-            if (automaticallySetTransforms)
+            if (forceZeroLocalTransforms)
+            {
+                sync.pos = Vector3.zero;
+                sync.rot = Quaternion.identity;
+            }
+            else
             {
                 sync.pos = transform.localPosition;
                 sync.rot = transform.localRotation;

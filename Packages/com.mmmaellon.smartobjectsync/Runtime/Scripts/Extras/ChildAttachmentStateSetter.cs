@@ -50,7 +50,7 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 if (collider == collision.collider)
                 {
-                    Attach();
+                    child.Attach(targetParent);
                     return;
                 }
             }
@@ -79,7 +79,7 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 if (collider == other)
                 {
-                    Attach();
+                    child.Attach(targetParent);
                     return;
                 }
             }
@@ -98,16 +98,6 @@ namespace MMMaellon.SmartObjectSyncExtra
             if (firstOwner)
             {
                 firstOwner = false;
-            }
-        }
-
-        public void Attach()
-        {
-            child.Attach(targetParent);
-            if (!child.automaticallySetTransforms)
-            {
-                child.sync.pos = Vector3.zero;
-                child.sync.rot = Quaternion.identity;
             }
         }
     }
