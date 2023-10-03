@@ -14,7 +14,6 @@ namespace MMMaellon.SmartObjectSyncExtra
         public bool attachOnTrigger = true;
         public bool attachWhileHeldOrAttachedToPlayer = true;
         public bool attachWhileInCustomState = false;
-        public bool startInState = false;
         public Collider[] attachColliders;
         public Transform targetParent;
         float lastDetach = -1001f;
@@ -26,10 +25,6 @@ namespace MMMaellon.SmartObjectSyncExtra
                 child = GetComponent<ChildAttachmentState>();
             }
             child.sync.AddListener(this);
-            if (startInState && child.sync.IsLocalOwner())
-            {
-                Attach();
-            }
         }
 
         public void OnCollisionStay(Collision collision)
@@ -103,10 +98,6 @@ namespace MMMaellon.SmartObjectSyncExtra
             if (firstOwner)
             {
                 firstOwner = false;
-                if (startInState && Utilities.IsValid(newOwner) && newOwner.isLocal)
-                {
-                    Attach();
-                }
             }
         }
 

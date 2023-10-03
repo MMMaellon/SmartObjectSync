@@ -11,14 +11,7 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-    ],
-    "versionDefines": [
-        {
-            "name": "com.vrchat.worlds",
-            "expression": "3.1.0",
-            "define": "VRC_WORLDS_READY"
-        }
-    ],
+    "defineConstraints": [],
+    "versionDefines": [],
     "noEngineReferences": false
 }

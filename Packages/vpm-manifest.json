@@ -40,7 +40,7 @@
       }
     },
     "com.vrchat.core.vpm-resolver": {
-      "version": "0.1.23",
+      "version": "0.1.24",
       "dependencies": {}
     },
     "dev.onevr.vrworldtoolkit": {
@@ -50,7 +50,7 @@
       }
     },
     "com.llealloo.audiolink": {
-      "version": "0.3.2",
+      "version": "1.0.0",
       "dependencies": {}
     }
   }

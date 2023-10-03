@@ -3,14 +3,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// This define is inserted into the file in CI.
-// We can't rely on regular scripting defines so early in the import process.
-#if !AUDIOLINK_STANDALONE
-using VRC.PackageManagement.Core.Types;
-using VRC.PackageManagement.Core.Types.Packages;
-#endif
-
-namespace VRCAudioLink.Editor
+namespace AudioLink.Editor
 {
     [InitializeOnLoad]
     public class AudioLinkAssetManager
@@ -30,23 +23,7 @@ namespace VRCAudioLink.Editor
                 }
                 else
                 {
-                    #if !AUDIOLINK_STANDALONE
-                    if (IsWorldProjectWithoutUdonSharp())
-                    {
-                        if (EditorUtility.DisplayDialog(
-                            "Install missing UdonSharp dependency",
-                            "It looks like you are trying to use AudioLink in a world project, but don't have UdonSharp 1.x installed.\n" +
-                            "AudioLink will not function correctly without UdonSharp 1.x. Would you like to install it now?",
-                            "Yes", "No"))
-                        {
-                            InstallUdonSharp();
-                        }
-                    }
-                    else
-                    #endif
-                    {
-                        ReimportPackage();
-                    }
+                    ReimportPackage();
                     File.WriteAllText(canaryFilePath, audioLinkReimportedKey);
                     AudioLinkShaderCompatabilityUtility.UpgradeShaders();
                 }
@@ -59,13 +36,13 @@ namespace VRCAudioLink.Editor
             SessionState.SetBool(audioLinkReimportedKey, true);
         }
 
-        #if !AUDIOLINK_STANDALONE
+#if !AUDIOLINK_STANDALONE
         [MenuItem("AudioLink/Open AudioLink Example Scene")]
         public static void OpenExampleScene()
         {
             if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
             {
-                string baseAssetsPath = "Samples/AudioLink/0.3.2";
+                string baseAssetsPath = "Samples/AudioLink/1.0.0";
                 string packagePath = "Packages/com.llealloo.audiolink/Samples~/AudioLinkExampleScene";
                 string assetsPath = Path.Combine("Assets", baseAssetsPath, "AudioLinkExampleScene");
                 if (!Directory.Exists(Path.Combine(Application.dataPath, baseAssetsPath, "AudioLinkExampleScene")))
@@ -77,51 +54,46 @@ namespace VRCAudioLink.Editor
                 EditorSceneManager.OpenScene(Path.Combine(assetsPath, "AudioLink_ExampleScene.unity"));
             }
         }
-
-        [MenuItem("AudioLink/Install UdonSharp dependency", true)]
-        public static bool IsWorldProjectWithoutUdonSharp()
-        {
-            var path = new DirectoryInfo(Application.dataPath).Parent?.FullName;
-            var project = new UnityProject(path);
-            return project.VPMProvider.HasPackage(VRCPackageNames.WORLDS) && !project.VPMProvider.HasPackage(VRCAddonPackageNames.UDONSHARP);
-        }
-
-        [MenuItem("AudioLink/Install UdonSharp dependency")]
-        public static void InstallUdonSharp()
-        {
-            var path = new DirectoryInfo(Application.dataPath).Parent?.FullName;
-            var project = new UnityProject(path);
-            project.AddVPMPackage(VRCAddonPackageNames.UDONSHARP, "1.x");
-            ReimportPackage();
-        }
-        #endif
+#endif
 
         [MenuItem("AudioLink/Add AudioLink Prefab to Scene", false)]
         [MenuItem("GameObject/AudioLink/Add AudioLink Prefab to Scene", false, 49)]
         public static void AddAudioLinkToScene()
         {
-            #if VRC_SDK_VRCSDK3 && !UDONSHARP //VRC AVATAR
             string[] paths = new string[]
             {
-                "Packages/com.llealloo.audiolink/Runtime/AudioLinkAvatar.prefab"
-            };
-            #else  //VRC WORLD or STANDALONE
-            string[] paths = new string[]
-            {
-                #if UDONSHARP
+
+#if UDONSHARP // VRC World        
+                "Packages/com.llealloo.audiolink/Runtime/AudioLink.prefab",
                 "Packages/com.llealloo.audiolink/Runtime/AudioLinkController.prefab",
-                #endif
-                "Packages/com.llealloo.audiolink/Runtime/AudioLink.prefab"
+#elif VRC_SDK_VRCSDK3 // VRC AVATAR
+                "Packages/com.llealloo.audiolink/Runtime/AudioLinkAvatar.prefab",
+#elif CVR_CCK_EXISTS // CVR
+                "Packages/com.llealloo.audiolink/Runtime/CVRAudioLink.prefab",
+                "Packages/com.llealloo.audiolink/Runtime/CVRAudioLinkController.prefab",
+#else // Standalone
+                "Packages/com.llealloo.audiolink/Runtime/AudioLink.prefab",
+#endif
             };
-            #endif
+            GameObject audiolink = null;
+
             foreach (string path in paths)
             {
                 GameObject asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 if (asset != null)
                 {
                     GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(asset);
+                    if (path.EndsWith("AudioLink.prefab"))
+                    {
+                        audiolink = instance;
+                    }
                     EditorGUIUtility.PingObject(instance);
                 }
+            }
+
+            if (audiolink != null)
+            {
+                AudioLinkEditor.LinkAll(audiolink.GetComponent<AudioLink>());
             }
         }
     }

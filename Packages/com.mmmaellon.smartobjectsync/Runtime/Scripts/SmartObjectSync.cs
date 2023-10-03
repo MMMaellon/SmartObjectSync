@@ -30,7 +30,7 @@ namespace MMMaellon
         SerializedProperty m_worldSpaceTeleport;
         SerializedProperty m_worldSpaceSleep;
         SerializedProperty m_preventStealWhileAttachedToPlayer;
-
+        SerializedProperty m_startingState;
         void OnEnable()
         {
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
@@ -42,6 +42,7 @@ namespace MMMaellon
             m_worldSpaceTeleport = serializedObject.FindProperty("worldSpaceTeleport");
             m_worldSpaceSleep = serializedObject.FindProperty("worldSpaceSleep");
             m_preventStealWhileAttachedToPlayer = serializedObject.FindProperty("preventStealWhileAttachedToPlayer");
+            m_startingState = serializedObject.FindProperty("startingState");
         }
 
         public static void _print(SmartObjectSync sync, string message)
@@ -255,6 +256,7 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_worldSpaceTeleport);
                 EditorGUILayout.PropertyField(m_worldSpaceSleep);
                 EditorGUILayout.PropertyField(m_preventStealWhileAttachedToPlayer);
+                EditorGUILayout.PropertyField(m_startingState);
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -296,6 +298,10 @@ namespace MMMaellon
         public bool reduceJitterDuringSleep = true;
         [HideInInspector, Tooltip("Only applies when we're attached to a player's playspace or avatar. Prevents other players from taking it.")]
         public bool preventStealWhileAttachedToPlayer = true;
+        [HideInInspector]
+        public bool respawnIntoStartingState = true;
+        [HideInInspector]
+        public SmartObjectSyncState startingState = null;
         [HideInInspector]
         public VRC_Pickup pickup;
         [HideInInspector]
@@ -651,6 +657,10 @@ namespace MMMaellon
             //used to decide if we simulate a bounce in the falling state
             fallSpeed = lagTime <= 0 ? 0 : Physics.gravity.magnitude * lagTime;
             startRan = true;
+            if (Utilities.IsValid(startingState) && IsLocalOwner())
+            {
+                startingState.EnterState();
+            }
         }
         [System.NonSerialized]
         public bool _loop = false;
@@ -810,7 +820,13 @@ namespace MMMaellon
         {
             _print("Respawn");
             TakeOwnership(false);
+
             TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
+                
+            if (Utilities.IsValid(startingState))
+            {
+                startingState.EnterState();
+            }
         }
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)

@@ -6,7 +6,11 @@ AudioLink can be used in 2 ways.
 
 ## Using AudioLink in Udon
 
-AudioLink can be used in Udon via the included UdonBehaviours prefixed by `AudioReactive`, such as `AudioReactiveLight` and `AudioReactiveSurface`. However, this use case is not recommended as it requires a fairly expensive GPU readback. Performing all of the work directly in a shader yields much better performance.
+AudioLink can be used in Udon via the included UdonBehaviours prefixed by `AudioReactive`, such as `AudioReactiveLight` and `AudioReactiveSurface`. You can also directly access the Audio Data in Udon to make custom behaviors, via `AudioLink.GetAudioDataAtPixel`, `AudioLink.LerpAudioDataAtPixel` and `AudioLink.audioData`.
+
+This functionality can be toggled using the "Enable Readback / Disable Readback" at the bottom of the AudioLink behavior inspector.
+
+Using this functionality requires reading data back from the GPU to CPU, which incurs a performance penalty. On PCVR, the penalty is mostly negligible, as we can make use of "asynchronous readbacks". On Quest, however, which does not support asynchronous readbacks, we must do an expensive synchronous readback. For this reason, we don't recommend using the feature on Quest.
 
 ## The AudioLink Texture
 
@@ -14,27 +18,28 @@ The AudioLink Texture is a 128 x 64 px RGBA texture which contains several featu
 
 The basic map is sort of a hodgepodge of various features avatars may want, and many features have been added over time.
 
-|                         | 0.1.5 | 0.2.0 | 0.2.1 | 0.2.2 | 0.2.3 | 0.2.4 | 0.2.5 | 0.2.6 | 0.2.8 | 0.3.0 |
-|-------------------------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
-| Waveform                |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
-| Spectrogram             |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
-| 4 Band (32 history)     |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
-| 4 Band (128 history)    |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
-| 4 Band Filtered         |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
-| ColorChord              |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
-| Autocorrelator          |       |       |       |       |   X   |   X   |   X   |   X   |   X   |   X   |
-| Floating Autocorrelator |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |
-| VU Meter Left           |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |
-| VU Meter Left+Right     |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
-| Filtered VU meter       |       |       |       |       |       |       |       |   X   |   X   |   X   |
-| AudioLink FPS           |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
-| AudioLink Version Read  |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
-| Synced Instance Time    |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
-| Chronotensity           |       |       |       |       |       |       |       |   X   |   X   |   X   |
-| ColorChord Index Colors |       |       |       |       |       |       |       |   X   |   X   |   X   |
-| Theme Colors            |       |       |       |       |       |       |       |   X   |   X   |   X   |
-| UTC Time                |       |       |       |       |       |       |       |       |   X   |   X   |
-| Global Strings          |       |       |       |       |       |       |       |       |       |   X   |
+|                         | 0.1.5 | 0.2.0 | 0.2.1 | 0.2.2 | 0.2.3 | 0.2.4 | 0.2.5 | 0.2.6 | 0.2.8 | 0.3.0 | 1.0.0 |
+|-------------------------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|-------|
+| Waveform                |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
+| Spectrogram             |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
+| 4 Band (32 history)     |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
+| 4 Band (128 history)    |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
+| 4 Band Filtered         |       |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |
+| ColorChord              |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
+| Autocorrelator          |       |       |       |       |   X   |   X   |   X   |   X   |   X   |   X   |   X   |
+| Floating Autocorrelator |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |   X   |
+| VU Meter Left           |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |   X   |
+| VU Meter Left+Right     |       |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |
+| Filtered VU meter       |       |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
+| AudioLink FPS           |       |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |
+| AudioLink Version Read  |       |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |
+| Synced Instance Time    |       |       |       |       |       |       |   X   |   X   |   X   |   X   |   X   |
+| Chronotensity           |       |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
+| ColorChord Index Colors |       |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
+| Theme Colors            |       |       |       |       |       |       |       |   X   |   X   |   X   |   X   |
+| UTC Time                |       |       |       |       |       |       |       |       |   X   |   X   |   X   |
+| Global Strings          |       |       |       |       |       |       |       |       |       |   X   |   X   |
+| Media States            |       |       |       |       |       |       |       |       |       |       |   X   |
 
 <img src=https://raw.githubusercontent.com/cnlohr/vrc-udon-audio-link/dev/Docs/Materials/tex_AudioLinkDocs_BaseImage.png width=512 height=256>
 
@@ -95,9 +100,9 @@ Shader "MyTestShader"
 #define ALPASS_GENERALVU_LOCAL_TIME     uint2(3,22)
 #define ALPASS_GENERALVU_NETWORK_TIME   uint2(4,22)
 #define ALPASS_GENERALVU_PLAYERINFO     uint2(6,22)
-// Added in version 2.5
+// Added in version 0.2.5
 #define ALPASS_FILTEREDAUDIOLINK        uint2(0,28)  //Size: 16, 4
-// Added in version 2.6
+// Added in version 0.2.6
 #define ALPASS_CHRONOTENSITY            uint2(16,28) //Size: 8, 4
 #define ALPASS_THEME_COLOR0             uint2(0,23)
 #define ALPASS_THEME_COLOR1             uint2(1,23)
@@ -106,9 +111,11 @@ Shader "MyTestShader"
 #define ALPASS_FILTEREDVU               uint2(24,28) //Size: 4, 4
 #define ALPASS_FILTEREDVU_INTENSITY     uint2(24,28) //Size: 4, 1
 #define ALPASS_FILTEREDVU_MARKER        uint2(24,29) //Size: 4, 1
-// Added in version 3.0
+// Added in version 0.3.0
 #define ALPASS_GLOBAL_STRINGS           uint2(40,28) //Size: 8, 4
 #define ALPASS_GENERALVU_SOURCE_POS     uint2(7,23)
+// Added in version 1.0.0
+#define ALPASS_MEDIASTATE               uint(5,22)
 ```
 
 These are the base coordinates for the different data blocks in AudioLink.  For data groups that are multiline, all data is represented as left-to-right (increasing X) then incrementing Y and scanning X from left to right on the next line.  They are the following groups that contain the following data:
@@ -206,7 +213,7 @@ It contains the following dedicated pixels:
 <tr><td>2, 0 </td><td>2, 22</td><td>Milliseconds Since Instance Start</td><td colspan=4><pre>AudioLinkDecodeDataAs[UInt/Seconds]( ALPASS_GENERALVU_INSTANCE_TIME )</pre></td></tr>
 <tr><td>3, 0 </td><td>3, 22</td><td>Milliseconds Since 12:00 AM Local Time</td><td colspan=4><pre>AudioLinkDecodeDataAs[UInt/Seconds]( ALPASS_GENERALVU_LOCAL_TIME )</pre></td></tr>
 <tr><td>4, 0 </td><td>4, 22</td><td>Milliseconds In Network Time</td><td colspan=4><pre>AudioLinkDecodeDataAs[UInt/Seconds]( ALPASS_GENERALVU_LOCAL_TIME )</pre></td></tr>
-<tr><td>5, 0 </td><td>5, 22</td><td>(Internal)</td><td colspan=4>Reserved for future use</td></tr>
+<tr><td>5, 0 </td><td>5, 22</td><td>Current Media State</td><td>Media Volume</td><td>Media Time</td><td>Media Playback</td><td>Media Loop & Random</td></tr>
 <tr><td>6, 0 </td><td>6, 22</td><td>Player Data Info</td><td>Number of Players In Instance</td><td>1 if you are master</td><td>1 if you are owner</td><td>Reserved.</td></tr>
 <tr><td>7, 0 </td><td>7, 22</td><td>(Internal)</td><td colspan=4>Reserved for future use</td></tr>
 <tr><td>8, 0 </td><td>8, 22</td><td>Current Intensity</td><td>RMS Left</td><td>Peak Left</td><td>RMS Right</td><td>Peak right</td></tr>
@@ -389,6 +396,41 @@ When doing this division, make sure to divide by a float! Dividing by `1000` is 
 
 You can combine these to create new motion.
 For example, to get "Fixed increase when the band is light" you could subtract a uint sample with `offset.x = 6` from a uint sample with `offset.x = 4`.
+
+### `ALPASS_MEDIASTATE`
+Provides the state of the attached Video Player set via Udon, or automatically queried from the attached Audio Source.
+- Red: Volume, 0.0f to 1.0f
+- Green: Time progress, 0.0f to 1.0f
+- Blue: Media playback state
+    - 0.0f None or Legacy
+    - 1.0f Playing
+    - 2.0f Paused
+    - 3.0f Stopped
+    - 4.0f Loading
+    - 5.0f Streaming
+    - 6.0f Error
+- Alpha: Loop & Random
+    - 0.0f None or Legacy
+    - 1.0f Loop
+    - 2.0f Loop one (Playlist players)
+    - 3.0f Random (Playlist players)
+    - 4.0f Random & Loop (Playlist players)
+```hlsl
+// Sample media state from AudioLink
+float4 mediaState = AudioLinkData(ALPASS_MEDIASTATE);
+
+// Get volume value
+float volume = mediaState.r;
+
+// Get progress value
+float progress = mediaState.g;
+
+// Get the playing state
+float playstate = mediaState.b;
+
+// Get the looping / random state
+float loopstate = mediaState.a;
+```
 
 ### `ALPASS_GLOBAL_STRINGS`
 This section provides access access to 4 globally synced strings of text. These can be read and displayed in a shader, or used to perform logic like a check for a specific player.

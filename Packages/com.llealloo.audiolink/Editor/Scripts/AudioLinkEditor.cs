@@ -1,39 +1,123 @@
-﻿#if !COMPILER_UDONSHARP && UNITY_EDITOR && UDONSHARP
+﻿#if !COMPILER_UDONSHARP && UNITY_EDITOR
+using System.Reflection;
+
+#if UDONSHARP
 using UdonSharp;
 using UdonSharpEditor;
+#endif
+
 using UnityEditor;
 using UnityEngine;
-using VRCAudioLink;
 
+namespace AudioLink.Editor
+{
     [CustomEditor(typeof(AudioLink))]
-    public class AudioLinkEditor : Editor
+    public class AudioLinkEditor : UnityEditor.Editor
     {
-        public override void OnInspectorGUI()
+        private readonly static GUIContent DisableReadbackButtonContent = EditorGUIUtility.TrTextContent("Disable readback", "Disables asynchronous readback, which is required for audio-reactive Udon scripts to function. This feature comes with a slight performance penalty.");
+        private readonly static GUIContent EnableReadbackButtonContent = EditorGUIUtility.TrTextContent("Enable readback", "Enables asynchronous readback, which is required for audio-reactive Udon scripts to function. This feature comes with a slight performance penalty.");
+
+        public void OnEnable()
         {
-            if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
-            EditorGUILayout.Space();
-            if (GUILayout.Button(new GUIContent("Link all sound reactive objects to this AudioLink", "Links all UdonBehaviours with 'audioLink' parameter to this object."))) { LinkAll(); }
-            EditorGUILayout.Space();
-            base.OnInspectorGUI();
+            AudioLink audioLink = (AudioLink)target;
+            if (audioLink.audioData2D == null)
+            {
+                audioLink.audioData2D =
+                    AssetDatabase.LoadAssetAtPath<Texture2D>(
+                        AssetDatabase.GUIDToAssetPath("b07c8466531ac5e4e852f3e276e4baca"));
+                Debug.Log(nameof(AudioLink) + ": restored audioData2D reference");
+            }
         }
 
-        void LinkAll()
+        public override void OnInspectorGUI()
         {
-            UdonSharpBehaviour[] allUdonSharpBehaviours = FindObjectsOfType<UdonSharpBehaviour>();
-            foreach (var behaviour in allUdonSharpBehaviours)
+            AudioLink audioLink = (AudioLink)target;
+#if UDONSHARP
+            if (UdonSharpGUI.DrawDefaultUdonSharpBehaviourHeader(target)) return;
+#endif
+
+            if (Camera.main == null)
             {
-                if (behaviour.GetType().GetField("audioLink") != null)
+                EditorGUILayout.HelpBox("The current scene might be missing a main camera, this could cause issues with the AudioLink camera.", MessageType.Warning);
+            }
+
+            if (audioLink.audioSource == null)
+            {
+                EditorGUILayout.HelpBox("No audio source assigned. AudioLink will not work.", MessageType.Warning);
+            }
+
+            EditorGUILayout.Space();
+            if (GUILayout.Button(new GUIContent("Link all sound reactive objects to this AudioLink instance",
+                    "Links all scripts with 'audioLink' parameter to this object.")))
+            {
+                LinkAll();
+            }
+
+            EditorGUILayout.Space();
+            base.OnInspectorGUI();
+            EditorGUILayout.Space();
+
+            if (audioLink.audioDataToggle)
+            {
+                GUI.backgroundColor = Color.red;
+                if (GUILayout.Button(DisableReadbackButtonContent))
                 {
-                    behaviour.GetType().GetField("audioLink").SetValue(behaviour,target);
+                    audioLink.DisableReadback();
+                    EditorUtility.SetDirty(audioLink);
+                }
+            }
+            else
+            {
+                GUI.backgroundColor = Color.green;
+                if (GUILayout.Button(EnableReadbackButtonContent))
+                {
+                    audioLink.EnableReadback();
+                    EditorUtility.SetDirty(audioLink);
+                }
+            }
+        }
+
+        public void LinkAll()
+        {
+            LinkAll(target as AudioLink);
+        }
+
+        public static void LinkAll(AudioLink target)
+        {
+#if UDONSHARP
+            UdonSharpBehaviour[] allBehaviours = FindObjectsOfType<UdonSharpBehaviour>();
+#else
+            MonoBehaviour[] allBehaviours = FindObjectsOfType<MonoBehaviour>();
+#endif
+            // this handles all reasonable cases of referencing audiolink
+            // (it doesn't handle referencing it multiple times in one monobehaviour, or referencing it as it's Base type)
+            foreach (var behaviour in allBehaviours)
+            {
+                FieldInfo fieldInfo = behaviour.GetType().GetField("audioLink");
+                // in case the field isn't called "audioLink"
+                if (fieldInfo == null)
+                {
+                    foreach (FieldInfo field in behaviour.GetType().GetFields())
+                    {
+                        if (field.FieldType == typeof(AudioLink))
+                        {
+                            fieldInfo = field;
+                            break;
+                        }
+                    }
+                }
+                if (fieldInfo != null && fieldInfo.FieldType == typeof(AudioLink))
+                {
+                    fieldInfo.SetValue(behaviour, target);
                     EditorUtility.SetDirty(behaviour);
-                    
-                    if(PrefabUtility.IsPartOfPrefabInstance(behaviour))
+
+                    if (PrefabUtility.IsPartOfPrefabInstance(behaviour))
                     {
                         PrefabUtility.RecordPrefabInstancePropertyModifications(behaviour);
                     }
-                    
                 }
             }
         }
     }
+}
 #endif

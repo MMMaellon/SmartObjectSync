@@ -82,7 +82,7 @@ namespace MMMaellon.SmartObjectSyncExtra
         }
         void Start()
         {
-            if (Utilities.IsValid(joint.connectedBody))
+            if (Utilities.IsValid(joint.connectedBody) && sync.IsLocalOwner())
             {
                 parentRigidName = GetFullPath(joint.connectedBody);
                 EnterState();

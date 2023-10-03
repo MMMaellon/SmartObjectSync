@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace VRCAudioLink.Editor
+namespace AudioLink.Editor
 {
     [InitializeOnLoad]
     public class AudioLinkDefineManager
@@ -12,6 +12,7 @@ namespace VRCAudioLink.Editor
         static AudioLinkDefineManager()
         {
             AddDefineIfMissing(EditorUserBuildSettings.selectedBuildTargetGroup, "AUDIOLINK");
+            AddDefineIfMissing(EditorUserBuildSettings.selectedBuildTargetGroup, "AUDIOLINK_V1");
             Shader.EnableKeyword("AUDIOLINK_IMPORTED");
         }
 

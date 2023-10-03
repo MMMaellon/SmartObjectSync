@@ -29,7 +29,7 @@ namespace MMMaellon
 
         public void EnterState()
         {
-            if (sync)
+            if (Utilities.IsValid(sync))
             {
                 if (!sync.IsLocalOwner())
                 {
