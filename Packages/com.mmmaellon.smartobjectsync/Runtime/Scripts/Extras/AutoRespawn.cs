@@ -27,7 +27,7 @@ namespace MMMaellon
             {
                 return;
             }
-            if (newState == SmartObjectSync.STATE_SLEEPING)
+            if (newState == SmartObjectSync.STATE_SLEEPING || (newState == SmartObjectSync.STATE_FALLING && s.rigid.isKinematic))
             {
                 if (lastSleepTime < 0)
                 {
