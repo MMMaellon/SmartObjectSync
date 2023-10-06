@@ -23,16 +23,10 @@ namespace VRC.SDKBase.Editor
             if (EditorApplication.isPlaying)
                 return;
 
-            #if UDON
-                if (!EditorPrefs.GetBool("VRCSDK_ShowedSplashScreenFirstTime", false))
-                {
-                    OpenSplashScreen();
-                    EditorPrefs.SetBool("VRCSDK_ShowedSplashScreenFirstTime", true);
-                }
-                else
-            #endif
-                if (EditorPrefs.GetBool("VRCSDK_ShowSplashScreen", true))
-                    OpenSplashScreen();
+            if (EditorPrefs.GetBool("VRCSDK_ShowedSplashScreenFirstTime", false)) return;
+            
+            OpenSplashScreen();
+            EditorPrefs.SetBool("VRCSDK_ShowedSplashScreenFirstTime", true);
         }
         
         [MenuItem("VRChat SDK/Splash Screen", false, 500)]

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using UnityEngine;
 using VRC.Udon.Common.Interfaces;
 
@@ -13,5 +11,8 @@ namespace VRC.Udon
 
         [PublicAPI]
         public abstract IUdonProgram RetrieveProgram();
+
+        [PublicAPI]
+        public abstract ulong GetSerializedProgramSize();
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading;
 using Unity.Profiling;
 using UnityEngine;
+using VRC.Compression;
 using VRC.Udon.Common;
 using VRC.Udon.Common.Interfaces;
 using VRC.Udon.Serialization.OdinSerializer;
@@ -16,7 +18,10 @@ namespace VRC.Udon.ProgramSources
         private static int DebugLevel => _debugLevel.Value;
 
         private const DataFormat DEFAULT_SERIALIZATION_DATA_FORMAT = DataFormat.Binary;
-        private const int MAXIMUM_CACHED_PROGRAM_SIZE = 1024 * 1024 * 2;
+        private const int MAXIMUM_CACHED_PROGRAM_SIZE = 1024 * 1024 * 2; // 2 MB
+
+        [SerializeField, HideInInspector]
+        private byte[] serializedProgramCompressedBytes;
 
         [SerializeField, HideInInspector]
         private string serializedProgramBytesString;
@@ -61,10 +66,11 @@ namespace VRC.Udon.ProgramSources
             #if VRC_CLIENT
             try
             {
-                if(serializedProgramBytesString.Length >= MAXIMUM_CACHED_PROGRAM_SIZE)
+                ulong totalProgramSize = GetSerializedProgramSize();
+                if(totalProgramSize >= MAXIMUM_CACHED_PROGRAM_SIZE)
                 {
                     Core.Logger.LogWarning(
-                        $"Skipping caching of UdonProgram '{name}' as serializedProgramBytesString[{serializedProgramBytesString.Length}] is longer than '{MAXIMUM_CACHED_PROGRAM_SIZE}'",
+                        $"Skipping caching of UdonProgram '{name}' as the total program size ({totalProgramSize}) is higher than '{MAXIMUM_CACHED_PROGRAM_SIZE}'",
                         DebugLevel);
 
                     _serializationCache = null;
@@ -74,18 +80,7 @@ namespace VRC.Udon.ProgramSources
                 // Deserialize the full program once and cache it.
                 // Then reserialize the IUdonHeap and cache it so we can deserialize a clone for each UdonProgram.
                 // This is more efficient than SerializationUtility.CreateCopy which serializes each time.
-                byte[] serializedProgramBytes;
-                try
-                {
-                    serializedProgramBytes = Convert.FromBase64String(serializedProgramBytesString ?? "");
-                }
-                catch(FormatException e)
-                {
-                    Core.Logger.LogWarning($"Failed to deserialize UdonProgram because the program was invalid. Exception:\n{e}");
-                    return;
-                }
-
-                IUdonProgram deserializedUdonProgram = SerializationUtility.DeserializeValue<IUdonProgram>(serializedProgramBytes, serializationDataFormat, programUnityEngineObjects);
+                IUdonProgram deserializedUdonProgram = ReadSerializedProgram();
                 if(deserializedUdonProgram == null)
                 {
                     return;
@@ -115,7 +110,9 @@ namespace VRC.Udon.ProgramSources
             }
 
             byte[] serializedProgramBytes = SerializationUtility.SerializeValue(udonProgram, DEFAULT_SERIALIZATION_DATA_FORMAT, out programUnityEngineObjects);
-            serializedProgramBytesString = Convert.ToBase64String(serializedProgramBytes);
+            // Store a compressed byte array only - we no longer store Base64 encoded strings.
+            serializedProgramCompressedBytes = GZip.Compress(serializedProgramBytes);
+            serializedProgramBytesString = string.Empty;
             serializationDataFormat = DEFAULT_SERIALIZATION_DATA_FORMAT;
 
             #if UNITY_EDITOR
@@ -140,18 +137,7 @@ namespace VRC.Udon.ProgramSources
 
                     if(_serializationCache == null)
                     {
-                        byte[] serializedProgramBytes;
-                        try
-                        {
-                            serializedProgramBytes = Convert.FromBase64String(serializedProgramBytesString ?? "");
-                        }
-                        catch(FormatException e)
-                        {
-                            Core.Logger.LogWarning($"Failed to deserialize UdonProgram because the program was invalid. Exception:\n{e}");
-                            return null;
-                        }
-
-                        return SerializationUtility.DeserializeValue<IUdonProgram>(serializedProgramBytes, serializationDataFormat, programUnityEngineObjects);
+                        return ReadSerializedProgram();
                     }
 
                     (IUdonProgram program, byte[] serializedHeap, List<UnityEngine.Object> serializedHeapUnityEngineObjects) = _serializationCache.Value;
@@ -210,6 +196,64 @@ namespace VRC.Udon.ProgramSources
             }
         }
 
+        private IUdonProgram ReadSerializedProgram()
+        {
+            byte[] serializedProgramBytes = null;
+
+            // If the newer compressed bytes format is available, use that.
+            if (serializedProgramCompressedBytes != null && serializedProgramCompressedBytes.Length > 0)
+            {
+                try
+                {
+                    serializedProgramBytes = GZip.Decompress(serializedProgramCompressedBytes);
+                }
+                catch (InvalidDataException invalidDataException)
+                {
+                    Core.Logger.LogWarning($"Failed to deserialize UdonProgram because the program was invalid. Exception:\n{invalidDataException}");
+                }
+            }
+
+            // If there is no compressed byte array or reading the array failed, try to fall back to the base 64 encoded string.
+            if (serializedProgramBytes == null)
+            {
+                try
+                {
+                    serializedProgramBytes = Convert.FromBase64String(serializedProgramBytesString ?? "");
+                }
+                catch (FormatException formatException)
+                {
+                    Core.Logger.LogWarning($"Failed to deserialize UdonProgram because the program was invalid. Exception:\n{formatException}");
+                }
+            }
+
+            if (serializedProgramBytes == null)
+            {
+                return null;
+            }
+            else
+            {
+                return SerializationUtility.DeserializeValue<IUdonProgram>(serializedProgramBytes, serializationDataFormat, programUnityEngineObjects);
+            }
+        }     
+
+        /// <summary>
+        /// Finds the total size of this serialized Udon program.
+        /// </summary>
+        /// <returns>The size of the program in bytes.</returns>
+        public override ulong GetSerializedProgramSize()
+        {
+            if (serializedProgramCompressedBytes != null && serializedProgramCompressedBytes.Length > 0)
+            {
+                return (ulong)serializedProgramCompressedBytes.Length;
+            }
+            else if (!string.IsNullOrEmpty(serializedProgramBytesString))
+            {
+                return (ulong)serializedProgramBytesString.Length;
+            }
+
+            return 0L;
+        }
+
         private static int InitializeLogging()
         {
             int hashCode = typeof(SerializedUdonProgramAsset).GetHashCode();
@@ -225,6 +269,7 @@ namespace VRC.Udon.ProgramSources
 
         private void OnDestroy()
         {
+            serializedProgramCompressedBytes = null;
             serializedProgramBytesString = null;
             _serializationCache = null;
             programUnityEngineObjects = null;

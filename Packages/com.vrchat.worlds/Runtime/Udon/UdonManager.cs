@@ -16,6 +16,12 @@ using VRC.Udon.Serialization.OdinSerializer;
 using VRC.Udon.Serialization.OdinSerializer.Utilities;
 using Logger = VRC.Core.Logger;
 using Object = UnityEngine.Object;
+
+#if VRC_CLIENT
+using VRC.Core;
+using VRC.Core.Pool;
+#endif
+
 #if ENABLE_PARALLEL_PRELOAD
 using System.Threading.Tasks;
 #endif
@@ -482,20 +488,34 @@ namespace VRC.Udon
                 Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory =
                     new Dictionary<GameObject, HashSet<UdonBehaviour>>();
 
+#if !VRC_CLIENT
                 List<Transform> transformsTempList = new List<Transform>();
+#endif
                 foreach(GameObject rootGameObject in scene.GetRootGameObjects())
                 {
+#if VRC_CLIENT
+                    using (rootGameObject.GetComponentsInChildrenPooled(out IReadOnlyList<Transform> transformsTempList, true))
+#else
                     rootGameObject.GetComponentsInChildren(true, transformsTempList);
-                    foreach(Transform currentTransform in transformsTempList)
+#endif
                     {
-                        List<UdonBehaviour> currentGameObjectUdonBehaviours = new List<UdonBehaviour>();
-                        GameObject currentGameObject = currentTransform.gameObject;
-                        currentGameObject.GetComponents(currentGameObjectUdonBehaviours);
-                        if(currentGameObjectUdonBehaviours.Count > 0)
+                        foreach(Transform currentTransform in transformsTempList)
                         {
-                            sceneUdonBehaviourDirectory.Add(
-                                currentGameObject,
-                                new HashSet<UdonBehaviour>(currentGameObjectUdonBehaviours));
+                            GameObject currentGameObject = currentTransform.gameObject;
+#if VRC_CLIENT
+                            using (currentGameObject.GetComponentsPooled(out IReadOnlyList<UdonBehaviour> currentGameObjectUdonBehaviours))
+#else
+                            List<UdonBehaviour> currentGameObjectUdonBehaviours = new List<UdonBehaviour>();
+                            currentGameObject.GetComponents(currentGameObjectUdonBehaviours);
+#endif
+                            {
+                                if(currentGameObjectUdonBehaviours.Count > 0)
+                                {
+                                    sceneUdonBehaviourDirectory.Add(
+                                        currentGameObject,
+                                        new HashSet<UdonBehaviour>(currentGameObjectUdonBehaviours));
+                                }
+                            }
                         }
                     }
                 }
@@ -602,6 +622,39 @@ namespace VRC.Udon
             Cache<BinaryDataReader>.Purge();
             Cache<UnityReferenceResolver>.Purge();
             Cache<BinaryDataWriter>.Purge();
+        }
+
+        public ulong GetTotalLoadedProgramSize()
+        {
+            ulong totalSize = 0L;
+
+#if VRC_CLIENT
+            using (HashSetPool.Get(out HashSet<int> observedProgramIds))
+#else
+            HashSet<int> observedProgramIds = new HashSet<int>();
+#endif
+            {
+                foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in _sceneUdonBehaviourDirectories.Values)
+                {
+                    foreach(HashSet<UdonBehaviour> udonBehaviourList in sceneUdonBehaviourDirectory.Values)
+                    {
+                        foreach(UdonBehaviour udonBehaviour in udonBehaviourList)
+                        {
+                            if(udonBehaviour != null)
+                            {
+                                int programId = udonBehaviour.ProgramId;
+                                if (programId != 0 && !observedProgramIds.Contains(programId))
+                                {
+                                    totalSize += udonBehaviour.ProgramSize;
+                                    observedProgramIds.Add(udonBehaviour.ProgramId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return totalSize;
         }
 
         #endregion

@@ -150,13 +150,13 @@ MonoBehaviour:
   syncParticleCollisions: 0
   respawnHeight: -100
   printDebugMessages: 0
-  worldSpaceRespawn: 0
+  worldSpaceTeleport: 0
+  worldSpaceSleep: 1
   forceContinuousSpeculative: 1
-  preventPickupSnapping: 0
-  lerpTime: 0.1
   kinematicWhileHeld: 1
   nonKinematicPickupJitterPreventionTime: 0
   reduceJitterDuringSleep: 0
+  preventStealWhileAttachedToPlayer: 1
   pickup: {fileID: 3535390553363129014}
   rigid: {fileID: 3535390553363129013}
   states: []

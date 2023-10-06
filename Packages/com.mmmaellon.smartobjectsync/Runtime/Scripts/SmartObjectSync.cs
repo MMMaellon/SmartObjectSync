@@ -541,16 +541,20 @@ namespace MMMaellon
         Quaternion rotControl1;
         Quaternion rotControl2;
         public Vector3 HermiteInterpolatePosition(Vector3 startPos, Vector3 startVel, Vector3 endPos, Vector3 endVel, float interpolation)
-        {
+        {//Shout out to Kit Kat for suggesting the improved hermite interpolation
             posControl1 = startPos + startVel * lagTime * interpolation / 3f;
             posControl2 = endPos - endVel * lagTime * (1.0f - interpolation) / 3f;
-            return Vector3.Lerp(posControl1, posControl2, interpolation);
+            return Vector3.Lerp(Vector3.Lerp(posControl1, endPos, interpolation), Vector3.Lerp(startPos, posControl2, interpolation), interpolation);
         }
         public Quaternion HermiteInterpolateRotation(Quaternion startRot, Vector3 startSpin, Quaternion endRot, Vector3 endSpin, float interpolation)
         {
-            rotControl1 = startRot * Quaternion.Euler(startSpin * lagTime * interpolation / 3f);
-            rotControl2 = endRot * Quaternion.Euler(-1.0f * endSpin * lagTime * (1.0f - interpolation) / 3f);
-            return Quaternion.Slerp(rotControl1, rotControl2, interpolation);
+            // rotControl1 = startRot * Quaternion.Euler(startSpin * lagTime * interpolation / 3f);
+            // rotControl2 = endRot * Quaternion.Euler(-1.0f * endSpin * lagTime * (1.0f - interpolation) / 3f);
+            // return Quaternion.Slerp(rotControl1, rotControl2, interpolation);
+
+
+            //we aren't actually doing hermite. It turns out higher order stuff isn't necessary just do a slerp
+            return Quaternion.Slerp(startRot, endRot, interpolation);
         }
         public bool IsLocalOwner()
         {

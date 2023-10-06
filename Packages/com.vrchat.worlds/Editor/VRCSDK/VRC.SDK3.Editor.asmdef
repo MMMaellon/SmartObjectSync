@@ -5,7 +5,8 @@
         "VRC.SDKBase.Editor",
         "VRC.Udon",
         "VRC.SDKBase",
-        "UniTask"
+        "UniTask",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

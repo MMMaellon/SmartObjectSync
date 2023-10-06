@@ -17,6 +17,10 @@ using VRC.Udon.VM;
 using Logger = VRC.Core.Logger;
 using Object = UnityEngine.Object;
 
+#if VRC_CLIENT
+using VRC.Core;
+#endif
+
 #if UNITY_EDITOR && !VRC_CLIENT
 using UnityEditor.SceneManagement;
 #endif
@@ -80,11 +84,18 @@ namespace VRC.Udon
                 }
 
                 // All synced UdonBehaviours on one GameObject must use the same sync method.
-                foreach(UdonBehaviour ub in gameObject.GetComponents<UdonBehaviour>())
+#if VRC_CLIENT
+                using(gameObject.GetComponentsPooled(out IReadOnlyList<UdonBehaviour> behaviours))
+#else
+                UdonBehaviour[] behaviours = gameObject.GetComponents<UdonBehaviour>();
+#endif
                 {
-                    if(ub != null && ub._syncMethod != Networking.SyncType.None)
+                    foreach(UdonBehaviour ub in behaviours)
                     {
-                        ub._syncMethod = value;
+                        if(ub != null && ub._syncMethod != Networking.SyncType.None)
+                        {
+                            ub._syncMethod = value;
+                        }
                     }
                 }
             }
@@ -148,6 +159,10 @@ namespace VRC.Udon
 
         [PublicAPI]
         public override bool DisableEventProcessing { get; set; } = false;
+
+        public int ProgramId => serializedProgramAsset != null ? serializedProgramAsset.GetInstanceID() : 0;
+
+        public ulong ProgramSize => serializedProgramAsset != null ? serializedProgramAsset.GetSerializedProgramSize() : 0L;
 
         #endregion
 

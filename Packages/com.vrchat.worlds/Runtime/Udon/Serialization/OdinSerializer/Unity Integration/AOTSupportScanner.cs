@@ -16,6 +16,8 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using VRC.Core;
+
 #if UNITY_EDITOR
 
 namespace VRC.Udon.Serialization.OdinSerializer.Editor
@@ -434,27 +436,34 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
                             
                             if ((go.hideFlags & HideFlags.DontSaveInBuild) == 0)
                             {
-                                foreach (var component in go.GetComponents<ISerializationCallbackReceiver>())
+#if VRC_CLIENT
+                                using (go.GetComponentsPooled(out IReadOnlyList<ISerializationCallbackReceiver> components))
+#else
+                                ISerializationCallbackReceiver[] components = go.GetComponents<ISerializationCallbackReceiver>();
+#endif
                                 {
-                                    try
+                                    foreach (var component in components)
                                     {
-                                        this.allowRegisteringScannedTypes = true;
-                                        component.OnBeforeSerialize();
-
-                                        var prefabSupporter = component as ISupportsPrefabSerialization;
-
-                                        if (prefabSupporter != null)
+                                        try
                                         {
-                                            // Also force a serialization of the object's prefab modifications, in case there are unknown types in there
+                                            this.allowRegisteringScannedTypes = true;
+                                            component.OnBeforeSerialize();
 
-                                            List<UnityEngine.Object> objs = null;
-                                            var mods = UnitySerializationUtility.DeserializePrefabModifications(prefabSupporter.SerializationData.PrefabModifications, prefabSupporter.SerializationData.PrefabModificationsReferencedUnityObjects);
-                                            UnitySerializationUtility.SerializePrefabModifications(mods, ref objs);
+                                            var prefabSupporter = component as ISupportsPrefabSerialization;
+
+                                            if (prefabSupporter != null)
+                                            {
+                                                // Also force a serialization of the object's prefab modifications, in case there are unknown types in there
+
+                                                List<UnityEngine.Object> objs = null;
+                                                var mods = UnitySerializationUtility.DeserializePrefabModifications(prefabSupporter.SerializationData.PrefabModifications, prefabSupporter.SerializationData.PrefabModificationsReferencedUnityObjects);
+                                                UnitySerializationUtility.SerializePrefabModifications(mods, ref objs);
+                                            }
                                         }
-                                    }
-                                    finally
-                                    {
-                                        this.allowRegisteringScannedTypes = false;
+                                        finally
+                                        {
+                                            this.allowRegisteringScannedTypes = false;
+                                        }
                                     }
                                 }
                             }

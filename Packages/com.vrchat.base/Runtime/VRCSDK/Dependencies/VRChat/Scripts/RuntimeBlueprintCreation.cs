@@ -349,7 +349,6 @@ namespace VRCSDK2
                     pipelineManager.blueprintId = savedBP.id;
                     UnityEditor.EditorPrefs.SetString("blueprintID-" + pipelineManager.GetInstanceID().ToString(), savedBP.id);
 
-                    AnalyticsSDK.AvatarUploaded(savedBP, false);
                     doneUploading = true;
                 },
                 (c) =>
@@ -386,7 +385,7 @@ namespace VRCSDK2
 
             SetUploadProgress("Saving Avatar", "Almost finished!!", 0.8f);
             apiAvatar.Save(
-                    (c) => { AnalyticsSDK.AvatarUploaded(apiAvatar, true); doneUploading = true; },
+                    (c) => {doneUploading = true; },
                     (c) => {
                         Debug.LogError(c.Error);
                         SetUploadProgress("Saving Avatar", "Error saving blueprint.", 0.0f);

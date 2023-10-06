@@ -184,8 +184,9 @@ namespace VRC.Editor
         {
             try
             {
-                if(!_requestConfigureSettings)
+                if(!_requestConfigureSettings || EditorApplication.isPlayingOrWillChangePlaymode)
                 {
+                    _requestConfigureSettings = false;
                     return;
                 }
 
@@ -361,7 +362,7 @@ namespace VRC.Editor
             // default to steam runtime in sdk (shouldn't matter)
             SetVRSDKs(EditorUserBuildSettings.selectedBuildTargetGroup, new string[] { "None", "OpenVR", "Oculus" });
 
-            VRC.Core.AnalyticsSDK.Initialize(VRC.Core.SDKClientUtilities.GetSDKVersionDate());
+            VRC.Core.AnalyticsSDK.Initialize(VRC.Tools.SdkVersion);
             #endif
 
             #if VRC_CLIENT
@@ -685,18 +686,30 @@ namespace VRC.Editor
                     changedProperty = true;
                 }
             }
-
+            
+            int defaultQuality = 
+#if UNITY_ANDROID || UNITY_IOS 
+                3;
+#else
+                2;
+#endif
+            
+            SerializedProperty currentGraphicsQuality = qualitySettings.FindProperty("m_CurrentQuality");
+            
+            if(currentGraphicsQuality.intValue != defaultQuality)
+            {
+                currentGraphicsQuality.intValue = defaultQuality;
+                changedProperty = true;
+            }
+            
             if(!changedProperty)
             {
                 return;
             }
 
-            int defaultQuality = !Application.isMobilePlatform ? 2 : 3;
             #if !VRC_CLIENT
-        Debug.Log($"A quality setting was changed resetting to the default quality: {_graphicsPresets[defaultQuality]["name"]}.");
+                Debug.Log($"A quality setting was changed resetting to the default quality: {_graphicsPresets[defaultQuality]["name"]}.");
             #endif
-            SerializedProperty currentGraphicsQuality = qualitySettings.FindProperty("m_CurrentQuality");
-            currentGraphicsQuality.intValue = defaultQuality;
 
             qualitySettings.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.SaveAssets();
@@ -1087,8 +1100,13 @@ namespace VRC.Editor
                 }
             #endif
 
+            #if UNITY_STANDALONE && !VRC_DISABLE_STANDALONE_GRAPHICS_JOBS
             PlayerSettings.graphicsJobs = true;
-
+            #elif (UNITY_ANDROID || UNITY_IOS) && VRC_ENABLE_MOBILE_GRAPHICS_JOBS
+            PlayerSettings.graphicsJobs = true;
+            #else
+            PlayerSettings.graphicsJobs = false;
+            #endif
             PlayerSettings.gpuSkinning = true;
 
             #if UNITY_2019_3_OR_NEWER
@@ -1170,11 +1188,13 @@ namespace VRC.Editor
 
                 #if UNITY_2019_3_OR_NEWER
                     #if VRC_MOBILE
-                        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)31;
+                        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)33;
                         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
+                        PlayerSettings.Android.optimizedFramePacing = false;
                     #else
                         PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)32;
                         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
+			PlayerSettings.Android.optimizedFramePacing = false;
                     #endif
                 #else
                     PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
