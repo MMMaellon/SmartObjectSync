@@ -1769,7 +1769,19 @@ namespace MMMaellon
                     }
                 }
             }
-            loop = false;//turn off immediately for max optimization
+            loop = IsLocalOwner();//turn off immediately for max optimization
+        }
+
+        public void teleport_Interpolation()
+        {
+            if (IsLocalOwner())
+            {
+                if (transform.position.y <= respawnHeight)
+                {
+                    Respawn();
+                }
+                return;
+            }
         }
         public void teleport_OnSmartObjectSerialize()
         {

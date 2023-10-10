@@ -69,6 +69,11 @@ namespace MMMaellon
 
         public GameObject debugLeftPoint;
         public GameObject debugRightPoint;
+
+        [Tooltip("Negative values mean it's unlimited")]
+        public int maxLeftInventorySize = -1001;
+        [Tooltip("Negative values mean it's unlimited")]
+        public int maxRightInventorySize = -1001;
         void Start()
         {
 
@@ -76,38 +81,32 @@ namespace MMMaellon
 
         public void AddToLeftInventory(InventoryState state)
         {
-            if (state)
+            state.inventoryIndex = -1 - leftInventoryCache.Length;
+            InventoryState[] newCache = new InventoryState[leftInventoryCache.Length + 1];
+            leftInventoryCache.CopyTo(newCache, 0);
+            newCache[newCache.Length - 1] = state;
+            leftInventoryCache = newCache;
+
+
+            foreach (InventoryState s in leftInventoryCache)
             {
-                state.inventoryIndex = -1 - leftInventoryCache.Length;
-                InventoryState[] newCache = new InventoryState[leftInventoryCache.Length + 1];
-                leftInventoryCache.CopyTo(newCache, 0);
-                newCache[newCache.Length - 1] = state;
-                leftInventoryCache = newCache;
-
-
-                foreach (InventoryState s in leftInventoryCache)
-                {
-                    //restart interpolation
-                    s.OnInterpolationStart();
-                }
+                //restart interpolation
+                s.OnInterpolationStart();
             }
         }
         public void AddToRightInventory(InventoryState state)
         {
-            if (state)
+            state.inventoryIndex = rightInventoryCache.Length;
+            InventoryState[] newCache = new InventoryState[rightInventoryCache.Length + 1];
+            rightInventoryCache.CopyTo(newCache, 0);
+            newCache[newCache.Length - 1] = state;
+            rightInventoryCache = newCache;
+
+
+            foreach (InventoryState s in rightInventoryCache)
             {
-                state.inventoryIndex = rightInventoryCache.Length;
-                InventoryState[] newCache = new InventoryState[rightInventoryCache.Length + 1];
-                rightInventoryCache.CopyTo(newCache, 0);
-                newCache[newCache.Length - 1] = state;
-                rightInventoryCache = newCache;
-
-
-                foreach (InventoryState s in rightInventoryCache)
-                {
-                    //restart interpolation
-                    s.OnInterpolationStart();
-                }
+                //restart interpolation
+                s.OnInterpolationStart();
             }
         }
 
@@ -177,7 +176,7 @@ namespace MMMaellon
         }
         float lastHapticLeft = -1001f;
         float lastHapticRight = -1001f;
-        public void Update()
+        public override void PostLateUpdate()
         {
             if (Networking.LocalPlayer.IsUserInVR())
             {
@@ -216,7 +215,7 @@ namespace MMMaellon
                 return;
             }
 
-            if (Input.GetKeyDown(addToInventoryShortcut))
+            if (Input.GetKeyDown(addToInventoryShortcut) && (maxLeftInventorySize < 0 || maxLeftInventorySize > leftInventoryCache.Length))
             {
                 VRC_Pickup pickup = Networking.LocalPlayer.GetPickupInHand(VRC_Pickup.PickupHand.Right);
                 if (!pickup)

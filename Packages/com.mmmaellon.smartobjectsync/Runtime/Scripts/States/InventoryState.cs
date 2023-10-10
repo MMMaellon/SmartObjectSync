@@ -58,7 +58,11 @@ namespace MMMaellon
         public int nonstatic_leftInventoryItemCount = 0;
         [System.NonSerialized]
         public int nonstatic_rightInventoryItemCount = 0;
+        public Vector3 inventoryPosOffset = Vector3.zero;
+        public Vector3 inventoryRotOffset = Vector3.zero;
         public float inventoryItemScale = 0.1f;
+        [Tooltip("We can't toggle the item off, so instead we shrink it and banish it to this far off position")]
+        public Vector3 inventoryHidePos = new Vector3(-1001f, -1001f, -1001f);
         [System.NonSerialized]
         public Vector3 startScale;
         [System.NonSerialized]
@@ -73,6 +77,7 @@ namespace MMMaellon
         Collider col;
         [System.NonSerialized]
         public Vector3 offset;
+
 
         void Start()
         {
@@ -112,11 +117,25 @@ namespace MMMaellon
             sync.rigid.detectCollisions = false;
         }
 
+        public override void ExitState()
+        {
+            if (sync)
+            {
+                transform.localScale = startScale;
+                sync.TeleportToLocalSpace(transform.localPosition, transform.localRotation, Vector3.zero, Vector3.zero);
+            }
+        }
+
         public override void OnExitState()
         {
             if (sync.IsLocalOwner())
             {
                 manager.RemoveFromInventory(inventoryIndex);
+            }
+            else
+            {
+                //unbanish it
+                transform.position = CalcPos();
             }
             transform.localScale = startScale;
             sync.rigid.detectCollisions = true;
@@ -209,28 +228,38 @@ namespace MMMaellon
         {
             if (sync.IsLocalOwner())
             {
-                return sync.owner.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation;
+                return sync.owner.GetTrackingData(VRCPlayerApi.TrackingDataType.Head).rotation * Quaternion.Euler(inventoryRotOffset);
             }
             return transform.rotation;
         }
 
         public override bool OnInterpolationEnd()
         {
-            return true;
+            if (sync.IsLocalOwner())
+            {
+                return true;
+            }
+            else
+            {
+                transform.position = inventoryHidePos;
+                return false;
+            }
         }
 
         public override void OnSmartObjectSerialize()
         {
+
         }
+
         public Vector3 CalcOffset()
         {
             if (inventoryIndex < 0)
             {
-                return Vector3.up * manager.inventoryOffset + Vector3.right * manager.inventorySpacing * ((-1 - inventoryIndex) - ((manager.leftInventoryCache.Length - 1) / 2.0f));
+                return Vector3.up * manager.inventoryOffset + Vector3.right * manager.inventorySpacing * ((-1 - inventoryIndex) - ((manager.leftInventoryCache.Length - 1) / 2.0f)) + inventoryPosOffset;
             }
             else
             {
-                return Vector3.up * manager.inventoryOffset + Vector3.right * manager.inventorySpacing * (inventoryIndex - ((manager.rightInventoryCache.Length - 1) / 2.0f));
+                return Vector3.up * manager.inventoryOffset + Vector3.right * manager.inventorySpacing * (inventoryIndex - ((manager.rightInventoryCache.Length - 1) / 2.0f)) + inventoryPosOffset;
             }
         }
 
@@ -268,14 +297,14 @@ namespace MMMaellon
             }
             if (useLeftHandInventory)
             {
-                if (IsHoveringLeftInventory())
+                if (IsHoveringLeftInventory() && (manager.maxLeftInventorySize < 0 || manager.maxLeftInventorySize > manager.leftInventoryCache.Length))
                 {
                     EnterState();
                 }
             }
             else
             {
-                if (IsHoveringRightInventory())
+                if (IsHoveringRightInventory() && (manager.maxRightInventorySize < 0 || manager.maxRightInventorySize > manager.rightInventoryCache.Length))
                 {
                     EnterState();
                 }
@@ -324,7 +353,7 @@ namespace MMMaellon
             base.OnOwnershipTransferred(player);
             if (IsActiveState() && sync.IsLocalOwner())
             {
-                ExitState();
+                sync.Respawn();
             }
         }
     }
