@@ -29,6 +29,7 @@ namespace MMMaellon
         SerializedProperty m_reduceJitterDuringSleep;
         SerializedProperty m_worldSpaceTeleport;
         SerializedProperty m_worldSpaceSleep;
+        SerializedProperty m_worldSpacePhysics;
         SerializedProperty m_preventStealWhileAttachedToPlayer;
         SerializedProperty m_startingState;
         void OnEnable()
@@ -41,6 +42,7 @@ namespace MMMaellon
             m_reduceJitterDuringSleep = serializedObject.FindProperty("reduceJitterDuringSleep");
             m_worldSpaceTeleport = serializedObject.FindProperty("worldSpaceTeleport");
             m_worldSpaceSleep = serializedObject.FindProperty("worldSpaceSleep");
+            m_worldSpacePhysics = serializedObject.FindProperty("worldSpacePhysics");
             m_preventStealWhileAttachedToPlayer = serializedObject.FindProperty("preventStealWhileAttachedToPlayer");
             m_startingState = serializedObject.FindProperty("startingState");
         }
@@ -255,6 +257,7 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_reduceJitterDuringSleep);
                 EditorGUILayout.PropertyField(m_worldSpaceTeleport);
                 EditorGUILayout.PropertyField(m_worldSpaceSleep);
+                EditorGUILayout.PropertyField(m_worldSpacePhysics);
                 EditorGUILayout.PropertyField(m_preventStealWhileAttachedToPlayer);
                 EditorGUILayout.PropertyField(m_startingState);
                 serializedObject.ApplyModifiedProperties();
@@ -286,6 +289,8 @@ namespace MMMaellon
         public bool worldSpaceTeleport = false;
         [HideInInspector, Tooltip("By default, everything is in world space. Uncheck if the relationship between this object and it's parent is more important than it and the world.")]
         public bool worldSpaceSleep = true;
+        [HideInInspector, Tooltip("By default, everything is in world space. Uncheck if the relationship between this object and it's parent is more important than it and the world.")]
+        public bool worldSpacePhysics = true;
         [HideInInspector, Tooltip("VRCObjectSync will set rigidbodies' collision detection mode to ContinuousSpeculative. This recreates that feature.")]
         public bool forceContinuousSpeculative = true;
         [HideInInspector, Tooltip("Turns the object kinematic when held. Will result in dampened collisions because that's just how Unity is.")]
@@ -933,7 +938,7 @@ namespace MMMaellon
 
         public void SetVelocityFromLastTransform()
         {
-            if (transformRecorded)
+            if (transformRecorded && !rigid.isKinematic)
             {
                 rigid.velocity = CalcVel();
                 rigid.angularVelocity = CalcSpin();
@@ -1380,7 +1385,7 @@ namespace MMMaellon
                     }
                 case (STATE_FALLING):
                     {
-                        falling_OnSmartObjectSerialize();
+                        interpolate_OnSmartObjectSerialize();
                         return;
                     }
                 case (STATE_LEFT_HAND_HELD):
@@ -1580,7 +1585,7 @@ namespace MMMaellon
                     }
                 case (STATE_FALLING):
                     {
-                        return falling_OnInterpolationEnd();
+                        return interpolate_OnInterpolationEnd();
                     }
                 case (STATE_LEFT_HAND_HELD):
                     {
@@ -1660,8 +1665,11 @@ namespace MMMaellon
                     transform.localPosition = HermiteInterpolatePosition(startPos, startVel, pos, Vector3.zero, interpolation);
                     transform.localRotation = HermiteInterpolateRotation(startRot, startSpin, rot, Vector3.zero, interpolation);
                 }
-                rigid.velocity = Vector3.zero;
-                rigid.angularVelocity = Vector3.zero;
+                if (!rigid.isKinematic)
+                {
+                    rigid.velocity = Vector3.zero;
+                    rigid.angularVelocity = Vector3.zero;
+                }
             }
             else if (!reduceJitterDuringSleep || ObjectMovedDuringSleep())
             {
@@ -1675,8 +1683,11 @@ namespace MMMaellon
                     transform.localPosition = pos;
                     transform.localRotation = rot;
                 }
-                rigid.velocity = Vector3.zero;
-                rigid.angularVelocity = Vector3.zero;
+                if (!rigid.isKinematic)
+                {
+                    rigid.velocity = Vector3.zero;
+                    rigid.angularVelocity = Vector3.zero;
+                }
                 rigid.Sleep();
                 lastSleep = Time.timeSinceLevelLoad;
             }
@@ -1813,10 +1824,21 @@ namespace MMMaellon
         //At the end of the state we set the velocity and then disable the update loop for optimization and to allow the physics engine to take over
         public void interpolate_OnInterpolationStart()
         {
-            startPos = transform.position;
-            startRot = transform.rotation;
-            startVel = rigid.velocity;
-            startSpin = rigid.angularVelocity;
+            if (worldSpacePhysics)
+            {
+                startPos = transform.position;
+                startRot = transform.rotation;
+                startVel = rigid.velocity;
+                startSpin = rigid.angularVelocity;
+            }
+            else
+            {
+                generic_CalcParentTransform();
+                startPos = transform.localPosition;
+                startRot = transform.localRotation;
+                startVel = Quaternion.Inverse(parentRot) * rigid.velocity;
+                startSpin = Quaternion.Inverse(parentRot) * rigid.angularVelocity;
+            }
         }
         public void interpolate_Interpolate(float interpolation)
         {
@@ -1828,8 +1850,15 @@ namespace MMMaellon
                 }
                 return;
             }
-            transform.position = HermiteInterpolatePosition(startPos, startVel, pos, vel, interpolation);
-            transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, spin, interpolation);
+            if (worldSpacePhysics)
+            {
+                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, vel, interpolation);
+                transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, spin, interpolation);
+            } else
+            {
+                transform.localPosition = HermiteInterpolatePosition(startPos, startVel, pos, vel, interpolation);
+                transform.localRotation = HermiteInterpolateRotation(startRot, startSpin, rot, spin, interpolation);
+            }
         }
 
         public bool interpolate_OnInterpolationEnd()
@@ -1853,25 +1882,56 @@ namespace MMMaellon
                 return true;
             }
 
-            rigid.velocity = vel;
-            rigid.angularVelocity = spin;
+            if (!rigid.isKinematic)
+            {
+                if (worldSpacePhysics)
+                {
+                    rigid.velocity = vel;
+                    rigid.angularVelocity = spin;
+                }
+                else
+                {
+                    generic_CalcParentTransform();
+                    rigid.velocity = parentRot * vel;
+                    rigid.angularVelocity = parentRot * spin;
+                }
+            }
             //let physics take over by returning false
             return false;
         }
 
         public void interpolate_OnSmartObjectSerialize()
         {
-            pos = transform.position;
-            rot = transform.rotation;
-            if (!rigid.isKinematic)
+            if (worldSpacePhysics)
             {
-                vel = rigid.velocity;
-                spin = rigid.angularVelocity;
+                pos = transform.position;
+                rot = transform.rotation;
+                if (!rigid.isKinematic)
+                {
+                    vel = rigid.velocity;
+                    spin = rigid.angularVelocity;
+                }
+                else
+                {
+                    vel = Vector3.zero;
+                    spin = Vector3.zero;
+                }
             }
             else
             {
-                vel = Vector3.zero;
-                spin = Vector3.zero;
+                generic_CalcParentTransform();
+                pos = transform.localPosition;
+                rot = transform.localRotation;
+                if (!rigid.isKinematic)
+                {
+                    vel = Quaternion.Inverse(parentRot) * rigid.velocity;
+                    spin = Quaternion.Inverse(parentRot) * rigid.angularVelocity;
+                }
+                else
+                {
+                    vel = Vector3.zero;
+                    spin = Vector3.zero;
+                }
             }
         }
 
@@ -1919,15 +1979,12 @@ namespace MMMaellon
         bool simulateBounce = false;
         public void falling_OnInterpolationStart()
         {
-            startPos = transform.position;
-            startRot = transform.rotation;
-            startVel = rigid.velocity;
-            startSpin = rigid.angularVelocity;
+            interpolate_OnInterpolationStart();
             simulateBounce = Vector3.Distance(startVel, vel) > fallSpeed;
         }
         public void falling_Interpolate(float interpolation)
         {
-            if (!simulateBounce)
+            if (!simulateBounce || rigid.isKinematic || !rigid.useGravity)
             {
                 //change in velocity wasn't great enough to be a bounce, so we just interpolate normally instead
                 interpolate_Interpolate(interpolation);
@@ -1943,56 +2000,16 @@ namespace MMMaellon
                 return;
             }
 
-            if (!rigid.isKinematic && rigid.useGravity)
+            if (worldSpacePhysics)
             {
                 transform.position = HermiteInterpolatePosition(startPos, startVel, pos, startVel + Physics.gravity * lagTime, interpolation);
                 transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, startSpin, interpolation);
             }
             else
             {
-                transform.position = HermiteInterpolatePosition(startPos, startVel, pos, startVel, interpolation);
-                transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, startSpin, interpolation);
-            }
-        }
-        public bool falling_OnInterpolationEnd()
-        {
-            if (IsLocalOwner())
-            {
-                if (rigid.isKinematic || rigid.IsSleeping())
-                {
-                    //wait around for the rigidbody to fall asleep
-                    state = STATE_SLEEPING;
-                }
-                // else if (NonGravitationalAcceleration())
-                // {
-                //     //some force other than gravity is acting upon our object
-                //     if (lastResync + lerpTime < Time.timeSinceLevelLoad)
-                //     {
-                //         Synchronize();
-                //     }
-                // }
-                //returning true means we extend the interpolation period
-                return true;
-            }
-            rigid.velocity = vel;
-            rigid.angularVelocity = spin;
-
-            return false;
-        }
-
-        public void falling_OnSmartObjectSerialize()
-        {
-            pos = transform.position;
-            rot = transform.rotation;
-            if (!rigid.isKinematic)
-            {
-                vel = rigid.velocity;
-                spin = rigid.angularVelocity;
-            }
-            else
-            {
-                vel = Vector3.zero;
-                spin = Vector3.zero;
+                generic_CalcParentTransform();
+                transform.localPosition = HermiteInterpolatePosition(startPos, startVel, pos, startVel + Quaternion.Inverse(parentRot) * Physics.gravity * lagTime, interpolation);
+                transform.localRotation = HermiteInterpolateRotation(startRot, startSpin, rot, startSpin, interpolation);
             }
         }
 
@@ -2010,9 +2027,21 @@ namespace MMMaellon
         public float rotationResyncThreshold = 0.995f;
         [System.NonSerialized]
         public float lastResync = -1001f;
+        public void generic_CalcParentTransform()
+        {
+            if (Utilities.IsValid(transform.parent))
+            {
+                parentPos = transform.parent.position;
+                parentRot = transform.parent.rotation;
+            }
+            else
+            {
+                parentPos = Vector3.zero;
+                parentRot = Quaternion.identity;
+            }
+        }
         public void generic_OnInterpolationStart()
         {
-            // CalcParentTransform();
             startPos = CalcPos();
             startRot = CalcRot();
         }
@@ -2021,8 +2050,11 @@ namespace MMMaellon
             RecordLastTransform();
             transform.position = HermiteInterpolatePosition(parentPos + parentRot * startPos, Vector3.zero, parentPos + parentRot * pos, Vector3.zero, interpolation);
             transform.rotation = HermiteInterpolateRotation(parentRot * startRot, Vector3.zero, parentRot * rot, Vector3.zero, interpolation);
-            rigid.velocity = Vector3.zero;
-            rigid.angularVelocity = Vector3.zero;
+            if (!rigid.isKinematic)
+            {
+                rigid.velocity = Vector3.zero;
+                rigid.angularVelocity = Vector3.zero;
+            }
         }
         public bool genericAttachment_OnInterpolationEnd()
         {
@@ -2148,9 +2180,13 @@ namespace MMMaellon
             {
                 generic_Interpolate(interpolation);
             }
-            else if (nonKinematicPickupJitterPreventionTime > 0 && lastState == state && Time.timeSinceLevelLoad - lastPickup > nonKinematicPickupJitterPreventionTime)
+            else
             {
-                preventPickupJitter();
+                RecordLastTransform();
+                if (nonKinematicPickupJitterPreventionTime > 0 && lastState == state && Time.timeSinceLevelLoad - lastPickup > nonKinematicPickupJitterPreventionTime)
+                {
+                    preventPickupJitter();
+                }
             }
         }
 
@@ -2171,9 +2207,13 @@ namespace MMMaellon
             {
                 generic_Interpolate(interpolation);
             }
-            else if (nonKinematicPickupJitterPreventionTime > 0 && lastState == state && Time.timeSinceLevelLoad - lastPickup > nonKinematicPickupJitterPreventionTime)
+            else
             {
-                preventPickupJitter();
+                RecordLastTransform();
+                if (nonKinematicPickupJitterPreventionTime > 0 && lastState == state && Time.timeSinceLevelLoad - lastPickup > nonKinematicPickupJitterPreventionTime)
+                {
+                    preventPickupJitter();
+                }
             }
         }
         //Right Hand Held State
@@ -2201,6 +2241,7 @@ namespace MMMaellon
 
         public bool genericHand_onInterpolationEnd()
         {
+            CalcVel();
             if (IsLocalOwner() && (pickup.orientation != VRC_Pickup.PickupOrientation.Any || owner.IsUserInVR()) && (rigid.isKinematic || nonKinematicPickupJitterPreventionTime > 0) && lastResync + lagTime < Time.timeSinceLevelLoad && interpolationStartTime + 0.5f < Time.timeSinceLevelLoad)//hard coded 0.5f because VRChat is like that
             {
                 if (generic_ObjectMoved())
@@ -2226,6 +2267,20 @@ namespace MMMaellon
             if (kinematicWhileHeld && rigid.isKinematic)
             {
                 rigid.isKinematic = lastKinematic;
+                if (!lastKinematic)
+                {
+                    if (worldSpacePhysics)
+                    {
+                        rigid.velocity = vel;
+                        rigid.angularVelocity = spin;
+                    }
+                    else
+                    {
+                        generic_CalcParentTransform();
+                        rigid.velocity = parentRot * vel;
+                        rigid.angularVelocity = parentRot * spin;
+                    }
+                }
             }
         }
         public void noHand_OnInterpolationStart()
@@ -2329,8 +2384,11 @@ namespace MMMaellon
         {
             transform.position = HermiteInterpolatePosition(startPos, Vector3.zero, pos, Vector3.zero, interpolation);
             transform.rotation = HermiteInterpolateRotation(startRot, Vector3.zero, rot, Vector3.zero, interpolation);
-            rigid.velocity = Vector3.zero;
-            rigid.angularVelocity = Vector3.zero;
+            if (!rigid.isKinematic)
+            {
+                rigid.velocity = Vector3.zero;
+                rigid.angularVelocity = Vector3.zero;
+            }
         }
         public bool world_OnInterpolationEnd()
         {
