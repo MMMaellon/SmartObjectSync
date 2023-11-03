@@ -1,7 +1,7 @@
 {
 	"name" : "com.vrchat.worlds",
 	"displayName" : "VRChat SDK - Worlds",
-	"version" : "3.4.0",
+	"version" : "3.4.1",
 	"unity" : "2019.4",
 	"description" : "Tools for creating interactive VRChat worlds using Udon",
 	"dependencies" : {
@@ -12,7 +12,7 @@
 		"com.unity.inputsystem" : "1.2.0"
 	},
 	"vpmDependencies" : {
-		"com.vrchat.base" : "3.4.0"
+		"com.vrchat.base" : "3.4.1"
 	},
 	"author" : {
 		"name" : "VRChat",

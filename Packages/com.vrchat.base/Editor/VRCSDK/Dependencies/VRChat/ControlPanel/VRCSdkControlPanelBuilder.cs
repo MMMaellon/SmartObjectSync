@@ -566,28 +566,19 @@ public partial class VRCSdkControlPanel : EditorWindow
             
             IVRCSdkControlPanelBuilder selectedBuilder = null;
             string errorMessage = null;
-        
+
+            // Grab the first valid builder, and if all builders are invalid then errorMessage will contain the last error.
             foreach (IVRCSdkControlPanelBuilder sdkBuilder in _sdkBuilders)
             {
-                if (!sdkBuilder.IsValidBuilder(out string message))
+                if (sdkBuilder.IsValidBuilder(out string message))
                 {
-                    if (selectedBuilder == null)
-                    {
-                        errorMessage = message;
-                    }
+                    selectedBuilder = sdkBuilder;
+                    errorMessage = null;
+                    break;
                 }
                 else
                 {
-                    if (selectedBuilder == null)
-                    {
-                        selectedBuilder = sdkBuilder;
-                        errorMessage = null;
-                    }
-                    else
-                    {
-                        errorMessage =
-                            "A Unity scene cannot contain a VRChat Scene Descriptor and also contain VRChat Avatar Descriptors";
-                    }
+                    errorMessage = message;
                 }
             }
 

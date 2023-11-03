@@ -12,17 +12,17 @@
   },
   "locked": {
     "com.vrchat.worlds": {
-      "version": "3.4.0",
+      "version": "3.4.1",
       "dependencies": {
-        "com.vrchat.base": "3.4.0"
+        "com.vrchat.base": "3.4.1"
       }
     },
     "com.vrchat.base": {
-      "version": "3.4.0",
+      "version": "3.4.1",
       "dependencies": {}
     },
     "com.vrchat.core.vpm-resolver": {
-      "version": "0.1.24",
+      "version": "0.1.26",
       "dependencies": {}
     },
     "dev.onevr.vrworldtoolkit": {

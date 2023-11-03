@@ -182,7 +182,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                 Debug.LogError("Error fetching your uploaded worlds:\n" + obj);
                 fetchingWorlds = null;
             },
-            ApiWorld.SortHeading.Updated,
+            "updated",
             ApiWorld.SortOwnership.Mine,
             ApiWorld.SortOrder.Descending,
             offset,

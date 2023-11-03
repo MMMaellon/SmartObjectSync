@@ -19,6 +19,7 @@ namespace MMMaellon
         [Tooltip("How the child should move when attaching itself to the parent, local to the parent's transform. If this is all zeros then the child just lerps smoothly in place. If this is is (0,0,1), then the child will lerp smoothly to (0,0,1) and then slide along the z axis into place")]
         public Vector3 attachmentVector = Vector3.zero;
         public bool returnToDefaultParentOnExit = true;
+        public bool kinematicWhileAttached = true;
         public bool forceNullDefaultParent = false;
         public bool forceZeroLocalTransforms = true;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
@@ -90,6 +91,7 @@ namespace MMMaellon
         {
             Attach(transform.parent);
         }
+        bool lastKinematic = false;
         public override void OnEnterState()
         {
             transform.SetParent(_parentTransform, true);//bug workaround
@@ -98,7 +100,8 @@ namespace MMMaellon
             {
                 sync.rigid.detectCollisions = false;
             }
-            sync.rigid.isKinematic = true;
+            lastKinematic = sync.rigid.isKinematic;
+            sync.rigid.isKinematic = kinematicWhileAttached;
             
             
             if (!Utilities.IsValid(parentTransform))
@@ -123,7 +126,7 @@ namespace MMMaellon
             {
                 SendCustomEventDelayedSeconds(nameof(EnableCollisions), collisionCooldown);
             }
-            sync.rigid.isKinematic = false;
+            sync.rigid.isKinematic = lastKinematic;
             if (returnToDefaultParentOnExit)
             {
                 _parentTransformName = GetFullPath(startingParent);
