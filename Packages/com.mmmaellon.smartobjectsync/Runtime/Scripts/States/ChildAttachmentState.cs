@@ -23,6 +23,9 @@ namespace MMMaellon
         public bool forceNullDefaultParent = false;
         public bool forceZeroLocalTransforms = true;
         public bool repeatEventsOnReparent = true;
+        public bool forceSlowLerp = false;
+        public float slowLerpDuration = 0.25f;
+        public float momentumMultiplier = 1f;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
 
         [System.NonSerialized, FieldChangeCallback(nameof(parentTransform))]
@@ -179,23 +182,59 @@ namespace MMMaellon
 
         public override void Interpolate(float interpolation)
         {
+            if (forceSlowLerp)
+            {
+                Lerp(Mathf.Clamp01((Time.timeSinceLevelLoad - sync.interpolationStartTime) / slowLerpDuration));
+            }
+            else
+            {
+                Lerp(interpolation);
+            }
+        }
+
+        public void Lerp(float interpolation)
+        {
             if (attachmentVector == Vector3.zero || !firstInterpolation)
             {
                 transform.localPosition = sync.HermiteInterpolatePosition(sync.startPos, Vector3.zero, sync.pos, Vector3.zero, interpolation);
                 transform.localRotation = sync.HermiteInterpolateRotation(sync.startRot, Vector3.zero, sync.rot, Vector3.zero, interpolation);
-            } else if (interpolation < 0.5)
+            }
+            else if (interpolation < 0.5)
             {
-                    transform.localPosition = sync.HermiteInterpolatePosition(sync.startPos, Vector3.zero, sync.pos + attachmentVector, Vector3.zero, interpolation * 2);
-                    transform.localRotation = sync.HermiteInterpolateRotation(sync.startRot, Vector3.zero, sync.rot, Vector3.zero, interpolation * 2);
-            } else
+                transform.localPosition = CustomHermiteInterpolatePosition(sync.startPos, Vector3.zero, sync.pos + attachmentVector, -attachmentVector * momentumMultiplier, interpolation * 2);
+                transform.localRotation = sync.HermiteInterpolateRotation(sync.startRot, Vector3.zero, sync.rot, Vector3.zero, interpolation * 2);
+            }
+            else
             {
-                transform.localPosition = sync.HermiteInterpolatePosition(sync.pos + attachmentVector, Vector3.zero, sync.pos, Vector3.zero, (interpolation - 0.5f) * 2f);
+                transform.localPosition = CustomHermiteInterpolatePosition(sync.pos + attachmentVector, -attachmentVector * momentumMultiplier, sync.pos, Vector3.zero, (interpolation - 0.5f) * 2f);
                 transform.localRotation = sync.rot;
+            }
+        }
+
+        Vector3 posControl1;
+        Vector3 posControl2;
+        public Vector3 CustomHermiteInterpolatePosition(Vector3 startPos, Vector3 startVel, Vector3 endPos, Vector3 endVel, float interpolation)
+        {//Shout out to Kit Kat for suggesting the improved hermite interpolation
+            if (forceSlowLerp)
+            {
+                posControl1 = startPos + startVel * slowLerpDuration * interpolation / 3f;
+                posControl2 = endPos - endVel * slowLerpDuration * (1.0f - interpolation) / 3f;
+                return Vector3.Lerp(Vector3.Lerp(posControl1, endPos, interpolation), Vector3.Lerp(startPos, posControl2, interpolation), interpolation);
+            }
+            else
+            {
+                posControl1 = startPos + startVel * sync.lagTime * interpolation / 3f;
+                posControl2 = endPos - endVel * sync.lagTime * (1.0f - interpolation) / 3f;
+                return Vector3.Lerp(Vector3.Lerp(posControl1, endPos, interpolation), Vector3.Lerp(startPos, posControl2, interpolation), interpolation);
             }
         }
 
         public override bool OnInterpolationEnd()
         {
+            if (forceSlowLerp && firstInterpolation && ((Time.timeSinceLevelLoad - sync.interpolationStartTime) / slowLerpDuration) < 1)
+            {
+                return true;
+            }
             firstInterpolation = false;
             return transform.localPosition != sync.pos || transform.localRotation != sync.rot;
         }
