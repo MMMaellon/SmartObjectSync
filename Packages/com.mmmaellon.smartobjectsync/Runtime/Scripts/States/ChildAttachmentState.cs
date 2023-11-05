@@ -22,6 +22,7 @@ namespace MMMaellon
         public bool kinematicWhileAttached = true;
         public bool forceNullDefaultParent = false;
         public bool forceZeroLocalTransforms = true;
+        public bool repeatEventsOnReparent = true;
         [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
 
         [System.NonSerialized, FieldChangeCallback(nameof(parentTransform))]
@@ -33,6 +34,19 @@ namespace MMMaellon
             {
                 _parentTransform = value;
                 transform.SetParent(_parentTransform, true);
+                if (repeatEventsOnReparent && IsActiveState() && sync.interpolationStartTime + sync.lagTime > Time.timeSinceLevelLoad)
+                {
+                    if (Utilities.IsValid(sync.listeners))
+                    {
+                        foreach (SmartObjectSyncListener listener in sync.listeners)
+                        {
+                            if (Utilities.IsValid(listener))
+                            {
+                                listener.OnChangeState(sync, sync.lastState, sync._state);
+                            }
+                        }
+                    }
+                }
                 if (sync.IsOwnerLocal())
                 {
                     RequestSerialization();
