@@ -2267,20 +2267,20 @@ namespace MMMaellon
             if (kinematicWhileHeld && rigid.isKinematic)
             {
                 rigid.isKinematic = lastKinematic;
-                if (!lastKinematic)
-                {
-                    if (worldSpacePhysics)
-                    {
-                        rigid.velocity = vel;
-                        rigid.angularVelocity = spin;
-                    }
-                    else
-                    {
-                        generic_CalcParentTransform();
-                        rigid.velocity = parentRot * vel;
-                        rigid.angularVelocity = parentRot * spin;
-                    }
-                }
+                // if (!lastKinematic)
+                // {
+                //     if (worldSpacePhysics)
+                //     {
+                //         rigid.velocity = vel;
+                //         rigid.angularVelocity = spin;
+                //     }
+                //     else
+                //     {
+                //         generic_CalcParentTransform();
+                //         rigid.velocity = parentRot * vel;
+                //         rigid.angularVelocity = parentRot * spin;
+                //     }
+                // }
             }
         }
         public void noHand_OnInterpolationStart()
