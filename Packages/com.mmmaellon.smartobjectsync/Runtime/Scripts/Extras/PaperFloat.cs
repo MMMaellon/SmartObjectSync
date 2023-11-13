@@ -81,7 +81,7 @@ namespace MMMaellon
 
         public override void OnChangeState(SmartObjectSync sync, int oldState, int newState)
         {
-            loop = newState == SmartObjectSync.STATE_FALLING || newState == SmartObjectSync.STATE_INTERPOLATING || newState == SmartObjectSync.STATE_TELEPORTING;
+            loop = !sync.rigid.isKinematic && (newState == SmartObjectSync.STATE_FALLING || newState == SmartObjectSync.STATE_INTERPOLATING || newState == SmartObjectSync.STATE_TELEPORTING);
         }
 
         public SmartObjectSync sync;
