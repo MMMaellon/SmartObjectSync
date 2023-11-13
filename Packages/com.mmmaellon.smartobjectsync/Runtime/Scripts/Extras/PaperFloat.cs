@@ -92,7 +92,7 @@ namespace MMMaellon
                 sync = GetComponent<SmartObjectSync>();
             }
             sync.AddListener(this);
-            loop = sync.state == SmartObjectSync.STATE_FALLING || sync.state == SmartObjectSync.STATE_INTERPOLATING || sync.state == SmartObjectSync.STATE_TELEPORTING;
+            loop = !sync.rigid.isKinematic && (sync.state == SmartObjectSync.STATE_FALLING || sync.state == SmartObjectSync.STATE_INTERPOLATING || sync.state == SmartObjectSync.STATE_TELEPORTING);
         }
 
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
