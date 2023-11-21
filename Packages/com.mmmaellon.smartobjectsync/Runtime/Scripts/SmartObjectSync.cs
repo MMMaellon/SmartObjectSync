@@ -634,7 +634,7 @@ namespace MMMaellon
             }
         }
 
-        bool startRan;
+        bool startRan = false;
         [System.NonSerialized]
         public Vector3 spawnPos;
         [System.NonSerialized]
@@ -643,6 +643,9 @@ namespace MMMaellon
         int randomCount = 0;
         public void Start()
         {
+            if(startRan){
+                return;
+            }
             _pickupable = Utilities.IsValid(pickup) && pickup.pickupable;
             randomSeed = Random.Range(0, 10);
             if (forceContinuousSpeculative)
@@ -773,6 +776,7 @@ namespace MMMaellon
         public void OnEnable()
         {
             _print("OnEnable");
+            Start();
             owner = Networking.GetOwner(gameObject);
             if (IsLocalOwner())
             {

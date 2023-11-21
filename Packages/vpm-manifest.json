@@ -5,9 +5,6 @@
     },
     "dev.onevr.vrworldtoolkit": {
       "version": "2.1.2"
-    },
-    "com.llealloo.audiolink": {
-      "version": "0.3.1"
     }
   },
   "locked": {
@@ -30,10 +27,6 @@
       "dependencies": {
         "com.vrchat.base": "^3.2.x"
       }
-    },
-    "com.llealloo.audiolink": {
-      "version": "1.2.0",
-      "dependencies": {}
     }
   }
 }
