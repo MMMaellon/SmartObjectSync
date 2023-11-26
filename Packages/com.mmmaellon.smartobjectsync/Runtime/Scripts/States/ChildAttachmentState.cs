@@ -26,8 +26,11 @@ namespace MMMaellon
         public bool forceSlowLerp = false;
         public float slowLerpDuration = 0.25f;
         public float momentumMultiplier = 1f;
-        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))] string _parentTransformName = "";
+        [System.NonSerialized, UdonSynced(UdonSyncMode.None), FieldChangeCallback(nameof(parentTransformName))]
+        string _parentTransformName = "";
 
+        [System.NonSerialized]
+        public Transform lastTransform = null;
         [System.NonSerialized, FieldChangeCallback(nameof(parentTransform))]
         public Transform _parentTransform = null;
         public Transform parentTransform
@@ -35,6 +38,7 @@ namespace MMMaellon
             get => _parentTransform;
             set
             {
+                lastTransform = _parentTransform;
                 _parentTransform = value;
                 transform.SetParent(_parentTransform, true);
                 if (repeatEventsOnReparent && IsActiveState() && sync.interpolationStartTime + sync.lagTime > Time.timeSinceLevelLoad)
@@ -144,6 +148,7 @@ namespace MMMaellon
                 SendCustomEventDelayedSeconds(nameof(EnableCollisions), collisionCooldown);
             }
             sync.rigid.isKinematic = lastKinematic;
+            lastCollide = Time.timeSinceLevelLoad;
             if (returnToDefaultParentOnExit)
             {
                 _parentTransformName = GetFullPath(startingParent);
@@ -260,6 +265,7 @@ namespace MMMaellon
             }
             return tempName;
         }
+        float lastCollide;
         public void OnCollisionStay(Collision collision)
         {
             if (!sync.IsLocalOwner())
@@ -277,6 +283,10 @@ namespace MMMaellon
 
             if (!attachOnCollisionEnter && !(attachRequested && !sync.IsHeld()))
             {
+                return;
+            }
+            if(collision.collider.transform == lastTransform && lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
+                lastCollide = Time.timeSinceLevelLoad;
                 return;
             }
 
@@ -299,6 +309,10 @@ namespace MMMaellon
             }
             if (!attachOnTriggerEnter && !(attachRequested && !sync.IsHeld()))
             {
+                return;
+            }
+            if(other.transform == lastTransform && lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
+                lastCollide = Time.timeSinceLevelLoad;
                 return;
             }
             Attach(other.transform);
