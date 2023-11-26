@@ -1,11 +1,5 @@
 {
   "dependencies": {
-    "com.llealloo.audiolink": {
-      "version": "file:com.llealloo.audiolink",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "com.mmmaellon.smartobjectsync": {
       "version": "file:com.mmmaellon.smartobjectsync",
       "depth": 0,
