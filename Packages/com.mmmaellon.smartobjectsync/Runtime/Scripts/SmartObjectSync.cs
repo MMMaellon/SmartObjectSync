@@ -643,9 +643,11 @@ namespace MMMaellon
         int randomCount = 0;
         public void Start()
         {
-            if(startRan){
+            if (startRan)
+            {
                 return;
             }
+            owner = Networking.GetOwner(gameObject);
             _pickupable = Utilities.IsValid(pickup) && pickup.pickupable;
             randomSeed = Random.Range(0, 10);
             if (forceContinuousSpeculative)
@@ -669,17 +671,22 @@ namespace MMMaellon
             //used to decide if we simulate a bounce in the falling state
             fallSpeed = lagTime <= 0 ? 0 : Physics.gravity.magnitude * lagTime;
             startRan = true;
-            if (Utilities.IsValid(startingState)){
-                if (startingState.sync == this)
+            if (IsLocalOwner())
+            {
+                if (Utilities.IsValid(startingState))
                 {
-                    if (IsLocalOwner())
+                    if (startingState.sync == this)
                     {
                         startingState.EnterState();
+                    }
+                    else
+                    {
+                        startingState = null;
                     }
                 }
                 else
                 {
-                    startingState = null;
+                    StartInterpolation();
                 }
             }
         }
@@ -717,6 +724,7 @@ namespace MMMaellon
         public bool serializeRequested = false;
         public void UpdateLoop()
         {
+            _print("update");
             loopRequested = false;
             if (!_loop)
             {
@@ -838,8 +846,12 @@ namespace MMMaellon
             }
             else
             {
-                spawnPos = transform.localPosition;
-                spawnRot = transform.localRotation;
+                // spawnPos = transform.localPosition;
+                // spawnRot = transform.localRotation;
+
+                generic_CalcParentTransform();
+                spawnPos = Quaternion.Inverse(parentRot) * (transform.position - parentPos);
+                spawnRot = Quaternion.Inverse(parentRot) * transform.rotation;
             }
         }
         public void Respawn()
@@ -884,10 +896,13 @@ namespace MMMaellon
             }
             else
             {
+                generic_CalcParentTransform();
                 pos = Quaternion.Inverse(parentRot) * (newPos - parentPos);
                 rot = Quaternion.Inverse(parentRot) * newRot;
-                vel = transform.InverseTransformVector(newVel);
-                spin = transform.InverseTransformVector(newSpin);
+                // vel = transform.InverseTransformVector(newVel);
+                // spin = transform.InverseTransformVector(newSpin);
+                vel = Quaternion.Inverse(parentRot) * vel;
+                spin = Quaternion.Inverse(parentRot) * spin;
             }
             state = STATE_TELEPORTING;
         }
@@ -900,10 +915,13 @@ namespace MMMaellon
             }
             if (worldSpaceTeleport)
             {
+                generic_CalcParentTransform();
                 pos = parentPos + parentRot * newPos;
                 rot = parentRot * newRot;
-                vel = transform.TransformPoint(newVel);
-                spin = transform.TransformPoint(newSpin);
+                // vel = transform.TransformPoint(newVel);
+                // spin = transform.TransformPoint(newSpin);
+                vel = parentRot * vel;
+                spin = parentRot * spin;
             }
             else
             {
@@ -1753,41 +1771,51 @@ namespace MMMaellon
                 }
                 else
                 {
-                    transform.localPosition = pos;
-                    transform.localRotation = rot;
+                    // transform.localPosition = pos;
+                    // transform.localRotation = rot;
+                    generic_CalcParentTransform();
+                    transform.position = parentPos + parentRot * pos;
+                    transform.rotation = parentRot * rot;
                     if (!rigid.isKinematic)
                     {
-                        rigid.velocity = transform.TransformVector(vel);
-                        rigid.angularVelocity = transform.TransformVector(spin);
+                        // rigid.velocity = transform.TransformVector(vel);
+                        // rigid.angularVelocity = transform.TransformVector(spin);
+                        rigid.velocity = parentRot * vel;
+                        rigid.angularVelocity = parentRot * spin;
                     }
                 }
             }
         }
         public void teleport_OnInterpolationStart()
         {
-            if (!IsLocalOwner())
-            {
-                if (worldSpaceTeleport)
-                {
-                    transform.position = pos;
-                    transform.rotation = rot;
-                    if (!rigid.isKinematic)
-                    {
-                        rigid.velocity = vel;
-                        rigid.angularVelocity = spin;
-                    }
-                }
-                else
-                {
-                    transform.localPosition = pos;
-                    transform.localRotation = rot;
-                    if (!rigid.isKinematic)
-                    {
-                        rigid.velocity = transform.TransformVector(vel);
-                        rigid.angularVelocity = transform.TransformVector(spin);
-                    }
-                }
-            }
+            // if (!IsLocalOwner())
+            // {
+            //     if (worldSpaceTeleport)
+            //     {
+            //         transform.position = pos;
+            //         transform.rotation = rot;
+            //         if (!rigid.isKinematic)
+            //         {
+            //             rigid.velocity = vel;
+            //             rigid.angularVelocity = spin;
+            //         }
+            //     }
+            //     else
+            //     {
+            //         // transform.localPosition = pos;
+            //         // transform.localRotation = rot;
+            //         generic_CalcParentTransform();
+            //         transform.position = parentPos + parentRot * pos;
+            //         transform.rotation = parentRot * rot;
+            //         if (!rigid.isKinematic)
+            //         {
+            //             // rigid.velocity = transform.TransformVector(vel);
+            //             // rigid.angularVelocity = transform.TransformVector(spin);
+            //             rigid.velocity = parentRot * vel;
+            //             rigid.angularVelocity = parentRot * spin;
+            //         }
+            //     }
+            // }
             loop = IsLocalOwner();//turn off immediately for max optimization
         }
 
@@ -1862,7 +1890,8 @@ namespace MMMaellon
             {
                 transform.position = HermiteInterpolatePosition(startPos, startVel, pos, vel, interpolation);
                 transform.rotation = HermiteInterpolateRotation(startRot, startSpin, rot, spin, interpolation);
-            } else
+            }
+            else
             {
                 transform.localPosition = HermiteInterpolatePosition(startPos, startVel, pos, vel, interpolation);
                 transform.localRotation = HermiteInterpolateRotation(startRot, startSpin, rot, spin, interpolation);
