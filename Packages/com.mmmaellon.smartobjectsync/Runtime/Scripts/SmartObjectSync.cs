@@ -776,7 +776,11 @@ namespace MMMaellon
         public void OnEnable()
         {
             _print("OnEnable");
-            Start();
+            if (!startRan)
+            {
+                Start();
+                return;
+            }
             owner = Networking.GetOwner(gameObject);
             if (IsLocalOwner())
             {
