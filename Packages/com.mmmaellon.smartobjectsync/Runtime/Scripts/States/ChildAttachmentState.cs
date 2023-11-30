@@ -265,14 +265,16 @@ namespace MMMaellon
             }
             return tempName;
         }
-        float lastCollide;
+        
+        [System.NonSerialized]
+        public float lastCollide;
         public void OnCollisionStay(Collision collision)
         {
             if (!sync.IsLocalOwner())
             {
                 return;
             }
-            if (!Utilities.IsValid(collision) || !Utilities.IsValid(collision.collider) || (((1 << collision.collider.gameObject.layer) | collisionLayers) != collisionLayers))
+            if (!Utilities.IsValid(collision) || !Utilities.IsValid(collision.collider) || (((1 << collision.gameObject.layer) | collisionLayers) != collisionLayers))
             {
                 return;
             }
@@ -285,12 +287,12 @@ namespace MMMaellon
             {
                 return;
             }
-            if(collision.collider.transform == lastTransform && lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
+            if(collision.transform == lastTransform && lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
                 lastCollide = Time.timeSinceLevelLoad;
                 return;
             }
 
-            Attach(collision.collider.transform);
+            Attach(collision.transform);
         }
 
 

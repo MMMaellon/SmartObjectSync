@@ -9,7 +9,7 @@ namespace MMMaellon.SmartObjectSyncExtra
     [UdonBehaviourSyncMode(BehaviourSyncMode.Manual), RequireComponent(typeof(ChildAttachmentState))]
     public class ChildAttachmentStateSetter : SmartObjectSyncListener
     {
-        public float collisionCooldown = 0.25f;
+        public float collisionCooldown = 0.1f;
         public bool attachOnCollision = true;
         public bool attachOnTrigger = true;
         public bool attachWhileHeldOrAttachedToPlayer = true;
@@ -41,9 +41,14 @@ namespace MMMaellon.SmartObjectSyncExtra
             {
                 return;
             }
-            if (child.IsActiveState() && collision.gameObject.transform == child.parentTransform)
+            if (child.IsActiveState() && collision.transform == child.parentTransform)
             {
                 //we're already attached
+                return;
+            }
+            if (collision.transform == child.lastTransform && child.lastCollide + collisionCooldown > Time.timeSinceLevelLoad)
+            {
+                child.lastCollide = Time.timeSinceLevelLoad;
                 return;
             }
             foreach (Collider collider in attachColliders)
@@ -73,6 +78,11 @@ namespace MMMaellon.SmartObjectSyncExtra
             if (child.IsActiveState() && other.transform == child.parentTransform)
             {
                 //we're already attached
+                return;
+            }
+            if (other.transform == child.lastTransform && child.lastCollide + collisionCooldown > Time.timeSinceLevelLoad)
+            {
+                child.lastCollide = Time.timeSinceLevelLoad;
                 return;
             }
             foreach (Collider collider in attachColliders)
