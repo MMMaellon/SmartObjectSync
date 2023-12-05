@@ -656,40 +656,15 @@ namespace MMMaellon
                 rigid.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             }
             SetSpawn();
-            if (!IsAttachedToPlayer() && state < STATE_CUSTOM)
-            {
-                //set starting synced values
-                pos = transform.position;
-                rot = transform.rotation;
-                if (!rigid.isKinematic)
-                {
-                    vel = rigid.velocity;
-                    spin = rigid.angularVelocity;
-                }
-            }
 
             //speed we gain from gravity in a free fall over the lerp time
             //used to decide if we simulate a bounce in the falling state
             fallSpeed = lagTime <= 0 ? 0 : Physics.gravity.magnitude * lagTime;
-            startRan = true;
             if (IsLocalOwner())
             {
-                if (Utilities.IsValid(startingState))
-                {
-                    if (startingState.sync == this)
-                    {
-                        startingState.EnterState();
-                    }
-                    else
-                    {
-                        startingState = null;
-                    }
-                }
-                else
-                {
-                    StartInterpolation();
-                }
+                Respawn();
             }
+            startRan = true;
         }
         [System.NonSerialized]
         public bool _loop = false;
@@ -880,7 +855,10 @@ namespace MMMaellon
             rot = newRot;
             vel = newVel;
             spin = newSpin;
-            state = STATE_TELEPORTING;
+            if (startRan)
+            {
+                state = STATE_TELEPORTING;
+            }
         }
         public void TeleportToWorldSpace(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
@@ -905,7 +883,10 @@ namespace MMMaellon
                 vel = Quaternion.Inverse(parentRot) * vel;
                 spin = Quaternion.Inverse(parentRot) * spin;
             }
-            state = STATE_TELEPORTING;
+            if (startRan)
+            {
+                state = STATE_TELEPORTING;
+            }
         }
 
         public void TeleportToLocalSpace(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
@@ -931,7 +912,10 @@ namespace MMMaellon
                 vel = newVel;
                 spin = newSpin;
             }
-            state = STATE_TELEPORTING;
+            if (startRan)
+            {
+                state = STATE_TELEPORTING;
+            }
         }
 
         public void StartInterpolation()
@@ -1755,32 +1739,37 @@ namespace MMMaellon
         //This state has no interpolation. It simply places sets the transforms and velocity then disables the update loop, letting physics take over
         //For the owner this has to happen when we enter the state before we serialize everything for the first time
         //non-owners see this happen in OnInterpolationStart like normal
-        public void teleport_SetTransforms(){
-                if (worldSpaceTeleport)
+        public void teleport_SetTransforms()
+        {
+            if (!startRan)
+            {
+                return;
+            }
+            if (worldSpaceTeleport)
+            {
+                transform.position = pos;
+                transform.rotation = rot;
+                if (!rigid.isKinematic)
                 {
-                    transform.position = pos;
-                    transform.rotation = rot;
-                    if (!rigid.isKinematic)
-                    {
-                        rigid.velocity = vel;
-                        rigid.angularVelocity = spin;
-                    }
+                    rigid.velocity = vel;
+                    rigid.angularVelocity = spin;
                 }
-                else
+            }
+            else
+            {
+                // transform.localPosition = pos;
+                // transform.localRotation = rot;
+                generic_CalcParentTransform();
+                transform.position = parentPos + parentRot * pos;
+                transform.rotation = parentRot * rot;
+                if (!rigid.isKinematic)
                 {
-                    // transform.localPosition = pos;
-                    // transform.localRotation = rot;
-                    generic_CalcParentTransform();
-                    transform.position = parentPos + parentRot * pos;
-                    transform.rotation = parentRot * rot;
-                    if (!rigid.isKinematic)
-                    {
-                        // rigid.velocity = transform.TransformVector(vel);
-                        // rigid.angularVelocity = transform.TransformVector(spin);
-                        rigid.velocity = parentRot * vel;
-                        rigid.angularVelocity = parentRot * spin;
-                    }
+                    // rigid.velocity = transform.TransformVector(vel);
+                    // rigid.angularVelocity = transform.TransformVector(spin);
+                    rigid.velocity = parentRot * vel;
+                    rigid.angularVelocity = parentRot * spin;
                 }
+            }
         }
         public void teleport_OnEnterState()
         {
@@ -1822,8 +1811,9 @@ namespace MMMaellon
             }
             else
             {
-                pos = transform.localPosition;
-                rot = transform.localRotation;
+                generic_CalcParentTransform();
+                pos = Quaternion.Inverse(parentRot) * (pos - parentPos);
+                rot = Quaternion.Inverse(parentRot) * rot;
                 if (!rigid.isKinematic)
                 {
                     vel = transform.InverseTransformVector(rigid.velocity);
