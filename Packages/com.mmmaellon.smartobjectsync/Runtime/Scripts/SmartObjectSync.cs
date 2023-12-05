@@ -1,4 +1,5 @@
 ﻿
+
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -1754,11 +1755,7 @@ namespace MMMaellon
         //This state has no interpolation. It simply places sets the transforms and velocity then disables the update loop, letting physics take over
         //For the owner this has to happen when we enter the state before we serialize everything for the first time
         //non-owners see this happen in OnInterpolationStart like normal
-        public void teleport_OnEnterState()
-        {
-            if (IsLocalOwner())
-            {
-                teleportFlagSet = true;
+        public void teleport_SetTransforms(){
                 if (worldSpaceTeleport)
                 {
                     transform.position = pos;
@@ -1784,38 +1781,18 @@ namespace MMMaellon
                         rigid.angularVelocity = parentRot * spin;
                     }
                 }
+        }
+        public void teleport_OnEnterState()
+        {
+            teleportFlagSet = true;
+            if (IsLocalOwner())
+            {
+                teleport_SetTransforms();
             }
         }
         public void teleport_OnInterpolationStart()
         {
-            // if (!IsLocalOwner())
-            // {
-            //     if (worldSpaceTeleport)
-            //     {
-            //         transform.position = pos;
-            //         transform.rotation = rot;
-            //         if (!rigid.isKinematic)
-            //         {
-            //             rigid.velocity = vel;
-            //             rigid.angularVelocity = spin;
-            //         }
-            //     }
-            //     else
-            //     {
-            //         // transform.localPosition = pos;
-            //         // transform.localRotation = rot;
-            //         generic_CalcParentTransform();
-            //         transform.position = parentPos + parentRot * pos;
-            //         transform.rotation = parentRot * rot;
-            //         if (!rigid.isKinematic)
-            //         {
-            //             // rigid.velocity = transform.TransformVector(vel);
-            //             // rigid.angularVelocity = transform.TransformVector(spin);
-            //             rigid.velocity = parentRot * vel;
-            //             rigid.angularVelocity = parentRot * spin;
-            //         }
-            //     }
-            // }
+            teleport_SetTransforms();
             loop = IsLocalOwner();//turn off immediately for max optimization
         }
 
