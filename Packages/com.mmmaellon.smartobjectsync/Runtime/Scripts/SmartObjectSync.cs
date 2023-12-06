@@ -1,6 +1,4 @@
-﻿
-
-using UdonSharp;
+﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
@@ -815,17 +813,17 @@ namespace MMMaellon
 
         public void SetSpawn()
         {
+            Debug.LogWarning("setspawn");
             if (worldSpaceTeleport)
             {
+                Debug.LogWarning("world space");
                 spawnPos = transform.position;
                 spawnRot = transform.rotation;
             }
             else
             {
-                // spawnPos = transform.localPosition;
-                // spawnRot = transform.localRotation;
-
                 generic_CalcParentTransform();
+                _print("parentPos " + parentPos);
                 spawnPos = Quaternion.Inverse(parentRot) * (transform.position - parentPos);
                 spawnRot = Quaternion.Inverse(parentRot) * transform.rotation;
             }
@@ -839,29 +837,35 @@ namespace MMMaellon
             {
                 startingState.EnterState();
             }
-            else if(worldSpaceTeleport)
+            else if (worldSpaceTeleport)
             {
                 // TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
                 TeleportToWorldSpace(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
-            } else {
+            }
+            else
+            {
                 TeleportToLocalSpace(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
             }
         }
 
         public void TeleportTo(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
-            if (!IsLocalOwner())
-            {
-                TakeOwnership(false);
-            }
-            pos = newPos;
-            rot = newRot;
-            vel = newVel;
-            spin = newSpin;
-            if (startRan)
-            {
-                state = STATE_TELEPORTING;
-            }
+            // if (!IsLocalOwner())
+            // {
+            //     TakeOwnership(false);
+            // }
+            // pos = newPos;
+            // rot = newRot;
+            // vel = newVel;
+            // spin = newSpin;
+            // if (startRan)
+            // {
+            //     state = STATE_TELEPORTING;
+            // }
+
+
+            //just an alias for backwards compatibility reasons
+            TeleportToWorldSpace(newPos, newRot, newVel, newSpin);
         }
         public void TeleportToWorldSpace(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
@@ -894,6 +898,7 @@ namespace MMMaellon
 
         public void TeleportToLocalSpace(Vector3 newPos, Quaternion newRot, Vector3 newVel, Vector3 newSpin)
         {
+
             if (!IsLocalOwner())
             {
                 TakeOwnership(false);
@@ -1744,6 +1749,7 @@ namespace MMMaellon
         //non-owners see this happen in OnInterpolationStart like normal
         public void teleport_SetTransforms()
         {
+            _print("settransforms pos: " + pos);
             if (!startRan)
             {
                 return;
@@ -1784,7 +1790,10 @@ namespace MMMaellon
         }
         public void teleport_OnInterpolationStart()
         {
-            teleport_SetTransforms();
+            if (!IsLocalOwner())
+            {
+                teleport_SetTransforms();
+            }
             loop = IsLocalOwner();//turn off immediately for max optimization
         }
 
@@ -1815,8 +1824,8 @@ namespace MMMaellon
             else
             {
                 generic_CalcParentTransform();
-                pos = Quaternion.Inverse(parentRot) * (pos - parentPos);
-                rot = Quaternion.Inverse(parentRot) * rot;
+                pos = Quaternion.Inverse(parentRot) * (transform.position - parentPos);
+                rot = Quaternion.Inverse(parentRot) * transform.rotation;
                 if (!rigid.isKinematic)
                 {
                     vel = transform.InverseTransformVector(rigid.velocity);
