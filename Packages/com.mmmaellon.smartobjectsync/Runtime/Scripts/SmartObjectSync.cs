@@ -839,9 +839,12 @@ namespace MMMaellon
             {
                 startingState.EnterState();
             }
-            else
+            else if(worldSpaceTeleport)
             {
-                TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
+                // TeleportTo(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
+                TeleportToWorldSpace(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
+            } else {
+                TeleportToLocalSpace(spawnPos, spawnRot, Vector3.zero, Vector3.zero);
             }
         }
 
