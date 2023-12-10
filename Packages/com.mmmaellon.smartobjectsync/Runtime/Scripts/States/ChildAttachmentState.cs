@@ -292,6 +292,10 @@ namespace MMMaellon
                 return;
             }
 
+            if(lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
+                return;
+            }
+
             Attach(collision.transform);
         }
 
@@ -315,6 +319,9 @@ namespace MMMaellon
             }
             if(other.transform == lastTransform && lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
                 lastCollide = Time.timeSinceLevelLoad;
+                return;
+            }
+            if(lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
                 return;
             }
             Attach(other.transform);
