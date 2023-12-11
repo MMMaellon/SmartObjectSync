@@ -51,6 +51,9 @@ namespace MMMaellon.SmartObjectSyncExtra
                 child.lastCollide = Time.timeSinceLevelLoad;
                 return;
             }
+            if(child.lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
+                return;
+            }
             foreach (Collider collider in attachColliders)
             {
                 if (collider == collision.collider)
@@ -83,6 +86,9 @@ namespace MMMaellon.SmartObjectSyncExtra
             if (other.transform == child.lastTransform && child.lastCollide + collisionCooldown > Time.timeSinceLevelLoad)
             {
                 child.lastCollide = Time.timeSinceLevelLoad;
+                return;
+            }
+            if(child.lastCollide + collisionCooldown > Time.timeSinceLevelLoad){
                 return;
             }
             foreach (Collider collider in attachColliders)
