@@ -3,6 +3,7 @@
     "displayName": "SmartObjectSync",
     "version": "3.10.6",
     "description": "A drop-in replacement for VRC_ObjectSync that allows for better syncing of objects in VRChat",
+    "unity": "2019.4",
     "url": "https://github.com/MMMaellon/SmartObjectSync.git",
     "dependencies": {},
     "gitDependencies": {},
@@ -12,11 +13,13 @@
         "url": "https://twitter.com/MMMaellon"
     },
     "vpmDependencies": {
-        "com.vrchat.worlds": "^3.2.1"
+        "com.vrchat.worlds": "^3.4.0"
     },
     "legacyFolders": {
         "Assets\\MMMaellon\\SmartObjectSync": ""
     },
+    "legacyFiles": {},
+    "legacyPackages": [],
     "samples": [
         {
             "displayName": "SmartObjectSync Example Scene",
