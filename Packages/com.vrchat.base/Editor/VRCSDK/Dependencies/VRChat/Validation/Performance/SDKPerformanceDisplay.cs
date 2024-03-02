@@ -76,13 +76,13 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Excellent:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Info;
-                            text = string.Format("Polygons: {0}", perfStats.polyCount);
+                            text = string.Format("Triangles: {0}", perfStats.polyCount);
                             break;
                         }
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Info;
-                            text = string.Format("Polygons: {0} (Recommended: {1})", perfStats.polyCount, AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).polyCount);
+                            text = string.Format("Triangles: {0} (Recommended: {1})", perfStats.polyCount, AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).polyCount);
                             break;
                         }
                         case PerformanceRating.Medium:
@@ -90,7 +90,7 @@ namespace VRC.SDKBase.Validation.Performance
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
                             text = string.Format(
-                                "Polygons: {0} - Please try to reduce your avatar poly count to less than {1} (Recommended: {2})",
+                                "Triangles: {0} - Please try to reduce your avatar triangle count to less than {1} (Recommended: {2})",
                                 perfStats.polyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Good, isMobilePlatform).polyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).polyCount);
@@ -101,7 +101,7 @@ namespace VRC.SDKBase.Validation.Performance
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
                             text = string.Format(
-                                "Polygons: {0} - This avatar has too many polygons. " +
+                                "Triangles: {0} - This avatar has too many triangles. " +
                                 (ValidationEditorHelpers.IsMobilePlatform()
                                     ? "It will be blocked by default on VRChat for Quest, and will not show unless a user chooses to show your avatar."
                                     : "It may be blocked by users depending on their Performance settings.") +
@@ -467,7 +467,7 @@ namespace VRC.SDKBase.Validation.Performance
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
                             text = string.Format(
-                                "Mesh Particle Total Max Poly Count: {0} (Recommended: {1}) - Reduce number of polygons in particle meshes, and reduce 'Max Particles' for better performance.",
+                                "Mesh Particle Total Max Poly Count: {0} (Recommended: {1}) - Reduce number of triangles in particle meshes, and reduce 'Max Particles' for better performance.",
                                 perfStats.particleMaxMeshPolyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).particleMaxMeshPolyCount);
 
@@ -477,8 +477,8 @@ namespace VRC.SDKBase.Validation.Performance
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
                             text = string.Format(
-                                "Mesh Particle Total Max Poly Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar uses too many mesh particle polygons." +
-                                " Reduce number of polygons in particle meshes, and reduce 'Max Particles' for better performance.",
+                                "Mesh Particle Total Max Poly Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar uses too many mesh particle triangles." +
+                                " Reduce number of triangles in particle meshes, and reduce 'Max Particles' for better performance.",
                                 perfStats.particleMaxMeshPolyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).particleTotalCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).particleMaxMeshPolyCount);

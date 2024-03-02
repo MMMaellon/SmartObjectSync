@@ -2179,11 +2179,19 @@ namespace VRC.Udon.Editor.ProgramSources
 
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
+            if (this == null)
+            {
+                return;
+            }
             OnAfterDeserialize();
         }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
+            if (this == null)
+            {
+                return;
+            }
             OnBeforeSerialize();
         }
 

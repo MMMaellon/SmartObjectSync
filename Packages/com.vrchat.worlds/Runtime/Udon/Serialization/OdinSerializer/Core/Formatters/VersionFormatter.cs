@@ -66,7 +66,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
             }
             else
             {
-            value = new Version(major, minor, build, revision);
+                value = new Version(major, minor, build, revision);
             }
         }
 

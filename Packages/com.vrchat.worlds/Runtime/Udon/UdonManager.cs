@@ -114,6 +114,9 @@ namespace VRC.Udon
 
         [PublicAPI]
         public const string UDON_EVENT_ONPLAYERRESPAWN = "_onPlayerRespawn";
+        
+        [PublicAPI]
+        public const string UDON_EVENT_ONSCREENUPDATE = "_onScreenUpdate";
 
         #region Input Actions and Axes
 
@@ -494,7 +497,7 @@ namespace VRC.Udon
                 foreach(GameObject rootGameObject in scene.GetRootGameObjects())
                 {
 #if VRC_CLIENT
-                    using (rootGameObject.GetComponentsInChildrenPooled(out IReadOnlyList<Transform> transformsTempList, true))
+                    using (rootGameObject.GetComponentsInChildrenPooled(out List<Transform> transformsTempList, true))
 #else
                     rootGameObject.GetComponentsInChildren(true, transformsTempList);
 #endif
@@ -503,7 +506,7 @@ namespace VRC.Udon
                         {
                             GameObject currentGameObject = currentTransform.gameObject;
 #if VRC_CLIENT
-                            using (currentGameObject.GetComponentsPooled(out IReadOnlyList<UdonBehaviour> currentGameObjectUdonBehaviours))
+                            using (currentGameObject.GetComponentsPooled(out List<UdonBehaviour> currentGameObjectUdonBehaviours))
 #else
                             List<UdonBehaviour> currentGameObjectUdonBehaviours = new List<UdonBehaviour>();
                             currentGameObject.GetComponents(currentGameObjectUdonBehaviours);
@@ -781,6 +784,28 @@ namespace VRC.Udon
             }
 
             udonBehaviour.InitializeUdonContent();
+        }
+
+        public List<UdonBehaviour> UdonBehavioursInScene = new List<UdonBehaviour>();
+        [PublicAPI]
+        public List<UdonBehaviour> GetUdonBehavioursInScene()
+        {
+            UdonBehavioursInScene.Clear();
+            foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in
+                    _sceneUdonBehaviourDirectories.Values)
+            {
+                foreach(HashSet<UdonBehaviour> udonBehaviourList in sceneUdonBehaviourDirectory.Values)
+                {
+                    foreach(UdonBehaviour udonBehaviour in udonBehaviourList)
+                    {
+                        if(udonBehaviour != null)
+                        {
+                            UdonBehavioursInScene.Add(udonBehaviour);
+                        }
+                    }
+                }
+            }
+            return UdonBehavioursInScene;
         }
 
         #region Global RunEvent Methods

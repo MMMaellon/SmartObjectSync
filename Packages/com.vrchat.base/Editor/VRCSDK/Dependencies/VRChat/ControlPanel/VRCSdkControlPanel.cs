@@ -53,6 +53,7 @@ public partial class VRCSdkControlPanel : EditorWindow, IVRCSdkPanelApi
     public static GUIStyle centeredLabelStyle;
     public static GUIStyle contentDescriptionStyle;
     public static GUIStyle contentTitleStyle;
+    public static GUIStyle unityUpgradeBannerStyle;
 
     void InitializeStyles()
     {
@@ -161,6 +162,18 @@ public partial class VRCSdkControlPanel : EditorWindow, IVRCSdkPanelApi
         contentTitleStyle = new GUIStyle(EditorStyles.boldLabel)
         {
             wordWrap = true
+        };
+        
+        unityUpgradeBannerStyle = new GUIStyle
+        {
+            normal = new GUIStyleState
+            {
+                background = Resources.Load<Texture2D>("vrcSdkMigrateTo2022Splash")
+            },
+            alignment = TextAnchor.LowerCenter,
+            margin = new RectOffset(0,0,20,0),
+            fixedWidth = 506,
+            fixedHeight = 148
         };
     }
     

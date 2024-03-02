@@ -1838,7 +1838,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 return null;
             }
 
-            string str = new string('\0', length);
+            string str = new string(' ', length);
 
             if (charSizeFlag == 0)
             {
@@ -2782,7 +2782,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
             this.bufferIndex = 0;
             this.bufferEnd = remainder;
         }
-
+        
         public void OnFreed()
         {
             Context = null;

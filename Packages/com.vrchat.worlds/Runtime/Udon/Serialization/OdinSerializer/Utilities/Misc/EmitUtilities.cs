@@ -16,9 +16,11 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-// #if NET_STANDARD_2_0
-// #error Odin Inspector is incapable of compiling source code against the .NET Standard 2.0 API surface. You can change the API Compatibility Level in the Player settings.
-// #endif
+#if false
+#if NET_STANDARD_2_0
+#error Odin Inspector is incapable of compiling source code against the .NET Standard 2.0 API surface. You can change the API Compatibility Level in the Player settings.
+#endif
+#endif
 
 #if (UNITY_EDITOR || UNITY_STANDALONE) && !ENABLE_IL2CPP && NET_4_6
 #define CAN_EMIT
@@ -90,6 +92,20 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
             }
         }
 
+#if UNITY_EDITOR
+        private static Assembly EditorAssembly = typeof(UnityEditor.Editor).Assembly;
+#endif
+        private static Assembly EngineAssembly = typeof(UnityEngine.Object).Assembly;
+
+        private static bool EmitIsIllegalForMember(MemberInfo member)
+        {
+#if UNITY_EDITOR
+            return member.DeclaringType != null && (member.DeclaringType.Assembly == EditorAssembly || member.DeclaringType.Assembly == EngineAssembly);
+#else
+            return member.DeclaringType != null && member.DeclaringType.Assembly == EngineAssembly;
+#endif
+        }
+
         /// <summary>
         /// Creates a delegate which gets the value of a field. If emitting is not supported on the current platform, the delegate will use reflection to get the value.
         /// </summary>
@@ -124,6 +140,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (FieldType)fieldInfo.GetValue(null);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return () =>
+                {
+                    return (FieldType)fieldInfo.GetValue(null);
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".get_" + fieldInfo.Name;
 
             DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(FieldType), new Type[0], true);
@@ -163,6 +187,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return fieldInfo.GetValue(null);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return () =>
+                {
+                    return fieldInfo.GetValue(null);
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".get_" + fieldInfo.Name;
 
             DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(object), new Type[0], true);
@@ -214,6 +246,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 fieldInfo.SetValue(null, value);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (FieldType value) =>
+                {
+                    fieldInfo.SetValue(null, value);
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".set_" + fieldInfo.Name;
 
             DynamicMethod setterMethod = new DynamicMethod(methodName, null, new Type[] { typeof(FieldType) }, true);
@@ -254,6 +294,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 fieldInfo.SetValue(null, value);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (object value) =>
+                {
+                    fieldInfo.SetValue(null, value);
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".set_" + fieldInfo.Name;
 
             DynamicMethod setterMethod = new DynamicMethod(methodName, null, new Type[] { typeof(object) }, true);
@@ -306,6 +354,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (FieldType)fieldInfo.GetValue(classInstance);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (ref InstanceType classInstance) =>
+                {
+                    return (FieldType)fieldInfo.GetValue(classInstance);
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".get_" + fieldInfo.Name;
 
             DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(FieldType), new Type[1] { typeof(InstanceType).MakeByRefType() }, true);
@@ -363,6 +419,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (FieldType)fieldInfo.GetValue(classInstance);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (ref object classInstance) =>
+                {
+                    return (FieldType)fieldInfo.GetValue(classInstance);
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".get_" + fieldInfo.Name;
 
             DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(FieldType), new Type[1] { typeof(object).MakeByRefType() }, true);
@@ -422,6 +486,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return fieldInfo.GetValue(classInstance);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (ref object classInstance) =>
+                {
+                    return fieldInfo.GetValue(classInstance);
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".get_" + fieldInfo.Name;
 
             DynamicMethod getterMethod = new DynamicMethod(methodName, typeof(object), new Type[1] { typeof(object).MakeByRefType() }, true);
@@ -498,6 +570,25 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 }
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (ref InstanceType classInstance, FieldType value) =>
+                {
+                    if (typeof(InstanceType).IsValueType)
+                    {
+                        // Box value type so that the value will be properly set via reflection
+                        object obj = classInstance;
+                        fieldInfo.SetValue(obj, value);
+                        // Unbox the boxed value type that was changed
+                        classInstance = (InstanceType)obj;
+                    }
+                    else
+                    {
+                        fieldInfo.SetValue(classInstance, value);
+                    }
+                };
+            }
+
             string methodName = fieldInfo.ReflectedType.FullName + ".set_" + fieldInfo.Name;
 
             DynamicMethod setterMethod = new DynamicMethod(methodName, null, new Type[2] { typeof(InstanceType).MakeByRefType(), typeof(FieldType) }, true);
@@ -560,6 +651,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 fieldInfo.SetValue(classInstance, value);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (ref object classInstance, FieldType value) =>
+                {
+                    fieldInfo.SetValue(classInstance, value);
+                };
+            }
 
             string methodName = fieldInfo.ReflectedType.FullName + ".set_" + fieldInfo.Name;
 
@@ -633,6 +731,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 fieldInfo.SetValue(classInstance, value);
             };
 #else
+            if (EmitIsIllegalForMember(fieldInfo))
+            {
+                return (ref object classInstance, object value) =>
+                {
+                    fieldInfo.SetValue(classInstance, value);
+                };
+            }
 
             string methodName = fieldInfo.ReflectedType.FullName + ".set_" + fieldInfo.Name;
 
@@ -735,6 +840,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return propertyInfo.GetValue(classInstance, null);
             };
 #else
+            if (EmitIsIllegalForMember(propertyInfo))
+            {
+                return (ref object classInstance) =>
+                {
+                    return propertyInfo.GetValue(classInstance, null);
+                };
+            }
 
             string methodName = propertyInfo.ReflectedType.FullName + ".get_" + propertyInfo.Name;
 
@@ -831,6 +943,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 propertyInfo.SetValue(classInstance, value, null);
             };
 #else
+            if (EmitIsIllegalForMember(propertyInfo))
+            {
+                return (ref object classInstance, object value) =>
+                {
+                    propertyInfo.SetValue(classInstance, value, null);
+                };
+            }
 
             string methodName = propertyInfo.ReflectedType.FullName + ".set_" + propertyInfo.Name;
 
@@ -943,6 +1062,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 propertyInfo.SetValue(null, value, null);
             };
 #else
+            if (EmitIsIllegalForMember(propertyInfo))
+            {
+                return (PropType value) =>
+                {
+                    propertyInfo.SetValue(null, value, null);
+                };
+            }
+
             string methodName = propertyInfo.ReflectedType.FullName + ".set_" + propertyInfo.Name;
 
             DynamicMethod setterMethod = new DynamicMethod(methodName, null, new Type[] { typeof(PropType) }, true);
@@ -996,6 +1123,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (PropType)propertyInfo.GetValue(null, null);
             };
 #else
+            if (EmitIsIllegalForMember(propertyInfo))
+            {
+                return () =>
+                {
+                    return (PropType)propertyInfo.GetValue(null, null);
+                };
+            }
 
             string methodName = propertyInfo.ReflectedType.FullName + ".get_" + propertyInfo.Name;
 
@@ -1068,6 +1202,24 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 }
             };
 #else
+            if (EmitIsIllegalForMember(propertyInfo))
+            {
+                return (ref InstanceType classInstance, PropType value) =>
+                {
+                    if (typeof(InstanceType).IsValueType)
+                    {
+                        // Box value type so that the value will be properly set via reflection
+                        object obj = classInstance;
+                        propertyInfo.SetValue(obj, value, null);
+                        // Unbox the boxed value type that was changed
+                        classInstance = (InstanceType)obj;
+                    }
+                    else
+                    {
+                        propertyInfo.SetValue(classInstance, value, null);
+                    }
+                };
+            }
 
             string methodName = propertyInfo.ReflectedType.FullName + ".set_" + propertyInfo.Name;
 
@@ -1135,6 +1287,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (PropType)propertyInfo.GetValue(classInstance, null);
             };
 #else
+            if (EmitIsIllegalForMember(propertyInfo))
+            {
+                return (ref InstanceType classInstance) =>
+                {
+                    return (PropType)propertyInfo.GetValue(classInstance, null);
+                };
+            }
 
             string methodName = propertyInfo.ReflectedType.FullName + ".get_" + propertyInfo.Name;
 
@@ -1252,6 +1411,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 methodInfo.Invoke(classInstance, new object[] { arg });
             };
 #else
+            if (EmitIsIllegalForMember(methodInfo))
+            {
+                return (object classInstance, TArg1 arg) =>
+                {
+                    methodInfo.Invoke(classInstance, new object[] { arg });
+                };
+            }
 
             Type declaringType = methodInfo.DeclaringType;
             string methodName = methodInfo.ReflectedType.FullName + ".call_" + methodInfo.Name;
@@ -1313,6 +1479,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 methodInfo.Invoke(classInstance, null);
             };
 #else
+            if (EmitIsIllegalForMember(methodInfo))
+            {
+                return (object classInstance) =>
+                {
+                    methodInfo.Invoke(classInstance, null);
+                };
+            }
 
             Type declaringType = methodInfo.DeclaringType;
             string methodName = methodInfo.ReflectedType.FullName + ".call_" + methodInfo.Name;
@@ -1406,6 +1579,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (TResult)methodInfo.Invoke(classInstance, new object[] { arg1 });
             };
 #else
+            if (EmitIsIllegalForMember(methodInfo))
+            {
+                return (object classInstance, TArg1 arg1) =>
+                {
+                    return (TResult)methodInfo.Invoke(classInstance, new object[] { arg1 });
+                };
+            }
 
             Type declaringType = methodInfo.DeclaringType;
             string methodName = methodInfo.ReflectedType.FullName + ".call_" + methodInfo.Name;
@@ -1474,6 +1654,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (TResult)methodInfo.Invoke(classInstance, null);
             };
 #else
+            if (EmitIsIllegalForMember(methodInfo))
+            {
+                return (object classInstance) =>
+                {
+                    return (TResult)methodInfo.Invoke(classInstance, null);
+                };
+            }
 
             Type declaringType = methodInfo.DeclaringType;
             string methodName = methodInfo.ReflectedType.FullName + ".call_" + methodInfo.Name;
@@ -1545,6 +1732,14 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 return (TResult)methodInfo.Invoke(classInstance, new object[] { arg });
             };
 #else
+            if (EmitIsIllegalForMember(methodInfo))
+            {
+                return (object classInstance, TArg arg) =>
+                {
+                    return (TResult)methodInfo.Invoke(classInstance, new object[] { arg });
+                };
+            }
+
             Type declaringType = methodInfo.DeclaringType;
             string methodName = methodInfo.ReflectedType.FullName + ".call_" + methodInfo.Name;
 
@@ -1684,6 +1879,16 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 instance = (InstanceType)obj;
             };
 #else
+            if (EmitIsIllegalForMember(methodInfo))
+            {
+                return (ref InstanceType instance) =>
+                {
+                    object obj = instance;
+                    methodInfo.Invoke(obj, null);
+                    instance = (InstanceType)obj;
+                };
+            }
+
             Type declaringType = methodInfo.DeclaringType;
             string methodName = methodInfo.ReflectedType.FullName + ".call_" + methodInfo.Name;
 
@@ -1743,6 +1948,16 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 instance = (InstanceType)obj;
             };
 #else
+            if (EmitIsIllegalForMember(methodInfo))
+            {
+                return (ref InstanceType instance, Arg1 arg1) =>
+                {
+                    object obj = instance;
+                    methodInfo.Invoke(obj, new object[] { arg1 });
+                    instance = (InstanceType)obj;
+                };
+            }
+
             Type declaringType = methodInfo.DeclaringType;
             string methodName = methodInfo.ReflectedType.FullName + ".call_" + methodInfo.Name;
 

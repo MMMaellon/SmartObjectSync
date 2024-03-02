@@ -6,11 +6,16 @@ UdonGraphToolbar {
     height: 28px;
     top: 20px;
     width: 100%;
-    padding: 0 0 0 238px;
+    padding: 0;
     background-color: #383838;
     border-bottom-color: #1F1F1F;
     border-bottom-width: 3px;
     position: absolute;
+}
+
+UdonGraphToolbar .toolbarSpacer {
+    width: 238px;
+    flex-shrink: 0;
 }
 
 UdonGraphToolbar > VisualElement {
@@ -25,10 +30,17 @@ UdonGraphToolbar .updateOrderField {
     flex-direction: row;
     align-items: center;
     padding: 4px 0 4px 0;
+    min-width: 50px;
+    flex-shrink: 1;
 }
 
-UdonGraphToolbar .updateOrderField > IntegerField {
-    min-width: 50px;
+UdonGraphToolbar .updateOrderField Label {
+    position: relative;
+    top: -2px;
+}
+
+UdonGraphToolbar .toolbarRightSide {
+    flex-shrink: 0;
 }
 
 UdonGraphToolbar Button {

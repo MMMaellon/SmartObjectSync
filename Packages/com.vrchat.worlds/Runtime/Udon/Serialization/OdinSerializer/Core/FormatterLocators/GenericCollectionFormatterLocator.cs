@@ -34,8 +34,26 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 formatter = null;
                 return false;
             }
+            
+            #if false //vrc security patch
+            try
+            {
+                formatter = (IFormatter)Activator.CreateInstance(typeof(GenericCollectionFormatter<,>).MakeGenericType(type, elementType));
+            }
+            catch (Exception ex)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                if (allowWeakFallbackFormatters && (ex is ExecutionEngineException || ex.GetBaseException() is ExecutionEngineException))
+#pragma warning restore CS0618 // Type or member is obsolete
+                {
+                    formatter = new WeakGenericCollectionFormatter(type, elementType);
+                }
+                else throw;
+            }
+            #endif
 
             formatter = (IFormatter)Activator.CreateInstance(typeof(GenericCollectionFormatter<,>).MakeGenericType(type, elementType));
+
             return true;
         }
     }

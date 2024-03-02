@@ -66,6 +66,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// Whether the object contains any serialized data.
         /// </summary>
         [Obsolete("Use ContainsData instead")]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public bool HasEditorData
         {
             get

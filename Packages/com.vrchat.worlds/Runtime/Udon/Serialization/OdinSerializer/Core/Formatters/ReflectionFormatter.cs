@@ -18,9 +18,9 @@
 
 namespace VRC.Udon.Serialization.OdinSerializer
 {
+    using Utilities;
     using System;
     using System.Reflection;
-    using System.Runtime.Serialization;
 
     /// <summary>
     /// Final fallback formatter for all types which have no other formatters. This formatter relies on reflection to work, and is thus comparatively slow and creates more garbage than a custom formatter.
@@ -69,7 +69,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
                 if (members.TryGetValue(name, out member) == false)
                 {
-                    reader.Context.Config.DebugContext.LogWarning("Lost serialization data for entry \"" + name + "\" of type \"" + entryType + "\"in node \"" + reader.CurrentNodeName + "\".");
+                    reader.Context.Config.DebugContext.LogWarning("Lost serialization data for entry \"" + name + "\" of type \"" + entryType + "\" in node \"" + reader.CurrentNodeName + "\" because a serialized member of that name could not be found in type " + typeof(T).GetNiceFullName() + ".");
                     reader.SkipEntry();
                     continue;
                 }
@@ -121,4 +121,78 @@ namespace VRC.Udon.Serialization.OdinSerializer
             }
         }
     }
+    
+    #if false //vrc securtity pach
+    public class WeakReflectionFormatter : WeakBaseFormatter
+    {
+        public WeakReflectionFormatter(Type serializedType) : base(serializedType)
+        {
+        }
+
+        protected override void DeserializeImplementation(ref object value, IDataReader reader)
+        {
+            var members = FormatterUtilities.GetSerializableMembersMap(this.SerializedType, reader.Context.Config.SerializationPolicy);
+
+            EntryType entryType;
+            string name;
+
+            while ((entryType = reader.PeekEntry(out name)) != EntryType.EndOfNode && entryType != EntryType.EndOfArray && entryType != EntryType.EndOfStream)
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    reader.Context.Config.DebugContext.LogError("Entry of type \"" + entryType + "\" in node \"" + reader.CurrentNodeName + "\" is missing a name.");
+                    reader.SkipEntry();
+                    continue;
+                }
+
+                MemberInfo member;
+
+                if (members.TryGetValue(name, out member) == false)
+                {
+                    reader.Context.Config.DebugContext.LogWarning("Lost serialization data for entry \"" + name + "\" of type \"" + entryType + "\" in node \"" + reader.CurrentNodeName + "\" because a serialized member of that name could not be found in type " + this.SerializedType.GetNiceFullName() + ".");
+                    reader.SkipEntry();
+                    continue;
+                }
+
+                Type expectedType = FormatterUtilities.GetContainedType(member);
+
+                try
+                {
+                    var serializer = Serializer.Get(expectedType);
+                    object entryValue = serializer.ReadValueWeak(reader);
+                    FormatterUtilities.SetMemberValue(member, value, entryValue);
+                }
+                catch (Exception ex)
+                {
+                    reader.Context.Config.DebugContext.LogException(ex);
+                }
+            }
+        }
+        
+        protected override void SerializeImplementation(ref object value, IDataWriter writer)
+        {
+            var members = FormatterUtilities.GetSerializableMembers(this.SerializedType, writer.Context.Config.SerializationPolicy);
+
+            for (int i = 0; i < members.Length; i++)
+            {
+                var member = members[i];
+                Type type;
+                var memberValue = FormatterUtilities.GetMemberValue(member, value);
+
+                type = FormatterUtilities.GetContainedType(member);
+
+                var serializer = Serializer.Get(type);
+
+                try
+                {
+                    serializer.WriteValueWeak(member.Name, memberValue, writer);
+                }
+                catch (Exception ex)
+                {
+                    writer.Context.Config.DebugContext.LogException(ex);
+                }
+            }
+        }
+    }
+    #endif
 }

@@ -1,6 +1,6 @@
 ﻿using EditorGV = UnityEditor.Experimental.GraphView;
 using EngineUI = UnityEngine.UIElements;
-using EditorUI = UnityEditor.UIElements;
+using EditorUI = UnityEngine.UIElements;
 using VRC.Udon.Graph;
 
 namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView.UdonNodes

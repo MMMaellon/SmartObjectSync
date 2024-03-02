@@ -39,6 +39,8 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
         private static readonly Dictionary<Type, Type> GenericConstraintsSatisfactionInferredParameters = new Dictionary<Type, Type>();
         private static readonly Dictionary<Type, Type> GenericConstraintsSatisfactionResolvedMap = new Dictionary<Type, Type>();
         private static readonly HashSet<Type> GenericConstraintsSatisfactionProcessedParams = new HashSet<Type>();
+        private static readonly HashSet<Type> GenericConstraintsSatisfactionTypesToCheck = new HashSet<Type>();
+        private static readonly List<Type> GenericConstraintsSatisfactionTypesToCheck_ToAdd = new List<Type>();
 
         private static readonly Type GenericListInterface = typeof(IList<>);
         private static readonly Type GenericCollectionInterface = typeof(ICollection<>);
@@ -488,7 +490,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
 
             foreach (var method in fromMethods)
             {
-                if ((method.Name == "op_Implicit" || (requireImplicitCast == false && method.Name == "op_Explicit")) && to.IsAssignableFrom(method.ReturnType))
+                if ((method.Name == "op_Implicit" || (requireImplicitCast == false && method.Name == "op_Explicit")) && method.GetParameters()[0].ParameterType.IsAssignableFrom(from) && to.IsAssignableFrom(method.ReturnType))
                 {
                     return method;
                 }
@@ -498,7 +500,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
 
             foreach (var method in toMethods)
             {
-                if ((method.Name == "op_Implicit" || (requireImplicitCast == false && method.Name == "op_Explicit")) && method.GetParameters()[0].ParameterType.IsAssignableFrom(from))
+                if ((method.Name == "op_Implicit" || (requireImplicitCast == false && method.Name == "op_Explicit")) && method.GetParameters()[0].ParameterType.IsAssignableFrom(from) && to.IsAssignableFrom(method.ReturnType))
                 {
                     return method;
                 }
@@ -581,17 +583,17 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 Type currentType = typeof(T);
 
                 while (currentType != null && currentType != typeof(object))
-        {
+                {
                     equalityMethod = currentType.GetOperatorMethod(Operator.Equality, currentType, currentType);
 
                     if (equalityMethod != null)
-        {
+                    {
                         result = (Func<T, T, bool>)Delegate.CreateDelegate(typeof(Func<T, T, bool>), equalityMethod, true);
                         break;
-            }
+                    }
 
                     currentType = currentType.BaseType;
-            }
+                }
             }
 
             if (result == null)
@@ -601,7 +603,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
             }
 
             return result;
-            }
+        }
 
         /// <summary>
         /// Gets the first attribute of type T. Returns null in the no attribute of type T was found.
@@ -759,7 +761,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
         /// Gets the MethodInfo of a specific operator kind, with the given left and right operands. This overload is *far* faster than any of the other GetOperatorMethod implementations, and should be used whenever possible.
         /// </summary>
         public static MethodInfo GetOperatorMethod(this Type type, Operator op, Type leftOperand, Type rightOperand)
-            {
+        {
             string methodName;
 
             switch (op)
@@ -847,18 +849,18 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
             var types = TwoLengthTypeArray_Cached;
 
             lock (types)
-                {
+            {
                 types[0] = leftOperand;
                 types[1] = rightOperand;
 
                 try
-                    {
+                {
                     var result = type.GetMethod(methodName, Flags.StaticAnyVisibility, null, types, null);
 
                     if (result != null && result.ReturnType != typeof(bool)) return null;
 
-                        return result;
-                    }
+                    return result;
+                }
                 catch (AmbiguousMatchException)
                 {
                     // We fallback to manual resolution
@@ -875,10 +877,10 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                         if (!parameters[1].ParameterType.IsAssignableFrom(rightOperand)) continue;
 
                         return method;
-            }
+                    }
 
-            return null;
-        }
+                    return null;
+                }
             }
         }
 
@@ -1609,6 +1611,9 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
         /// <exception cref="System.ArgumentException">The genericTypeDefinition parameter must be a generic type definition.</exception>
         public static bool TryInferGenericParameters(this Type genericTypeDefinition, out Type[] inferredParams, params Type[] knownParameters)
         {
+            // NOTE: When modifying this method, also remember to modify Sirenix.Utilities.TypeExtensions.TryInferGenericParameters
+            // and GenericParameterInferenceTypeMatcher.TryInferGenericParameters!
+
             if (genericTypeDefinition == null)
             {
                 throw new ArgumentNullException("genericTypeDefinition");
@@ -1628,6 +1633,17 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
             {
                 Dictionary<Type, Type> matches = GenericConstraintsSatisfactionInferredParameters;
                 matches.Clear();
+
+                HashSet<Type> typesToCheck = GenericConstraintsSatisfactionTypesToCheck;
+                typesToCheck.Clear();
+
+                List<Type> typesToCheck_ToAdd = GenericConstraintsSatisfactionTypesToCheck_ToAdd;
+                typesToCheck_ToAdd.Clear();
+
+                for (int i = 0; i < knownParameters.Length; i++)
+                {
+                    typesToCheck.Add(knownParameters[i]);
+                }
 
                 Type[] definitions = genericTypeDefinition.GetGenericArguments();
 
@@ -1677,15 +1693,15 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                     return true;
                 }
 
-                foreach (var type in definitions)
+                foreach (var typeArg in definitions)
                 {
-                    if (matches.ContainsKey(type)) continue;
+                    //if (matches.ContainsKey(type)) continue;
 
-                    var constraints = type.GetGenericParameterConstraints();
+                    var constraints = typeArg.GetGenericParameterConstraints();
 
                     foreach (var constraint in constraints)
                     {
-                        foreach (var parameter in knownParameters)
+                        foreach (var parameter in typesToCheck)
                         {
                             if (!constraint.IsGenericType)
                             {
@@ -1714,16 +1730,25 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                                 continue;
                             }
 
-                            matches[type] = parameter;
+                            matches[typeArg] = parameter;
+                            typesToCheck_ToAdd.Add(parameter);
 
                             for (int i = 0; i < constraintParams.Length; i++)
                             {
                                 if (constraintParams[i].IsGenericParameter)
                                 {
                                     matches[constraintParams[i]] = paramParams[i];
+                                    typesToCheck_ToAdd.Add(paramParams[i]);
                                 }
                             }
                         }
+
+                        foreach (var type in typesToCheck_ToAdd)
+                        {
+                            typesToCheck.Add(type);
+                        }
+
+                        typesToCheck_ToAdd.Clear();
                     }
                 }
 
@@ -2143,7 +2168,6 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
 
             return sb.ToString();
         }
-
         /// <summary>
         /// Determines whether a generic type contains the specified generic argument constraints.
         /// </summary>
@@ -2175,50 +2199,50 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                     argsToCheck.Push(args[i]);
                 }
 
-            while (argsToCheck.Count > 0)
-            {
-                var arg = argsToCheck.Pop();
-
-                // Check if it's one of the types we're looking for, and if so, mark that as seen
-                for (int i = 0; i < types.Length; i++)
+                while (argsToCheck.Count > 0)
                 {
-                    Type lookingForType = types[i];
+                    var arg = argsToCheck.Pop();
 
-                    if (lookingForType == arg)
+                    // Check if it's one of the types we're looking for, and if so, mark that as seen
+                    for (int i = 0; i < types.Length; i++)
                     {
-                        typesSeen[i] = true;
-                    }
-                    else if (lookingForType.IsGenericTypeDefinition && arg.IsGenericType && !arg.IsGenericTypeDefinition && arg.GetGenericTypeDefinition() == lookingForType)
-                    {
-                        typesSeen[i] = true;
-                    }
-                }
+                        Type lookingForType = types[i];
 
-                // Check if all types we're looking for have been seen
-                {
-                    bool allSeen = true;
-
-                    for (int i = 0; i < typesSeen.Length; i++)
-                    {
-                        if (typesSeen[i] == false)
+                        if (lookingForType == arg)
                         {
-                            allSeen = false;
-                            break;
+                            typesSeen[i] = true;
+                        }
+                        else if (lookingForType.IsGenericTypeDefinition && arg.IsGenericType && !arg.IsGenericTypeDefinition && arg.GetGenericTypeDefinition() == lookingForType)
+                        {
+                            typesSeen[i] = true;
                         }
                     }
 
-                    if (allSeen)
+                    // Check if all types we're looking for have been seen
                     {
-                        return true;
-                    }
-                }
+                        bool allSeen = true;
 
-                // If argument is a generic type, we have to also check its arguments
-                if (arg.IsGenericType)
-                {
-                    foreach (var innerArg in arg.GetGenericArguments())
+                        for (int i = 0; i < typesSeen.Length; i++)
+                        {
+                            if (typesSeen[i] == false)
+                            {
+                                allSeen = false;
+                                break;
+                            }
+                        }
+
+                        if (allSeen)
+                        {
+                            return true;
+                        }
+                    }
+
+                    // If argument is a generic type, we have to also check its arguments
+                    if (arg.IsGenericType)
                     {
-                        argsToCheck.Push(innerArg);
+                        foreach (var innerArg in arg.GetGenericArguments())
+                        {
+                            argsToCheck.Push(innerArg);
                         }
                     }
                 }

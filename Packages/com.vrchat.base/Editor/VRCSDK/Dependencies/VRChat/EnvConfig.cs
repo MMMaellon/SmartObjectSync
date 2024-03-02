@@ -1,13 +1,21 @@
-﻿#define ENV_SET_INCLUDED_SHADERS
+#define ENV_SET_INCLUDED_SHADERS
 
 using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
+using UnityEditor.PackageManager.Requests;
+using UnityEditor.SceneManagement;
+using UnityEditor.XR.Management;
+using UnityEditor.XR.Management.Metadata;
 using UnityEngine.Rendering;
+using UnityEngine.XR;
+using UnityEngine.XR.Management;
 using VRC.SDKBase.Validation.Performance.Stats;
 using Object = UnityEngine.Object;
 
@@ -28,13 +36,11 @@ namespace VRC.Editor
             BuildTarget.StandaloneOSX
         };
 
-        #if !VRC_CLIENT
-    private static readonly BuildTarget[] allowedBuildtargets = {
-        BuildTarget.StandaloneWindows64,
-        BuildTarget.Android,
-        BuildTarget.iOS,
-    };
-        #endif
+        private static readonly BuildTarget[] allowedBuildtargets = {
+            BuildTarget.StandaloneWindows64,
+            BuildTarget.Android,
+            BuildTarget.iOS,
+        };
 
         private static readonly Dictionary<BuildTarget, GraphicsDeviceType[]> allowedGraphicsAPIs = new Dictionary<BuildTarget, GraphicsDeviceType[]>()
         {
@@ -46,132 +52,24 @@ namespace VRC.Editor
             { BuildTarget.StandaloneOSX, new[] { GraphicsDeviceType.Metal } }
         };
 
-        #if ENV_SET_INCLUDED_SHADERS && VRC_CLIENT
-        private static readonly string[] ensureTheseShadersAreAvailable =
+        private struct SDKInfo
         {
-            "Hidden/CubeBlend",
-            "Hidden/CubeBlur",
-            "Hidden/CubeCopy",
-            "Hidden/VideoDecode",
-            "Legacy Shaders/Bumped Diffuse",
-            "Legacy Shaders/Bumped Specular",
-            "Legacy Shaders/Decal",
-            "Legacy Shaders/Diffuse Detail",
-            "Legacy Shaders/Diffuse Fast",
-            "Legacy Shaders/Diffuse",
-            "Legacy Shaders/Diffuse",
-            "Legacy Shaders/Lightmapped/Diffuse",
-            "Legacy Shaders/Lightmapped/Specular",
-            "Legacy Shaders/Lightmapped/VertexLit",
-            "Legacy Shaders/Parallax Diffuse",
-            "Legacy Shaders/Parallax Specular",
-            "Legacy Shaders/Reflective/Bumped Diffuse",
-            "Legacy Shaders/Reflective/Bumped Specular",
-            "Legacy Shaders/Reflective/Bumped Unlit",
-            "Legacy Shaders/Reflective/Bumped VertexLit",
-            "Legacy Shaders/Reflective/Diffuse",
-            "Legacy Shaders/Reflective/Parallax Diffuse",
-            "Legacy Shaders/Reflective/Parallax Specular",
-            "Legacy Shaders/Reflective/Specular",
-            "Legacy Shaders/Reflective/VertexLit",
-            "Legacy Shaders/Self-Illumin/Bumped Diffuse",
-            "Legacy Shaders/Self-Illumin/Bumped Specular",
-            "Legacy Shaders/Self-Illumin/Diffuse",
-            "Legacy Shaders/Self-Illumin/Parallax Diffuse",
-            "Legacy Shaders/Self-Illumin/Parallax Specular",
-            "Legacy Shaders/Self-Illumin/Specular",
-            "Legacy Shaders/Self-Illumin/VertexLit",
-            "Legacy Shaders/Specular",
-            "Legacy Shaders/Transparent/Bumped Diffuse",
-            "Legacy Shaders/Transparent/Bumped Specular",
-            "Legacy Shaders/Transparent/Cutout/Bumped Diffuse",
-            "Legacy Shaders/Transparent/Cutout/Bumped Specular",
-            "Legacy Shaders/Transparent/Cutout/Diffuse",
-            "Legacy Shaders/Transparent/Cutout/Soft Edge Unlit",
-            "Legacy Shaders/Transparent/Cutout/Specular",
-            "Legacy Shaders/Transparent/Cutout/VertexLit",
-            "Legacy Shaders/Transparent/Diffuse",
-            "Legacy Shaders/Transparent/Parallax Diffuse",
-            "Legacy Shaders/Transparent/Parallax Specular",
-            "Legacy Shaders/Transparent/Specular",
-            "Legacy Shaders/Transparent/VertexLit",
-            "Legacy Shaders/VertexLit",
-            "Legacy Shaders/Particles/Additive",
-            "Legacy Shaders/Particles/~Additive-Multiply",
-            "Legacy Shaders/Particles/Additive (Soft)",
-            "Legacy Shaders/Particles/Alpha Blended",
-            "Legacy Shaders/Particles/Anim Alpha Blended",
-            "Legacy Shaders/Particles/Multiply",
-            "Legacy Shaders/Particles/Multiply (Double)",
-            "Legacy Shaders/Particles/Alpha Blended Premultiply",
-            "Legacy Shaders/Particles/VertexLit Blended",
-            "Mobile/Particles/Additive",
-            "Mobile/Particles/Alpha Blended",
-            "Mobile/Particles/Multiply",
-            "Mobile/Particles/VertexLit Blended",
-            "Mobile/Skybox",
-            "Nature/Terrain/Diffuse",
-            "Nature/Terrain/Specular",
-            "Nature/Terrain/Standard",
-            "Particles/Additive (Soft)",
-            "Particles/Additive",
-            "Particles/Alpha Blended Premultiply",
-            "Particles/Alpha Blended",
-            "Particles/Anim Alpha Blended",
-            "Particles/Multiply (Double)",
-            "Particles/Multiply",
-            "Particles/VertexLit Blended",
-            "Particles/~Additive-Multiply",
-            "Skybox/Cubemap",
-            "Skybox/Procedural",
-            "Skybox/6 Sided",
-            "Sprites/Default",
-            "Sprites/Diffuse",
-            "UI/Default",
-            "VRChat/UI/Unlit/WebPanelTransparent",
-            "Toon/Lit",
-            "Toon/Lit (Double)",
-            "Toon/Lit Cutout",
-            "Toon/Lit Cutout (Double)",
-            "Toon/Lit Outline",
-            "VRChat/Mobile/Diffuse",
-            "Video/RealtimeEmissiveGamma",
-            "VRChat/PC/Toon Lit",
-            "VRChat/PC/Toon Lit (Double)",
-            "VRChat/PC/Toon Lit Cutout",
-            "VRChat/PC/Toon Lit Cutout (Double)",
-            "Unlit/Color",
-            "Unlit/Transparent",
-            "Unlit/Transparent Cutout",
-            "Unlit/Texture",
-            "MatCap/Vertex/Textured Lit",
-            "VRChat/Mobile/Bumped Uniform Diffuse",
-            "VRChat/Mobile/Bumped Uniform Specular",
-            "VRChat/Mobile/Toon Lit",
-            "VRChat/Mobile/MatCap Lit",
-            "VRChat/Mobile/Skybox",
-            "VRChat/Mobile/Lightmapped",
-            "VRChat/Mobile/Bumped Mapped Specular",
-            "VRChat/Mobile/Diffuse",
-            "VRChat/Mobile/Particles/Additive",
-            "VRChat/Mobile/Particles/Multiply",
-            "VRChat/Mobile/Standard Lite",
-            "TextMeshPro/Distance Field (Surface)",
-            "TextMeshPro/Mobile/Distance Field (No ZTest)",
-            "TextMeshPro/Distance Field Overlay",
-            "TextMeshPro/Sprite",
-            "TextMeshPro/Mobile/Distance Field - Masking",
-            "TextMeshPro/Mobile/Distance Field Overlay",
-            "TextMeshPro/Mobile/Distance Field (Surface)",
-            "TextMeshPro/Mobile/Distance Field",
-            "TextMeshPro/Distance Field",
-            "TextMeshPro/Bitmap Custom Atlas",
-            "VRChat/UI/TextMeshPro/Mobile/Distance Field",
-            "TextMeshPro/Mobile/Bitmap",
-            "TextMeshPro/Bitmap",
-            "TextMeshPro/Mobile/Distance Field - Masking (NoZTest)"
+            public string Name;
+            public string LoaderType;
+        }
+        
+        private static readonly List<SDKInfo> xrSDKs = new List<SDKInfo>
+        {
+            new SDKInfo { Name = "Oculus", LoaderType = "Unity.XR.Oculus.OculusLoader" },
+            new SDKInfo { Name = "OpenVR", LoaderType = "Unity.XR.OpenVR.OpenVRLoader" },
+            new SDKInfo { Name = "MockHMD", LoaderType = "Unity.XR.MockHMD.MockHMDLoader" },
+            new SDKInfo { Name = "OpenXR", LoaderType = "UnityEngine.XR.OpenXR.OpenXRLoader" },
         };
-        #endif
+        
+        private static readonly List<string> loadersThatNeedsRestart = new List<string>
+        {
+            "UnityEngine.XR.OpenXR.OpenXRLoader",
+        };
 
         private static bool _requestConfigureSettings = true;
 
@@ -235,23 +133,22 @@ namespace VRC.Editor
             return true;
         }
 
-        #if !VRC_CLIENT
-    private static void SetDLLPlatforms(string dllName, bool active)
+    private static void SetDLLPlatforms(string dllName, bool active, bool isPreloaded = false)
     {
         string[] assetGuids = AssetDatabase.FindAssets(dllName);
-
         foreach(string guid in assetGuids)
         {
             string dllPath = AssetDatabase.GUIDToAssetPath(guid);
+            
             if(string.IsNullOrEmpty(dllPath) || dllPath.ToLower().EndsWith(".dll") == false)
             {
-                return;
+                continue;
             }
 
             PluginImporter importer = AssetImporter.GetAtPath(dllPath) as PluginImporter;
             if(importer == null)
             {
-                return;
+                continue;
             }
 
             bool allCorrect = true;
@@ -277,6 +174,11 @@ namespace VRC.Editor
                         allCorrect = false;
                     }
                 }
+                
+                if(importer.isPreloaded != isPreloaded && isPreloaded)
+                {
+                    allCorrect = false;
+                }
             }
 
             if(allCorrect)
@@ -293,6 +195,7 @@ namespace VRC.Editor
                 importer.SetExcludeFromAnyPlatform(BuildTarget.StandaloneWindows, false);
                 importer.SetExcludeFromAnyPlatform(BuildTarget.StandaloneWindows64, false);
                 importer.SetExcludeFromAnyPlatform(BuildTarget.StandaloneLinux64, false);
+                importer.isPreloaded = isPreloaded;
             }
             else
             {
@@ -303,12 +206,13 @@ namespace VRC.Editor
                 importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows, false);
                 importer.SetCompatibleWithPlatform(BuildTarget.StandaloneWindows64, false);
                 importer.SetCompatibleWithPlatform(BuildTarget.StandaloneLinux64, false);
+                importer.isPreloaded = isPreloaded;
             }
 
             importer.SaveAndReimport();
+            return;
         }
     }
-        #endif
 
         [MenuItem("VRChat SDK/Utilities/Force Configure Player Settings")]
         public static void ConfigurePlayerSettings()
@@ -329,73 +233,16 @@ namespace VRC.Editor
                 PlayerSettings.runInBackground = true;
             }
 
-            #if !VRC_CLIENT
-        SetDLLPlatforms("VRCCore-Standalone", false);
-        SetDLLPlatforms("VRCCore-Editor", true);
-            #endif
+            SetDLLPlatforms("VRCCore-Standalone", false);
+            SetDLLPlatforms("VRCCore-Editor", true);
+            SetSpatializerPluginSettings();
 
             SetDefaultGraphicsAPIs();
             SetGraphicsSettings();
             SetQualitySettings();
             SetAudioSettings();
             SetPlayerSettings();
-
-            #if VRC_CLIENT
-                #if VRC_DISABLE_XR_MANAGEMENT
-            PlatformSwitcher.RefreshRequiredPackages(EditorUserBuildSettings.selectedBuildTargetGroup, true);
-                #else
-            PlatformSwitcher.RefreshRequiredPackages(EditorUserBuildSettings.selectedBuildTargetGroup, false);
-
-                    #if VRC_VR_OCULUS_QUEST
-            VrChatBuildSettings.BuildConfiguration xrBuildConfiguration = VrChatBuildSettings.BuildConfiguration.AndroidOculusQuest;
-            VrChatXRSettingsHelper.ConfigureXRSettings(EditorUserBuildSettings.selectedBuildTargetGroup, xrBuildConfiguration);
-                    #elif VRC_MOBILE
-            VrChatBuildSettings.BuildConfiguration xrBuildConfiguration = VrChatBuildSettings.BuildConfiguration.AndroidMonoscopic;
-            VrChatXRSettingsHelper.ConfigureXRSettings(EditorUserBuildSettings.selectedBuildTargetGroup, xrBuildConfiguration);
-                    #endif
-                #endif
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            #else
-            // SDK
-
-            // default to steam runtime in sdk (shouldn't matter)
-            SetVRSDKs(EditorUserBuildSettings.selectedBuildTargetGroup, new string[] { "None", "OpenVR", "Oculus" });
-
-            VRC.Core.AnalyticsSDK.Initialize(VRC.Tools.SdkVersion);
-            #endif
-
-            #if VRC_CLIENT
-            // VRCLog should handle disk writing
-            PlayerSettings.usePlayerLog = false;
-            foreach(LogType logType in Enum.GetValues(typeof(LogType)).Cast<LogType>())
-            {
-                switch(logType)
-                {
-                    case LogType.Assert:
-                    case LogType.Exception:
-                    {
-                        PlayerSettings.SetStackTraceLogType(logType, StackTraceLogType.ScriptOnly);
-                        break;
-                    }
-                    case LogType.Error:
-                    case LogType.Warning:
-                    case LogType.Log:
-                    {
-                        #if UNITY_EDITOR
-                        PlayerSettings.SetStackTraceLogType(logType, StackTraceLogType.ScriptOnly);
-                        #else
-                    PlayerSettings.SetStackTraceLogType(logType, StackTraceLogType.None);
-                        #endif
-                        break;
-                    }
-                    default:
-                    {
-                        throw new ArgumentOutOfRangeException();
-                    }
-                }
-            }
-            #endif
+            SetVRSDKs(EditorUserBuildSettings.selectedBuildTargetGroup, new string[] { "None", "Oculus" });
         }
 
         internal static void EnableBatching(bool enable)
@@ -450,23 +297,160 @@ namespace VRC.Editor
 
             playerSettingsSerializedObject.ApplyModifiedProperties();
         }
-
-        public static void SetVRSDKs(BuildTargetGroup buildTargetGroup, string[] sdkNames)
+        
+        public static void SetVRSDKs(BuildTargetGroup buildTargetGroup, [NotNull] string[] sdkNames)
         {
-            VRC.Core.Logger.Log("Setting virtual reality SDKs in PlayerSettings: ", VRC.Core.DebugLevel.All);
-            if(sdkNames != null)
+            if(sdkNames == null)
             {
-                foreach(string s in sdkNames)
-                {
-                    VRC.Core.Logger.Log("- " + s, VRC.Core.DebugLevel.All);
-                }
+                throw new ArgumentNullException(nameof(sdkNames));
+            }
+
+            VRC.Core.Logger.Log("Setting virtual reality SDKs in PlayerSettings: ", VRC.Core.DebugLevel.All);
+            foreach(string s in sdkNames)
+            {
+                VRC.Core.Logger.Log("- " + s, VRC.Core.DebugLevel.All);
             }
 
             if(!EditorApplication.isPlaying)
             {
-#pragma warning disable 618
-                PlayerSettings.SetVirtualRealitySDKs(buildTargetGroup, sdkNames);
-#pragma warning restore 618
+
+                var loadersToAssign = new List<string>();
+                foreach (var sdkName in sdkNames)
+                {
+                    if (!sdkName.Equals("None"))
+                    {
+                        var sdkInfoIndex = xrSDKs.FindIndex(x => x.Name == sdkName);
+                        if (sdkInfoIndex == -1)
+                        {
+                            VRC.Core.Logger.LogError($"No SDK info found for SDK name '{sdkName}'");
+                        }
+                        else
+                        {
+                            loadersToAssign.Add(xrSDKs[sdkInfoIndex].LoaderType);
+                        }
+                    }
+                }
+                
+                var assignedLoaders = new bool[loadersToAssign.Count];
+                Array.Fill(assignedLoaders, false);
+
+                {
+                    Type xrGeneralSettingsPerBuildTargetType = typeof(XRGeneralSettingsPerBuildTarget);
+                    MethodInfo methodInfo = xrGeneralSettingsPerBuildTargetType.GetMethod("GetOrCreate",
+                        BindingFlags.Static | BindingFlags.NonPublic);
+
+                    XRGeneralSettingsPerBuildTarget settings = methodInfo?.Invoke(null, null) as XRGeneralSettingsPerBuildTarget;
+                    if(settings == null)
+                    {
+                        return;
+                    }
+
+                    if(!settings.HasManagerSettingsForBuildTarget(buildTargetGroup))
+                    {
+                        settings.CreateDefaultManagerSettingsForBuildTarget(buildTargetGroup);
+                    }
+                }
+                
+                var buildTargetSettings = XRGeneralSettingsPerBuildTarget.XRGeneralSettingsForBuildTarget(buildTargetGroup);
+                var pluginsSettings = buildTargetSettings != null ? buildTargetSettings.AssignedSettings : null;
+                var packages = XRPackageMetadataStore.GetAllPackageMetadataForBuildTarget(buildTargetGroup);
+                foreach (var package in packages)
+                {
+                    foreach (var loader in package.metadata.loaderMetadata)
+                    {
+                        int loaderIndex = loadersToAssign.IndexOf(loader.loaderType);
+                        if (loaderIndex != -1)
+                        {
+                            assignedLoaders[loaderIndex] = true;
+
+                            if (loadersThatNeedsRestart.Contains(loader.loaderType) && 
+                                !XRPackageMetadataStore.IsLoaderAssigned(loader.loaderType, buildTargetGroup))
+                            {
+                                // A loader change needs a reboot
+                                RequestRestart(loader.loaderType);
+                            }
+                            
+                            if (XRPackageMetadataStore.AssignLoader(pluginsSettings, loader.loaderType, buildTargetGroup))
+                            {
+                                VRC.Core.Logger.Log($"Assigned XR loader - {loader.loaderType} (buildTargetGroup: {buildTargetGroup})", VRC.Core.DebugLevel.All);
+                            }
+                        }
+                        else
+                        {
+                            if (loadersThatNeedsRestart.Contains(loader.loaderType) && 
+                                XRPackageMetadataStore.IsLoaderAssigned(loader.loaderType, buildTargetGroup))
+                            {
+                                // A loader change needs a reboot
+                                RequestRestart(loader.loaderType);
+                            }
+                            
+                            if (XRPackageMetadataStore.RemoveLoader(pluginsSettings, loader.loaderType, buildTargetGroup))
+                            {
+                                VRC.Core.Logger.Log($"Removed XR loader - {loader.loaderType} (buildTargetGroup: {buildTargetGroup})", VRC.Core.DebugLevel.All);
+                            }
+                        }
+                    }
+                }
+
+                for  (int i = 0; i < assignedLoaders.Length; ++i)
+                {
+                    if (!assignedLoaders[i])
+                    {
+                        VRC.Core.Logger.LogError($"Failed to assign loader '{loadersToAssign[i]}'. Ensure the plugin is configured for the project correctly.");
+
+                        // A loader fail could be from an xr package being added, a restart would help
+                        RequestRestart(loadersToAssign[i]);
+                    }
+                }
+            }
+        }
+        
+        public static bool HasXRPackageSymlinked(bool requiresOpenXR)
+        {
+            ListRequest openXRListRequest = UnityEditor.PackageManager.Client.List(true);
+            while (!openXRListRequest.IsCompleted)
+            {
+            }
+            
+            if (requiresOpenXR)
+            {
+                if (openXRListRequest.Result != null)
+                {
+                    if (openXRListRequest.Result.Any(x => x.name == "com.unity.xr.openxr"))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                if (openXRListRequest.Result != null)
+                {
+                    if (openXRListRequest.Result.Any(x => x.name == "com.unity.xr.oculus"))
+                    {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        private static void RequestRestart(string loader)
+        {
+            if (!Application.isBatchMode && !EditorPrefs.GetBool("PlatformSwitchRestart"))
+            {
+                EditorPrefs.SetBool("PlatformSwitchRestart", true);
+                EditorPrefs.SetString("PlatformSwitchVRSDK", "");
+                
+                for (int j = 0; j < xrSDKs.Count; j++)
+                {
+                    if (xrSDKs[j].LoaderType == loader)
+                    {
+                        EditorPrefs.SetString("PlatformSwitchVRSDK", xrSDKs[j].Name);
+                        break;
+                    }
+                }
             }
         }
 
@@ -560,13 +544,10 @@ namespace VRC.Editor
                     }
 
                     object settingValue = setting.Value;
-                    #if !VRC_CLIENT
                 if(setting.Key == "name")
                 {
                     settingValue = $"VRC {setting.Value}";
                 }
-                    #endif
-
                     switch(settingValue)
                     {
                         case null:
@@ -665,7 +646,6 @@ namespace VRC.Editor
                         }
                     }
 
-                    #if !VRC_CLIENT
                 string levelName = _graphicsPresets[index]["name"] as string;
                 if(Application.isMobilePlatform)
                 {
@@ -682,7 +662,6 @@ namespace VRC.Editor
                     }
                 }
 
-                    #endif
                     changedProperty = true;
                 }
             }
@@ -707,9 +686,7 @@ namespace VRC.Editor
                 return;
             }
 
-            #if !VRC_CLIENT
-                Debug.Log($"A quality setting was changed resetting to the default quality: {_graphicsPresets[defaultQuality]["name"]}.");
-            #endif
+            Debug.Log($"A quality setting was changed resetting to the default quality: {_graphicsPresets[defaultQuality]["name"]}.");
 
             qualitySettings.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.SaveAssets();
@@ -751,13 +728,6 @@ namespace VRC.Editor
                 isDirty = true;
             }
 
-            SerializedProperty legacyDeferred = graphicsManager.FindProperty("m_LegacyDeferred.m_Mode");
-            if (legacyDeferred.enumValueIndex != 1)
-            {
-                legacyDeferred.enumValueIndex = 1;
-                isDirty = true;
-            }
-
             SerializedProperty depthNormals = graphicsManager.FindProperty("m_DepthNormals.m_Mode");
             if (depthNormals.enumValueIndex != 1)
             {
@@ -785,75 +755,13 @@ namespace VRC.Editor
                 lensFlare.enumValueIndex = 1;
                 isDirty = true;
             }
-
-            #if ENV_SET_INCLUDED_SHADERS && VRC_CLIENT
-            // clear GraphicsSettings->Always Included Shaders - these cause a +5s app startup time increase on Quest.
-            // include Shader objects as resources instead
-            SerializedProperty alwaysIncluded = graphicsManager.FindProperty("m_AlwaysIncludedShaders");
-            alwaysIncluded.arraySize = 0;
-
-            #if ENV_SEARCH_FOR_SHADERS
-            Resources.LoadAll("", typeof(Shader));
-            System.Collections.Generic.List<Shader> foundShaders = Resources.FindObjectsOfTypeAll<Shader>()
-                .Where(s => { string name = s.name.ToLower(); return 0 == (s.hideFlags & HideFlags.DontSave); })
-                .GroupBy(s => s.name)
-                .Select(g => g.First())
-                .ToList();
-            #else
-            List<Shader> foundShaders = new List<Shader>();
-            #endif
-
-            foreach(string shader in ensureTheseShadersAreAvailable.OrderBy(s => s, StringComparer.Ordinal))
-            {
-                if(foundShaders.Any(s => s.name == shader))
-                {
-                    continue;
-                }
-
-                Shader namedShader = Shader.Find(shader);
-                if(namedShader != null)
-                {
-                    foundShaders.Add(namedShader);
-                }
-            }
-
-            foundShaders.Sort((s1, s2) => string.Compare(s1.name, s2.name, StringComparison.Ordinal));
-
-            // populate Resources list of "always included shaders"
-            ShaderAssetList alwaysIncludedShaders = AssetDatabase.LoadAssetAtPath<ShaderAssetList>("Assets/Resources/AlwaysIncludedShaders.asset");
-            if(alwaysIncludedShaders == null)
-            {
-                alwaysIncludedShaders = ScriptableObject.CreateInstance<ShaderAssetList>();
-                AssetDatabase.CreateAsset(alwaysIncludedShaders, "Assets/Resources/AlwaysIncludedShaders.asset");
-            }
-
-            bool anyMissing = false;
-            HashSet<Shader> alwaysIncludeShadersHashSet = new HashSet<Shader>(alwaysIncludedShaders.Shaders);
-            foundShaders.Sort((left, right) => string.CompareOrdinal(left.name, right.name));
-            foreach(Shader foundShader in foundShaders)
-            {
-                if(alwaysIncludeShadersHashSet.Contains(foundShader))
-                {
-                    continue;
-                }
-
-                anyMissing = true;
-                break;
-            }
-
-            if(anyMissing)
-            {
-                alwaysIncludedShaders.Shaders = foundShaders.ToArray();
-                EditorUtility.SetDirty(alwaysIncludedShaders);
-            }
-            #else
+            
             SerializedProperty alwaysIncluded = graphicsManager.FindProperty("m_AlwaysIncludedShaders");
             if (alwaysIncluded.arraySize != 0)
             {
                 alwaysIncluded.arraySize = 0;
                 isDirty = true;
             }
-            #endif
 
             SerializedProperty preloaded = graphicsManager.FindProperty("m_PreloadedShaders");
             if (preloaded.arraySize != 0)
@@ -1077,6 +985,58 @@ namespace VRC.Editor
             audioManagerSerializedObject.ApplyModifiedPropertiesWithoutUndo();
             AssetDatabase.SaveAssets();
         }
+        
+        private static void SetSpatializerPluginSettings()
+        {
+            string[] desktopGuids = AssetDatabase.FindAssets("AudioPluginOculusSpatializer");
+
+            var plugins = new List<PluginImporter>();
+            foreach (var guid in desktopGuids)
+            {
+                var importer = AssetImporter.GetAtPath(AssetDatabase.GUIDToAssetPath(guid)) as PluginImporter;
+                if (importer == null)
+                {
+                    continue;
+                }
+
+                if (importer.assetPath.Contains("com.vrchat.base"))
+                {
+                    plugins.Add(importer);
+                }
+            }
+
+            var shouldWarn = false;
+
+            foreach (var plugin in plugins)
+            {
+                var sO = new SerializedObject(plugin);
+                var overrideProp = sO.FindProperty("m_IsOverridable");
+                if (overrideProp.boolValue)
+                {
+                    shouldWarn = true;
+                }
+                overrideProp.boolValue = false;
+                sO.ApplyModifiedProperties();
+                plugin.SaveAndReimport();
+            }
+
+            if (shouldWarn)
+            {
+                if (!EditorUtility.DisplayDialog(
+                        "Spatializer Settings Updated", 
+                        "VRChat SDK detected incorrect Audio Spatializer settings and corrected them." +
+                        "\n\nFor the changes to fully apply - you need to restart your editor",
+                        "Restart Later",
+                        "Save and Restart",
+                        DialogOptOutDecisionType.ForThisMachine,
+                        "VRC.Editor.EnvConfig.ShowSpatializerApplyDialog")
+                   )
+                {
+                    EditorSceneManager.SaveOpenScenes();
+                    EditorApplication.OpenProject(Directory.GetCurrentDirectory());
+                }
+            }
+        }
 
         private static void SetPlayerSettings()
         {
@@ -1091,92 +1051,83 @@ namespace VRC.Editor
                 PlayerSettings.colorSpace = ColorSpace.Linear;
             #endif
 
-            #if !VRC_CLIENT // In client rely on platform-switcher
-                if (!EditorApplication.isPlaying)
-                {
-                #pragma warning disable 618
-                    PlayerSettings.SetVirtualRealitySupported(EditorUserBuildSettings.selectedBuildTargetGroup, true);
-                #pragma warning restore 618
-                }
-            #endif
-
-            #if UNITY_STANDALONE && !VRC_DISABLE_STANDALONE_GRAPHICS_JOBS
-            PlayerSettings.graphicsJobs = true;
-            #elif (UNITY_ANDROID || UNITY_IOS) && VRC_ENABLE_MOBILE_GRAPHICS_JOBS
+            if (!EditorApplication.isPlaying)
+            {
+            #pragma warning disable 618
+                PlayerSettings.SetVirtualRealitySupported(EditorUserBuildSettings.selectedBuildTargetGroup, true);
+            #pragma warning restore 618
+            }
+            
+            #if (UNITY_ANDROID || UNITY_IOS) && VRC_ENABLE_MOBILE_GRAPHICS_JOBS
             PlayerSettings.graphicsJobs = true;
             #else
             PlayerSettings.graphicsJobs = false;
             #endif
+
             PlayerSettings.gpuSkinning = true;
 
-            #if UNITY_2019_3_OR_NEWER
-                PlayerSettings.gcIncremental = true;
-            #endif
+            PlayerSettings.legacyClampBlendShapeWeights = true;
 
-            #if VRC_VR_WAVE
-                PlayerSettings.stereoRenderingPath = StereoRenderingPath.MultiPass;     // Need to use Multi-pass on Wave SDK otherwise mirrors break
-            #else
-                PlayerSettings.stereoRenderingPath = StereoRenderingPath.SinglePass;
-            #endif
+            PlayerSettings.gcIncremental = true;
 
-            #if UNITY_2018_4_OR_NEWER && !UNITY_2019_3_OR_NEWER
-                PlayerSettings.scriptingRuntimeVersion = ScriptingRuntimeVersion.Latest;
-            #endif
+            PlayerSettings.stereoRenderingPath = StereoRenderingPath.SinglePass;
+            
+            PlayerSettings.SetIl2CppCompilerConfiguration(EditorUserBuildSettings.selectedBuildTargetGroup, Il2CppCompilerConfiguration.Release);
+            
+            XRGeneralSettingsPerBuildTarget generalSettings;
+            if (!EditorBuildSettings.TryGetConfigObject(
+                    XRGeneralSettings.k_SettingsKey, out generalSettings))
+            { 
+                generalSettings = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
+                if(!AssetDatabase.IsValidFolder("Assets/XR"))
+                    AssetDatabase.CreateFolder("Assets", "XR");
+                AssetDatabase.CreateAsset(generalSettings, "Assets/XR/XRGeneralSettings.asset");
+                AssetDatabase.SaveAssets();
+                EditorBuildSettings.AddConfigObject(XRGeneralSettings.k_SettingsKey, generalSettings, true);
+            }
+            
+            if(!generalSettings.HasSettingsForBuildTarget(BuildTargetGroup.Standalone))
+                generalSettings.CreateDefaultSettingsForBuildTarget(BuildTargetGroup.Standalone);
+            
+            XRGeneralSettings settings = generalSettings.SettingsForBuildTarget(BuildTargetGroup.Standalone);
+            if(settings != null)
+            {
+                settings.InitManagerOnStart = false;
+                
+                if(settings.Manager != null)
+                {
+                    XRPackageMetadataStore.AssignLoader(settings.Manager, "Unity.XR.Oculus.OculusLoader",
+                    BuildTargetGroup.Standalone);
+                }
+            } 
+            
+            if(!generalSettings.HasSettingsForBuildTarget(BuildTargetGroup.Android)) 
+                generalSettings.CreateDefaultSettingsForBuildTarget(BuildTargetGroup.Android);
+            
+            settings = generalSettings.SettingsForBuildTarget(BuildTargetGroup.Android);
+            if (settings != null)
+            {
+                settings.InitManagerOnStart = false;
+                
+                if (settings.Manager != null)
+                {
+                    XRPackageMetadataStore.AssignLoader(settings.Manager, "Unity.XR.Oculus.OculusLoader",
+                        BuildTargetGroup.Android);
+                }
+            } 
 
-            #if ENABLE_LTO_BUILD
-                // On Desktop, LTO is enabled by Master builds automatically
-                PlayerSettings.SetIl2CppCompilerConfiguration(EditorUserBuildSettings.selectedBuildTargetGroup, Il2CppCompilerConfiguration.Master);
-            #else
-                PlayerSettings.SetIl2CppCompilerConfiguration(EditorUserBuildSettings.selectedBuildTargetGroup, Il2CppCompilerConfiguration.Release);
-            #endif
-
+            if(!generalSettings.HasSettingsForBuildTarget(BuildTargetGroup.iOS))
+                generalSettings.CreateDefaultSettingsForBuildTarget(BuildTargetGroup.iOS);
+            
+            settings = generalSettings.SettingsForBuildTarget(BuildTargetGroup.iOS);
+            if(settings != null)
+            {
+                settings.InitManagerOnStart = false;
+            } 
+            
             #if UNITY_ANDROID
                 PlayerSettings.Android.forceSDCardPermission = true; // Need access to SD card for saving images
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-
-                // #if !VRC_MOBILE
-                    // Unique for each -march=native:
-                    // Quest 1: -target-feature +v8a -fallow-half-arguments-and-returns
-                    // Quest 2: -target-feature +v8.2a -fallow-half-arguments-and-returns
-                    // Quest Pro: -target-feature +v8.2a
-
-                    // TODO: Quest 1 will be deprecated as of October 2023, so we can change to -march=armv8.2-a
-                    // compilerArgs.Add(-Xclang=-target-feature");
-                    // compilerArgs.Add(-Xclang=+v8.2a");
-                // #endif // !VRC_MOBILE
-
-                #if ENABLE_LTO_BUILD
-                    // On Android, LTO must be enabled manually
-                    // These flags are provided by unity's default build configuration in addition to LTO
-                    // Build flags must be provided at link-time, so we have to list them out manually
-                    compilerArgs.Add("-flto=thin");
-                    compilerArgs.Add("-ffp-contract=on");
-                    compilerArgs.Add("-fno-signed-char");
-                    compilerArgs.Add("-DNDEBUG");
-                    compilerArgs.Add("-fexceptions");
-                    compilerArgs.Add("-fno-limit-debug-info");
-                    compilerArgs.Add("-fdata-sections");
-                    compilerArgs.Add("-ffunction-sections");
-                    compilerArgs.Add("-Wa,--noexecstack");
-                    compilerArgs.Add("-fno-rtti");
-                    compilerArgs.Add("-fno-strict-aliasing");
-                    compilerArgs.Add("-fvisibility=hidden");
-                    compilerArgs.Add("-fvisibility-inlines-hidden");
-                    compilerArgs.Add("-fno-strict-overflow");
-                    compilerArgs.Add("-fno-addrsig");
-                    compilerArgs.Add("-fPIC");
-                    compilerArgs.Add("-target aarch64-linux-android21");
-                    compilerArgs.Add("-D__ANDROID_API__=21");
-                    compilerArgs.Add("-march=armv8-a");
-                    compilerArgs.Add("-Wno-unused-value");
-                    // Aggressive dead code stripping
-                    compilerArgs.Add("-Wl,--gc-sections");
-                    compilerArgs.Add("-Wl,--as-needed");
-                    // Generic optimizations
-                    linkerArgs.Add("-lto-O2");
-                    linkerArgs.AddRange(compilerArgs);
-                    compilerArgs.Add("-Os");
-                #endif // ENABLE_LTO_BUILD
 
                 if(PlayerSettings.Android.targetArchitectures.HasFlag(AndroidArchitecture.ARM64))
                 {
@@ -1192,29 +1143,15 @@ namespace VRC.Editor
                         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
                         PlayerSettings.Android.optimizedFramePacing = false;
                     #else
-                        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)32;
+                        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)33;
                         PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
-			PlayerSettings.Android.optimizedFramePacing = false;
+                        PlayerSettings.Android.optimizedFramePacing = false;
                     #endif
                 #else
                     PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
                     PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
                 #endif
-
-                #if VRC_VR_OCULUS
-                    #pragma warning disable CS0618
-                        PlayerSettings.VROculus.v2Signing = true;
-                    #pragma warning restore CS0618
-                #endif
             #endif // UNITY_ANDROID
-
-            #if UNITY_2021_3_OR_NEWER
-                // IL2CPP struggles with generics in unity 2021 and will not generate some code the UdonBehaviour needs
-                // A blog post is available for more information here:
-                // https://blog.unity.com/engine-platform/il2cpp-full-generic-sharing-in-unity-2022-1-beta
-                // increasing this setting will cause longer builds
-                il2CppAdditionalArgs.Add("--generic-virtual-method-iterations=2");
-            #endif
 
             il2CppArgs.Add($"--compiler-flags=\"{string.Join(" ", compilerArgs)}\"");
             il2CppArgs.Add($"--linker-flags=\"{string.Join(" ", linkerArgs)}\"");
@@ -1279,7 +1216,6 @@ namespace VRC.Editor
 
         private static void SetBuildTarget()
         {
-            #if !VRC_CLIENT
         VRC.Core.Logger.Log("Setting build target", VRC.Core.DebugLevel.All);
 
         BuildTarget target = UnityEditor.EditorUserBuildSettings.activeBuildTarget;
@@ -1292,7 +1228,6 @@ namespace VRC.Editor
             EditorUserBuildSettings.SwitchActiveBuildTarget(target);
             #pragma warning restore CS0618 // Type or member is obsolete
         }
-            #endif
         }
 
         private static void LoadEditorResources()
@@ -1346,16 +1281,19 @@ namespace VRC.Editor
                 { "shadowCascade4Split", new Vector3(0.06666667f, 0.19999999f, 0.46666664f) },
                 { "shadowmaskMode", 0 },
                 { "skinWeights", 4 },
-                { "textureQuality", 0 },
+                { "globalTextureMipmapLimit", 0 },
+                { "textureMipmapLimitSettings", Array.Empty<string>() },
                 { "anisotropicTextures", 2 },
                 { "antiAliasing", 0 },
                 { "softParticles", true },
                 { "softVegetation", true },
                 { "realtimeReflectionProbes", true },
                 { "billboardsFaceCameraPosition", true },
+                { "useLegacyDetailDistribution", true },
                 { "vSyncCount", 0 },
                 { "lodBias", 1f },
                 { "maximumLODLevel", 0 },
+                { "enableLODCrossFade", true },
                 { "streamingMipmapsActive", false },
                 { "streamingMipmapsAddAllCameras", true },
                 { "streamingMipmapsMemoryBudget", 512f },
@@ -1368,6 +1306,15 @@ namespace VRC.Editor
                 { "asyncUploadPersistentBuffer", true },
                 { "resolutionScalingFixedDPIFactor", 1f },
                 { "customRenderPipeline", null },
+                { "terrainQualityOverrides", 0 },
+                { "terrainPixelError", 1.0f },
+                { "terrainDetailDensityScale", 1.0f },
+                { "terrainBasemapDistance", 1000.0f },
+                { "terrainDetailDistance", 80.0f },
+                { "terrainTreeDistance", 5000.0f },
+                { "terrainBillboardStart", 50.0f },
+                { "terrainFadeLength", 5.0f },
+                { "terrainMaxTrees", 50 },
                 { "excludedTargetPlatforms", new[] { "Android" } }
             },
             new Dictionary<string, object>
@@ -1384,16 +1331,19 @@ namespace VRC.Editor
                 { "shadowCascade4Split", new Vector3(0.06666667f, 0.19999999f, 0.46666664f) },
                 { "shadowmaskMode", 0 },
                 { "skinWeights", 4 },
-                { "textureQuality", 0 },
+                { "globalTextureMipmapLimit", 0 },
+                { "textureMipmapLimitSettings", Array.Empty<string>() },
                 { "anisotropicTextures", 2 },
                 { "antiAliasing", 2 },
                 { "softParticles", true },
                 { "softVegetation", true },
                 { "realtimeReflectionProbes", true },
                 { "billboardsFaceCameraPosition", true },
+                { "useLegacyDetailDistribution", true },
                 { "vSyncCount", 0 },
                 { "lodBias", 1.5f },
                 { "maximumLODLevel", 0 },
+                { "enableLODCrossFade", true },
                 { "streamingMipmapsActive", false },
                 { "streamingMipmapsAddAllCameras", true },
                 { "streamingMipmapsMemoryBudget", 512f },
@@ -1406,6 +1356,15 @@ namespace VRC.Editor
                 { "asyncUploadPersistentBuffer", true },
                 { "resolutionScalingFixedDPIFactor", 1f },
                 { "customRenderPipeline", null },
+                { "terrainQualityOverrides", 0 },
+                { "terrainPixelError", 1.0f },
+                { "terrainDetailDensityScale", 1.0f },
+                { "terrainBasemapDistance", 1000.0f },
+                { "terrainDetailDistance", 80.0f },
+                { "terrainTreeDistance", 5000.0f },
+                { "terrainBillboardStart", 50.0f },
+                { "terrainFadeLength", 5.0f },
+                { "terrainMaxTrees", 50 },
                 { "excludedTargetPlatforms", new[] { "Android" } }
             },
             new Dictionary<string, object>
@@ -1422,16 +1381,19 @@ namespace VRC.Editor
                 { "shadowCascade4Split", new Vector3(0.06666667f, 0.19999999f, 0.46666664f) },
                 { "shadowmaskMode", 0 },
                 { "skinWeights", 4 },
-                { "textureQuality", 0 },
+                { "globalTextureMipmapLimit", 0 },
+                { "textureMipmapLimitSettings", Array.Empty<string>() },
                 { "anisotropicTextures", 2 },
                 { "antiAliasing", 4 },
                 { "softParticles", true },
                 { "softVegetation", true },
                 { "realtimeReflectionProbes", true },
                 { "billboardsFaceCameraPosition", true },
+                { "useLegacyDetailDistribution", true },
                 { "vSyncCount", 0 },
                 { "lodBias", 2f },
                 { "maximumLODLevel", 0 },
+                { "enableLODCrossFade", true },
                 { "streamingMipmapsActive", false },
                 { "streamingMipmapsAddAllCameras", true },
                 { "streamingMipmapsMemoryBudget", 512f },
@@ -1444,6 +1406,15 @@ namespace VRC.Editor
                 { "asyncUploadPersistentBuffer", true },
                 { "resolutionScalingFixedDPIFactor", 1f },
                 { "customRenderPipeline", null },
+                { "terrainQualityOverrides", 0 },
+                { "terrainPixelError", 1.0f },
+                { "terrainDetailDensityScale", 1.0f },
+                { "terrainBasemapDistance", 1000.0f },
+                { "terrainDetailDistance", 80.0f },
+                { "terrainTreeDistance", 5000.0f },
+                { "terrainBillboardStart", 50.0f },
+                { "terrainFadeLength", 5.0f },
+                { "terrainMaxTrees", 50 },
                 { "excludedTargetPlatforms", new[] { "Android" } }
             },
             new Dictionary<string, object>
@@ -1460,16 +1431,19 @@ namespace VRC.Editor
                 { "shadowCascade4Split", new Vector3(0.06666667f, 0.19999999f, 0.46666664f) },
                 { "shadowmaskMode", 0 },
                 { "skinWeights", 4 },
-                { "textureQuality", 0 },
+                { "globalTextureMipmapLimit", 0 },
+                { "textureMipmapLimitSettings", Array.Empty<string>() },
                 { "anisotropicTextures", 2 },
                 { "antiAliasing", 2 },
                 { "softParticles", false },
                 { "softVegetation", false },
                 { "realtimeReflectionProbes", false },
                 { "billboardsFaceCameraPosition", true },
+                { "useLegacyDetailDistribution", true },
                 { "vSyncCount", 0 },
                 { "lodBias", 2f },
                 { "maximumLODLevel", 0 },
+                { "enableLODCrossFade", true },
                 { "streamingMipmapsActive", false },
                 { "streamingMipmapsAddAllCameras", true },
                 { "streamingMipmapsMemoryBudget", 512f },
@@ -1482,6 +1456,15 @@ namespace VRC.Editor
                 { "asyncUploadPersistentBuffer", true },
                 { "resolutionScalingFixedDPIFactor", 1f },
                 { "customRenderPipeline", null },
+                { "terrainQualityOverrides", 0 },
+                { "terrainPixelError", 1.0f },
+                { "terrainDetailDensityScale", 1.0f },
+                { "terrainBasemapDistance", 1000.0f },
+                { "terrainDetailDistance", 80.0f },
+                { "terrainTreeDistance", 5000.0f },
+                { "terrainBillboardStart", 50.0f },
+                { "terrainFadeLength", 5.0f },
+                { "terrainMaxTrees", 50 },
                 { "excludedTargetPlatforms", new[] { "Standalone" } }
             }
         };

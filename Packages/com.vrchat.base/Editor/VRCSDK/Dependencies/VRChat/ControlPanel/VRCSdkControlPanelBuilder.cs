@@ -7,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Rendering.PostProcessing;
 using UnityEditor.SceneManagement;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
@@ -16,6 +17,7 @@ using VRC.Editor;
 using VRC.SDKBase.Validation.Performance;
 using Object = UnityEngine.Object;
 using VRC.SDKBase.Editor;
+using VRC.SDKBase;
 
 /// This file handles the Build tab of the SDK Panel
 /// It finds currently available builder via an attribute and a common interface, checks its validity and displays its UI
@@ -56,6 +58,8 @@ public partial class VRCSdkControlPanel : EditorWindow
     static Texture _perfIcon_Poor;
     static Texture _perfIcon_VeryPoor;
     static Texture _bannerImage;
+    
+    public const int MAX_SDK_TEXTURE_SIZE = 8192;
 
     public void ResetIssues()
     {
@@ -213,46 +217,39 @@ public partial class VRCSdkControlPanel : EditorWindow
         GUIStyle style = new GUIStyle("HelpBox");
         style.fixedWidth = (haveButtons ? (SdkWindowWidth - 110) : SdkWindowWidth - 20);
         float minHeight = 40;
-
-        try
+        
+        EditorGUILayout.BeginHorizontal();
+        if (icon != null)
         {
-            EditorGUILayout.BeginHorizontal();
-            if (icon != null)
-            {
-                GUIContent c = new GUIContent(message, icon);
-                float height = style.CalcHeight(c, style.fixedWidth);
-                GUILayout.Box(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
-            }
-            else
-            {
-                GUIContent c = new GUIContent(message);
-                float height = style.CalcHeight(c, style.fixedWidth);
-                Rect rt = GUILayoutUtility.GetRect(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
-                EditorGUI.HelpBox(rt, message, msgType);    // note: EditorGUILayout resulted in uneven button layout in this case
-            }
-
-            if (haveButtons)
-            {
-                EditorGUILayout.BeginVertical();
-                float buttonHeight = ((show == null || fix == null) ? minHeight : (minHeight * 0.5f));
-                if ((show != null) && GUILayout.Button("Select", GUILayout.Height(buttonHeight)))
-                    show();
-                if ((fix != null) && GUILayout.Button("Auto Fix", GUILayout.Height(buttonHeight)))
-                {
-                    fix();
-                    EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-                    CheckedForIssues = false;
-                    Repaint();
-                }
-                EditorGUILayout.EndVertical();
-            }
-
-            EditorGUILayout.EndHorizontal();
+            GUIContent c = new GUIContent(message, icon);
+            float height = style.CalcHeight(c, style.fixedWidth);
+            GUILayout.Box(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
         }
-        catch
+        else
         {
-            // mutes 'ArgumentException: Getting control 0's position in a group with only 0 controls when doing repaint'
+            GUIContent c = new GUIContent(message);
+            float height = style.CalcHeight(c, style.fixedWidth);
+            Rect rt = GUILayoutUtility.GetRect(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
+            EditorGUI.HelpBox(rt, message, msgType);    // note: EditorGUILayout resulted in uneven button layout in this case
         }
+
+        if (haveButtons)
+        {
+            EditorGUILayout.BeginVertical();
+            float buttonHeight = ((show == null || fix == null) ? minHeight : (minHeight * 0.5f));
+            if ((show != null) && GUILayout.Button("Select", GUILayout.Height(buttonHeight)))
+                show();
+            if ((fix != null) && GUILayout.Button("Auto Fix", GUILayout.Height(buttonHeight)))
+            {
+                fix();
+                EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+                CheckedForIssues = false;
+                Repaint();
+            }
+            EditorGUILayout.EndVertical();
+        }
+
+        EditorGUILayout.EndHorizontal();
     }
 
     public void OnGuiFixIssuesToBuildOrTest()
@@ -272,57 +269,64 @@ public partial class VRCSdkControlPanel : EditorWindow
 
     public void OnGUIShowIssues(Object subject = null)
     {
-        if (subject == null)
-            subject = this;
-
-        EditorGUI.BeginChangeCheck();
-
-        GUIStyle style = GUI.skin.GetStyle("HelpBox");
-
-        if (GUIErrors.ContainsKey(subject))
-            foreach (Issue error in GUIErrors[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                DrawIssueBox(MessageType.Error, null, error.issueText, error.showThisIssue, error.fixThisIssue);
-        if (GUIWarnings.ContainsKey(subject))
-            foreach (Issue error in GUIWarnings[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                DrawIssueBox(MessageType.Warning, null, error.issueText, error.showThisIssue, error.fixThisIssue);
-
-        if (GUIStats.ContainsKey(subject))
+        try
         {
-            foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.VeryPoor))
-                DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
+            if (subject == null)
+                subject = this;
 
-            foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Poor))
-                DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
+            EditorGUI.BeginChangeCheck();
 
-            foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Medium))
-                DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
+            GUIStyle style = GUI.skin.GetStyle("HelpBox");
 
-            foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Good || k.performanceRating == PerformanceRating.Excellent))
-                DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
-        }
+            if (GUIErrors.ContainsKey(subject))
+                foreach (Issue error in GUIErrors[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
+                    DrawIssueBox(MessageType.Error, null, error.issueText, error.showThisIssue, error.fixThisIssue);
+            if (GUIWarnings.ContainsKey(subject))
+                foreach (Issue error in GUIWarnings[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
+                    DrawIssueBox(MessageType.Warning, null, error.issueText, error.showThisIssue, error.fixThisIssue);
 
-        if (GUIInfos.ContainsKey(subject))
-            foreach (Issue error in GUIInfos[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                EditorGUILayout.HelpBox(error.issueText, MessageType.Info);
-        if (GUILinks.ContainsKey(subject))
-        {
-            EditorGUILayout.BeginVertical(style);
-            foreach (Issue error in GUILinks[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
+            if (GUIStats.ContainsKey(subject))
             {
-                var s = error.issueText.Split('\n');
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.Label(s[0]);
-                if (GUILayout.Button("Open Link", GUILayout.Width(100)))
-                    Application.OpenURL(s[1]);
-                EditorGUILayout.EndHorizontal();
-            }
-            EditorGUILayout.EndVertical();
-        }
+                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.VeryPoor))
+                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
 
-        if (EditorGUI.EndChangeCheck())
+                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Poor))
+                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
+
+                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Medium))
+                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
+
+                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Good || k.performanceRating == PerformanceRating.Excellent))
+                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
+            }
+
+            if (GUIInfos.ContainsKey(subject))
+                foreach (Issue error in GUIInfos[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
+                    EditorGUILayout.HelpBox(error.issueText, MessageType.Info);
+            if (GUILinks.ContainsKey(subject))
+            {
+                EditorGUILayout.BeginVertical(style);
+                foreach (Issue error in GUILinks[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
+                {
+                    var s = error.issueText.Split('\n');
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Label(s[0]);
+                    if (GUILayout.Button("Open Link", GUILayout.Width(100)))
+                        Application.OpenURL(s[1]);
+                    EditorGUILayout.EndHorizontal();
+                }
+                EditorGUILayout.EndVertical();
+            }
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                EditorUtility.SetDirty(subject);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+            }
+        }
+        catch (Exception)
         {
-            EditorUtility.SetDirty(subject);
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+            // Catches System.ArgumentException: Getting control 2's position in a group with only 2 controls when doing repaint
         }
     }
     
@@ -593,7 +597,8 @@ public partial class VRCSdkControlPanel : EditorWindow
                 var errorText = _descriptorErrorBlock.Q<Label>("descriptor-error-text");
                 
                 // if there is a builder discovered, let the builder create a more specific error message
-                if (_sdkBuilders.Length == 1)
+                // if there are two builders discovered, we check if they implement the same interfaces, which will indicate that they're the same kind of builder
+                if (_sdkBuilders.Length == 1 || (_sdkBuilders.Length == 2 && _sdkBuilders[0].GetType().GetInterfaces().SequenceEqual(_sdkBuilders[1].GetType().GetInterfaces())))
                 {
                     // only add the GUI if there is not already a GUI
                     if (builderErrorBlock.childCount != 0) return;
@@ -996,6 +1001,58 @@ public partial class VRCSdkControlPanel : EditorWindow
     public static bool HasSubstances(GameObject obj = null)
     {
         return (GetSubstanceObjects(obj, true) != null);
+    }
+
+    public static GameObject GetReferenceCameraObject()
+    {
+        var sceneDescriptor = FindObjectOfType<VRC_SceneDescriptor>();
+        if (sceneDescriptor == null) return null;
+
+        return sceneDescriptor.ReferenceCamera;
+    }
+
+    public static bool ReferenceCameraHasTAAEnabled()
+    {
+        var refCam = GetReferenceCameraObject();
+        if (refCam == null) return false;
+
+        var ppl = refCam.GetComponent<PostProcessLayer>();
+        if (ppl == null) return false;
+
+        return ppl.antialiasingMode == PostProcessLayer.Antialiasing.TemporalAntialiasing;
+    }
+
+    public static List<TextureImporter> GetOversizeTextureImporters(List<Renderer> renderers)
+    {
+        List<TextureImporter> badTextureImporters = new List<TextureImporter>();
+        List<Object> badTextures = new List<Object>();
+        foreach (Renderer r in renderers)
+        {
+            foreach (Material m in r.sharedMaterials)
+            {
+                if (!m)
+                    continue;
+                int[] texIDs = m.GetTexturePropertyNameIDs();
+                if (texIDs == null)
+                    continue;
+                foreach (int i in texIDs)
+                {
+                    Texture t = m.GetTexture(i);
+                    if (!t)
+                        continue;
+                    string path = AssetDatabase.GetAssetPath(t);
+                    if (string.IsNullOrEmpty(path))
+                        continue;
+                    TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                    if (importer != null && importer.maxTextureSize > MAX_SDK_TEXTURE_SIZE)
+                    {
+                        badTextureImporters.Add(importer);
+                        badTextures.Add(t);
+                    }
+                }
+            }
+        }
+        return badTextureImporters;
     }
 
     EditorWindow GetLightingWindow()

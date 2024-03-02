@@ -22,7 +22,9 @@ using VRC.Udon.Serialization.OdinSerializer;
 
 namespace VRC.Udon.Serialization.OdinSerializer
 {
+    using Utilities;
     using System;
+    using System.Collections;
     using System.Collections.Generic;
 
     /// <summary>
@@ -138,4 +140,94 @@ namespace VRC.Udon.Serialization.OdinSerializer
             }
         }
     }
+    #if false //vrc security patch
+    public class WeakListFormatter : WeakBaseFormatter
+    {
+        private readonly Serializer ElementSerializer;
+
+        public WeakListFormatter(Type serializedType) : base(serializedType)
+        {
+            var args = serializedType.GetArgumentsOfInheritedOpenGenericClass(typeof(List<>));
+            this.ElementSerializer = Serializer.Get(args[0]);
+        }
+
+        protected override object GetUninitializedObject()
+        {
+            return null;
+        }
+
+        protected override void DeserializeImplementation(ref object value, IDataReader reader)
+        {
+            string name;
+            var entry = reader.PeekEntry(out name);
+
+            if (entry == EntryType.StartOfArray)
+            {
+                try
+                {
+                    long length;
+                    reader.EnterArray(out length);
+                    value = Activator.CreateInstance(this.SerializedType, (int)length);
+                    IList list = (IList)value;
+
+                    // We must remember to register the list reference ourselves, since we return null in GetUninitializedObject
+                    this.RegisterReferenceID(value, reader);
+
+                    // There aren't any OnDeserializing callbacks on lists.
+                    // Hence we don't invoke this.InvokeOnDeserializingCallbacks(value, reader, context);
+                    for (int i = 0; i < length; i++)
+                    {
+                        if (reader.PeekEntry(out name) == EntryType.EndOfArray)
+                        {
+                            reader.Context.Config.DebugContext.LogError("Reached end of array after " + i + " elements, when " + length + " elements were expected.");
+                            break;
+                        }
+
+                        list.Add(ElementSerializer.ReadValueWeak(reader));
+
+                        if (reader.IsInArrayNode == false)
+                        {
+                            // Something has gone wrong
+                            reader.Context.Config.DebugContext.LogError("Reading array went wrong. Data dump: " + reader.GetDataDump());
+                            break;
+                        }
+                    }
+                }
+                finally
+                {
+                    reader.ExitArray();
+                }
+            }
+            else
+            {
+                reader.SkipEntry();
+            }
+        }
+
+        protected override void SerializeImplementation(ref object value, IDataWriter writer)
+        {
+            try
+            {
+                IList list = (IList)value;
+                writer.BeginArrayNode(list.Count);
+
+                for (int i = 0; i < list.Count; i++)
+                {
+                    try
+                    {
+                        ElementSerializer.WriteValueWeak(list[i], writer);
+                    }
+                    catch (Exception ex)
+                    {
+                        writer.Context.Config.DebugContext.LogException(ex);
+                    }
+                }
+            }
+            finally
+            {
+                writer.EndArrayNode();
+            }
+        }
+    }
+    #endif
 }

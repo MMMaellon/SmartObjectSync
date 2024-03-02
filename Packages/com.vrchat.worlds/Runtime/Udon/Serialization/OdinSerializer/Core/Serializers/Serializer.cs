@@ -24,6 +24,11 @@ namespace VRC.Udon.Serialization.OdinSerializer
     using System.Diagnostics;
     using System.Reflection;
 
+
+// System.ExecutionEngineException is marked obsolete in .NET 4.6
+// That's all very good for .NET, but Unity still uses it!
+#pragma warning disable 618
+
     /// <summary>
     /// Serializes and deserializes a given type, and wraps serialization and deserialization with all the proper calls to free formatters from tedious boilerplate.
     /// <para />
@@ -58,7 +63,8 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
         private static readonly object LOCK = new object();
 
-        private static readonly Dictionary<Type, Serializer> ReaderWriterCache = new Dictionary<Type, Serializer>(FastTypeComparer.Instance);
+        private static readonly Dictionary<Type, Serializer> Weak_ReaderWriterCache = new Dictionary<Type, Serializer>(FastTypeComparer.Instance);
+        private static readonly Dictionary<Type, Serializer> Strong_ReaderWriterCache = new Dictionary<Type, Serializer>(FastTypeComparer.Instance);
 
 #if UNITY_EDITOR
 
@@ -107,7 +113,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// <returns>A <see cref="Serializer"/> for type T.</returns>
         public static Serializer<T> Get<T>()
         {
-            return (Serializer<T>)Serializer.Get(typeof(T));
+            return (Serializer<T>)Serializer.Get(typeof(T), false);
         }
 
         /// <summary>
@@ -118,6 +124,11 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// <exception cref="System.ArgumentNullException">The type argument is null.</exception>
         public static Serializer Get(Type type)
         {
+            return Get(type, true);
+        }
+
+        private static Serializer Get(Type type, bool allowWeakFallback)
+        {
             if (type == null)
             {
                 throw new ArgumentNullException();
@@ -125,12 +136,14 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
             Serializer result;
 
+            var cache = allowWeakFallback ? Weak_ReaderWriterCache : Strong_ReaderWriterCache;
+
             lock (LOCK)
             {
-                if (ReaderWriterCache.TryGetValue(type, out result) == false)
+                if (cache.TryGetValue(type, out result) == false)
                 {
-                    result = Create(type);
-                    ReaderWriterCache.Add(type, result);
+                    result = Create(type, allowWeakFallback);
+                    cache.Add(type, result);
                 }
             }
 
@@ -162,8 +175,10 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// <param name="writer">The writer to use.</param>
         public abstract void WriteValueWeak(string name, object value, IDataWriter writer);
 
-        private static Serializer Create(Type type)
+        private static Serializer Create(Type type, bool allowWeakfallback)
         {
+            ExecutionEngineException aotEx = null;
+
             try
             {
                 Type resultType = null;
@@ -190,15 +205,11 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
                 return (Serializer)Activator.CreateInstance(resultType);
             }
-            // System.ExecutionEngineException is marked obsolete in .NET 4.6
-            // That's all very good for .NET, but Unity still uses it!
-#pragma warning disable 618
             catch (TargetInvocationException ex)
             {
                 if (ex.GetBaseException() is ExecutionEngineException)
                 {
-                    LogAOTError(type, ex.GetBaseException() as ExecutionEngineException);
-                    return null;
+                    aotEx = ex.GetBaseException() as ExecutionEngineException;
                 }
                 else
                 {
@@ -209,8 +220,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
             {
                 if (ex.GetBaseException() is ExecutionEngineException)
                 {
-                    LogAOTError(type, ex.GetBaseException() as ExecutionEngineException);
-                    return null;
+                    aotEx = ex.GetBaseException() as ExecutionEngineException;
                 }
                 else
                 {
@@ -219,9 +229,11 @@ namespace VRC.Udon.Serialization.OdinSerializer
             }
             catch (ExecutionEngineException ex)
             {
-                LogAOTError(type, ex);
-                return null;
+                aotEx = ex;
             }
+
+            LogAOTError(type, aotEx);
+            throw aotEx;
         }
 
         private static void LogAOTError(Type type, ExecutionEngineException ex)
@@ -234,8 +246,6 @@ namespace VRC.Udon.Serialization.OdinSerializer
             throw new SerializationAbortException("AOT serializer was missing for type '" + type.GetNiceFullName() + "'.");
         }
     }
-
-#pragma warning restore 618
 
     /// <summary>
     /// Serializes and deserializes the type <see cref="T"/>, and wraps serialization and deserialization with all the proper calls to free formatters from tedious boilerplate.

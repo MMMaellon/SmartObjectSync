@@ -21,6 +21,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     static string clientInstallPath;
     static bool signingIn = false;
     static string error = null;
+    private const string UNITY_UPGRADE_PROMPT_URL = "https://creators.vrchat.com/sdk/upgrade/unity-2022";
 
     public static bool FutureProofPublishEnabled { get { return UnityEditor.EditorPrefs.GetBool("futureProofPublish", DefaultFutureProofPublishEnabled); } }
     //public static bool DefaultFutureProofPublishEnabled { get { return !SDKClientUtilities.IsInternalSDK(); } }
@@ -177,7 +178,6 @@ public partial class VRCSdkControlPanel : EditorWindow
                     VRC.Tools.ClearCookies();
                     APIUser.Logout();
                     ClearContent();
-                    VRC_EditorTools.GetClearClientMethod().Invoke(null, null);
                 }
                 return !signingIn;
             }
@@ -244,8 +244,30 @@ public partial class VRCSdkControlPanel : EditorWindow
                     EditorGUILayout.LabelField("Could not fetch remote config.");
                 else if (Application.unityVersion != sdkUnityVersion)
                 {
-                    EditorGUILayout.LabelField("Unity Version", EditorStyles.boldLabel);
-                    EditorGUILayout.LabelField("Wrong Unity version. Please use " + sdkUnityVersion);
+                    var currentVersion = UnityVersion.Parse(Application.unityVersion).major;
+                    var sdkVersion = UnityVersion.Parse(sdkUnityVersion).major;
+                    if (currentVersion < sdkVersion && sdkVersion == 2022)
+                    {
+                        using (new EditorGUILayout.VerticalScope(unityUpgradeBannerStyle))
+                        {
+                            EditorGUILayout.Space(115);
+                            using (new EditorGUILayout.HorizontalScope())
+                            {
+                                EditorGUILayout.Space();
+                                if (GUILayout.Button("Learn More"))
+                                {
+                                    Application.OpenURL(UNITY_UPGRADE_PROMPT_URL);
+                                }
+                                EditorGUILayout.Space();
+                            }
+                            EditorGUILayout.Space(5);
+                        }
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField("Unity Version", EditorStyles.boldLabel);
+                        EditorGUILayout.LabelField("Wrong Unity version. Please use " + sdkUnityVersion);
+                    }
                 }
             }
         }

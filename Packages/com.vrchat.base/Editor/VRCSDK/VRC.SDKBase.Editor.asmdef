@@ -1,10 +1,14 @@
 {
     "name": "VRC.SDKBase.Editor",
+    "rootNamespace": "",
     "references": [
         "VRC.SDKBase",
         "VRC.Enums.Validation.Performance",
         "UniTask",
-        "Unity.Postprocessing.Runtime"
+        "Unity.Postprocessing.Runtime",
+        "Unity.XR.Management",
+        "Unity.XR.Management.Editor",
+        "Unity.XR.Oculus"
     ],
     "includePlatforms": [
         "Editor"

@@ -11,6 +11,7 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
         private readonly Button _graphHighlightFlow;
         private readonly UdonGraphStatus _graphStatus;
         private float _sidebarOffset = 238f;
+        private VisualElement _sidebarSpacer;
 
         private readonly StyleSheet styles = (StyleSheet)Resources.Load("UdonToolbarStyle");
 
@@ -24,16 +25,15 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
             {
                 graphView.styleSheets.Add(styles);
             }
-
-            VisualElement updateOrderField = new VisualElement();
-            updateOrderField.AddToClassList("updateOrderField");
-            updateOrderField.Add(new Label("UpdateOrder"));
+            
             bool hasValue = graphView.graphProgramAsset != null && graphView.graphProgramAsset.graphData != null;
             _updateOrderIntField = new IntegerField
             {
                 name = "UpdateOrderIntegerField",
-                value = hasValue ? graphView.graphProgramAsset.graphData.updateOrder : 0,
+                label = "Update Order",
+                value = hasValue ? graphView.graphProgramAsset.graphData.updateOrder : 0
             };
+            _updateOrderIntField.AddToClassList("updateOrderField");
 
             _updateOrderIntField.RegisterValueChangedCallback(e =>
             {
@@ -43,12 +43,17 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
                 AssetDatabase.SaveAssets();
             });
             _updateOrderIntField.isDelayed = true;
-            updateOrderField.Add(_updateOrderIntField);
             var leftSide = new VisualElement();
+
+            _sidebarSpacer = new VisualElement();
+            _sidebarSpacer.AddToClassList("toolbarSpacer");
+            Add(_sidebarSpacer);
+            
             Add(leftSide);
-            leftSide.Add(updateOrderField);
+            leftSide.Add(_updateOrderIntField);
 
             var rightSide = new VisualElement();
+            rightSide.AddToClassList("toolbarRightSide");
 
             _graphHighlightFlow = new Button(() =>
             {
@@ -105,7 +110,7 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
         private void OnSidebarResize(object sender, MouseMoveEvent evt)
         {
             _sidebarOffset = evt.mousePosition.x + 8f;
-            contentContainer.style.paddingLeft = new StyleLength(_sidebarOffset);
+            _sidebarSpacer.style.width = new StyleLength(_sidebarOffset);
         }
     }
 }

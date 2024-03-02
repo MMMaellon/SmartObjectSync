@@ -36,7 +36,24 @@ namespace VRC.Udon.Serialization.OdinSerializer
             if ((step == FormatterLocationStep.BeforeRegisteredFormatters && type.IsDefined<AlwaysFormatsSelfAttribute>())
                 || step == FormatterLocationStep.AfterRegisteredFormatters)
             {
+                #if false //vrc security patch 
+                try
+                {
+                    formatter = (IFormatter)Activator.CreateInstance(typeof(SelfFormatterFormatter<>).MakeGenericType(type));
+                }
+                catch (Exception ex)
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    if (allowWeakFallbackFormatters && (ex is ExecutionEngineException || ex.GetBaseException() is ExecutionEngineException))
+#pragma warning restore CS0618 // Type or member is obsolete
+                    {
+                        formatter = new WeakSelfFormatterFormatter(type);
+                    }
+                    else throw;
+                }
+                #endif
                 formatter = (IFormatter)Activator.CreateInstance(typeof(SelfFormatterFormatter<>).MakeGenericType(type));
+
                 return true;
             }
 

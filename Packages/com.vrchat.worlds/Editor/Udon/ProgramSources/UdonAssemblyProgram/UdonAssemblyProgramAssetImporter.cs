@@ -1,16 +1,16 @@
 ﻿using System.IO;
 using JetBrains.Annotations;
 using UnityEditor;
-using UnityEditor.Experimental.AssetImporters;
+
 using UnityEngine;
 
 namespace VRC.Udon.Editor.ProgramSources
 {
-    [ScriptedImporter(1, "uasm")]
+    [UnityEditor.AssetImporters.ScriptedImporter(1, "uasm")]
     [UsedImplicitly]
-    public class UdonAssemblyProgramAssetImporter : ScriptedImporter
+    public class UdonAssemblyProgramAssetImporter : UnityEditor.AssetImporters.ScriptedImporter
     {
-        public override void OnImportAsset(AssetImportContext ctx)
+        public override void OnImportAsset(UnityEditor.AssetImporters.AssetImportContext ctx)
         {
             UdonAssemblyProgramAsset udonAssemblyProgramAsset = ScriptableObject.CreateInstance<UdonAssemblyProgramAsset>();
             SerializedObject serializedUdonAssemblyProgramAsset = new SerializedObject(udonAssemblyProgramAsset);

@@ -37,6 +37,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// The reader's or writer's serialization binder.
         /// </value>
         [Obsolete("Use the Binder member on the writer's SerializationContext/DeserializationContext instead.", error: false)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public TwoWaySerializationBinder Binder
         {
             get
@@ -81,6 +82,14 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// The current node depth.
         /// </value>
         protected int NodeDepth { get { return this.nodesLength; } }
+
+        /// <summary>
+        /// Gets the current nodes array. The amount of nodes contained in it is stored in the <see cref="NodeDepth"/> property. The remainder of the array's length is buffer space.
+        /// </summary>
+        /// <value>
+        /// The current node array.
+        /// </value>
+        protected NodeInfo[] NodesArray { get { return this.nodes; } }
 
         /// <summary>
         /// Gets the current node, or <see cref="NodeInfo.Empty"/> if there is no current node.

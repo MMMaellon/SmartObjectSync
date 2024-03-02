@@ -38,6 +38,8 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
         private bool scanning;
         private bool allowRegisteringScannedTypes;
         private HashSet<Type> seenSerializedTypes = new HashSet<Type>();
+        private HashSet<string> scannedPathsNoDependencies = new HashSet<string>();
+        private HashSet<string> scannedPathsWithDependencies = new HashSet<string>();
 
         private static System.Diagnostics.Stopwatch smartProgressBarWatch = System.Diagnostics.Stopwatch.StartNew();
         private static int smartProgressBarDisplaysSinceLastUpdate = 0;
@@ -51,6 +53,8 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
             allowRegisteringScannedTypes = false;
 
             this.seenSerializedTypes.Clear();
+            this.scannedPathsNoDependencies.Clear();
+            this.scannedPathsWithDependencies.Clear();
 
             FormatterLocator.OnLocatedEmittableFormatterForType += this.OnLocatedEmitType;
             FormatterLocator.OnLocatedFormatter += this.OnLocatedFormatter;
@@ -291,6 +295,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
                 }
 
                 var resourcesPathsSet = new HashSet<string>();
+
                 for (int i = 0; i < resourcesPaths.Count; i++)
                 {
                     var resourcesPath = resourcesPaths[i];
@@ -319,7 +324,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
                             Debug.LogException(ex, resource);
                             continue;
                         }
-                }
+                    }
                 }
 
                 string[] resourcePaths = resourcesPathsSet.ToArray();
@@ -329,19 +334,19 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
                     if (resourcePaths[i] == null) continue;
 
                     try
-                {
-                        if (showProgressBar && DisplaySmartUpdatingCancellableProgressBar("Scanning resource " + i + " for AOT support", resourcePaths[i], (float)i / resourcePaths.Length))
                     {
-                        return false;
-                    }
+                        if (showProgressBar && DisplaySmartUpdatingCancellableProgressBar("Scanning resource " + i + " for AOT support", resourcePaths[i], (float)i / resourcePaths.Length))
+                        {
+                            return false;
+                        }
 
                         var assetPath = resourcePaths[i];
 
-                    // Exclude editor-only resources
-                    if (assetPath.ToLower().Contains("/editor/")) continue;
+                        // Exclude editor-only resources
+                        if (assetPath.ToLower().Contains("/editor/")) continue;
 
-                    this.ScanAsset(assetPath, includeAssetDependencies: includeResourceDependencies);
-                }
+                        this.ScanAsset(assetPath, includeAssetDependencies: includeResourceDependencies);
+                    }
                     catch (MissingReferenceException ex)
                     {
                         Debug.LogError("A resource '" + resourcePaths[i] + "' threw a missing reference exception when scanning. Skipping resource and continuing scan.");
@@ -437,7 +442,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
                             if ((go.hideFlags & HideFlags.DontSaveInBuild) == 0)
                             {
 #if VRC_CLIENT
-                                using (go.GetComponentsPooled(out IReadOnlyList<ISerializationCallbackReceiver> components))
+                                using (go.GetComponentsPooled(out List<ISerializationCallbackReceiver> components))
 #else
                                 ISerializationCallbackReceiver[] components = go.GetComponents<ISerializationCallbackReceiver>();
 #endif
@@ -550,6 +555,20 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
 
         public bool ScanAsset(string assetPath, bool includeAssetDependencies)
         {
+            if (includeAssetDependencies)
+            {
+                if (this.scannedPathsWithDependencies.Contains(assetPath)) return true; // Already scanned this asset
+
+                this.scannedPathsWithDependencies.Add(assetPath);
+                this.scannedPathsNoDependencies.Add(assetPath);
+            }
+            else
+            {
+                if (this.scannedPathsNoDependencies.Contains(assetPath)) return true; // Already scanned this asset
+
+                this.scannedPathsNoDependencies.Add(assetPath);
+            }
+
             if (assetPath.EndsWith(".unity"))
             {
                 return this.ScanScenes(new string[] { assetPath }, includeAssetDependencies, false);
@@ -557,7 +576,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
 
             if (!(assetPath.EndsWith(".asset") || assetPath.EndsWith(".prefab")))
             {
-                // ScanAsset can only scan .asset and .prefab assets.
+                // ScanAsset can only scan .unity, .asset and .prefab assets.
                 return false;
             }
 
@@ -665,7 +684,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Editor
             this.RegisterType(type);
         }
 
-        private static bool AllowRegisterType(Type type)
+        public static bool AllowRegisterType(Type type)
         {
             if (IsEditorOnlyAssembly(type.Assembly))
                 return false;

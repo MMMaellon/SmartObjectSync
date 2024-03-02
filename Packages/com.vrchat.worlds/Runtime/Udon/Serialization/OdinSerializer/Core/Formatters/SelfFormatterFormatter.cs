@@ -18,6 +18,8 @@
 
 namespace VRC.Udon.Serialization.OdinSerializer
 {
+    using System;
+
     /// <summary>
     /// Formatter for types that implement the <see cref="ISelfFormatter"/> interface.
     /// </summary>
@@ -41,4 +43,29 @@ namespace VRC.Udon.Serialization.OdinSerializer
             value.Serialize(writer);
         }
     }
+    
+    #if false //vrc security patch
+    public sealed class WeakSelfFormatterFormatter : WeakBaseFormatter
+    {
+        public WeakSelfFormatterFormatter(Type serializedType) : base(serializedType)
+        {
+        }
+
+        /// <summary>
+        /// Calls <see cref="ISelfFormatter.Deserialize" />  on the value to deserialize.
+        /// </summary>
+        protected override void DeserializeImplementation(ref object value, IDataReader reader)
+        {
+            ((ISelfFormatter)value).Deserialize(reader);
+        }
+
+        /// <summary>
+        /// Calls <see cref="ISelfFormatter.Serialize" />  on the value to deserialize.
+        /// </summary>
+        protected override void SerializeImplementation(ref object value, IDataWriter writer)
+        {
+            ((ISelfFormatter)value).Serialize(writer);
+        }
+    }
+    #endif
 }

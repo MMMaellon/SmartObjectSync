@@ -34,15 +34,18 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
     public static class FormatterLocator
     {
-        private static readonly object LOCK = new object();
+        private static readonly object StrongFormatters_LOCK = new object();
+        private static readonly object WeakFormatters_LOCK = new object();
 
         private static readonly Dictionary<Type, IFormatter> FormatterInstances = new Dictionary<Type, IFormatter>(FastTypeComparer.Instance);
-        private static readonly DoubleLookupDictionary<Type, ISerializationPolicy, IFormatter> TypeFormatterMap = new DoubleLookupDictionary<Type, ISerializationPolicy, IFormatter>(FastTypeComparer.Instance, ReferenceEqualityComparer<ISerializationPolicy>.Default);
+        private static readonly DoubleLookupDictionary<Type, ISerializationPolicy, IFormatter> StrongTypeFormatterMap = new DoubleLookupDictionary<Type, ISerializationPolicy, IFormatter>(FastTypeComparer.Instance, ReferenceEqualityComparer<ISerializationPolicy>.Default);
+        private static readonly DoubleLookupDictionary<Type, ISerializationPolicy, IFormatter> WeakTypeFormatterMap = new DoubleLookupDictionary<Type, ISerializationPolicy, IFormatter>(FastTypeComparer.Instance, ReferenceEqualityComparer<ISerializationPolicy>.Default);
 
         private struct FormatterInfo
         {
             public Type FormatterType;
             public Type TargetType;
+            public Type WeakFallbackType;
             public bool AskIfCanFormatTypes;
             public int Priority;
         }
@@ -205,6 +208,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// This can be used to hook into and extend the serialization system's formatter resolution logic.
         /// </summary>
         [Obsolete("Use the new IFormatterLocator interface instead, and register your custom locator with the RegisterFormatterLocator assembly attribute.", true)]
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static event Func<Type, IFormatter> FormatterResolve
         {
             add { throw new NotSupportedException(); }
@@ -235,6 +239,8 @@ namespace VRC.Udon.Serialization.OdinSerializer
         /// <exception cref="System.ArgumentNullException">The type argument is null.</exception>
         public static IFormatter GetFormatter(Type type, ISerializationPolicy policy)
         {
+            IFormatter result;
+
             if (type == null)
             {
                 throw new ArgumentNullException("type");
@@ -245,11 +251,12 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 policy = SerializationPolicies.Strict;
             }
 
-            IFormatter result;
+            var lockObj = StrongFormatters_LOCK;
+            var formatterMap = StrongTypeFormatterMap;
 
-            lock (LOCK)
+            lock (lockObj)
             {
-                if (TypeFormatterMap.TryGetInnerValue(type, policy, out result) == false)
+                if (formatterMap.TryGetInnerValue(type, policy, out result) == false)
                 {
                     // System.ExecutionEngineException is marked obsolete in .NET 4.6.
                     // That's all very good for .NET, but Unity still uses it, and that means we use it as well!
@@ -285,7 +292,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
                         LogAOTError(type, ex);
                     }
 
-                    TypeFormatterMap.AddInner(type, policy, result);
+                    formatterMap.AddInner(type, policy, result);
 #pragma warning restore 618
                 }
             }
@@ -325,7 +332,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 "and ADD THEM MANUALLY): \n\n" + string.Join("\n", types) + "\n\nIF ALL THE TYPES ARE IN THE SUPPORT LIST AND YOU STILL GET THIS ERROR, PLEASE REPORT AN ISSUE." +
                 "The exception contained the following message: \n" + ex.Message);
 
-            throw new SerializationAbortException("AOT formatter support was missing for type '" + type.GetNiceFullName() + "'.");
+            throw new SerializationAbortException("AOT formatter support was missing for type '" + type.GetNiceFullName() + "'.", ex);
         }
 
         private static IEnumerable<string> GetAllPossibleMissingAOTTypes(Type type)
@@ -513,6 +520,8 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 var info = FormatterInfos[i];
 
                 Type formatterType = null;
+                Type weakFallbackType = null;
+                Type[] genericFormatterArgs = null;
 
                 if (type == info.TargetType)
                 {
@@ -524,7 +533,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
                     if (info.FormatterType.TryInferGenericParameters(out inferredArgs, type))
                     {
-                        formatterType = info.FormatterType.GetGenericTypeDefinition().MakeGenericType(inferredArgs);
+                        genericFormatterArgs = inferredArgs;
                     }
                 }
                 else if (type.IsGenericType && info.FormatterType.IsGenericType && info.TargetType.IsGenericType && type.GetGenericTypeDefinition() == info.TargetType.GetGenericTypeDefinition())
@@ -533,13 +542,70 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
                     if (info.FormatterType.AreGenericConstraintsSatisfiedBy(args))
                     {
-                        formatterType = info.FormatterType.GetGenericTypeDefinition().MakeGenericType(args);
+                        genericFormatterArgs = args;
                     }
+                }
+
+                if (formatterType == null && genericFormatterArgs != null)
+                {
+                    formatterType = info.FormatterType.GetGenericTypeDefinition().MakeGenericType(genericFormatterArgs);
+                    weakFallbackType = info.WeakFallbackType;
                 }
 
                 if (formatterType != null)
                 {
-                    var instance = GetFormatterInstance(formatterType);
+                    
+                    #if false //vrc security patch
+                    IFormatter instance = null;
+
+                    bool aotError = false;
+                    Exception aotEx = null;
+
+                    try
+                    {
+                        instance = GetFormatterInstance(formatterType);
+                    }
+#pragma warning disable 618
+                    catch (TargetInvocationException ex)
+                    {
+                        aotError = true;
+                        aotEx = ex;
+                    }
+                    catch (TypeInitializationException ex)
+                    {
+                        aotError = true;
+                        aotEx = ex;
+                    }
+                    catch (ExecutionEngineException ex)
+                    {
+                        aotError = true;
+                        aotEx = ex;
+                    }
+#pragma warning restore 618
+
+                    if (aotError && !EmitUtilities.CanEmit && allowWeakFormatters)
+                    {
+                        if (weakFallbackType != null)
+                        {
+                            instance = (IFormatter)Activator.CreateInstance(weakFallbackType, type);
+                        }
+
+                        if (instance == null)
+                        {
+                            string argsStr = "";
+
+                            for (int j = 0; j < genericFormatterArgs.Length; j++)
+                            {
+                                if (j > 0) argsStr = argsStr + ", ";
+                                argsStr = argsStr + genericFormatterArgs[j].GetNiceFullName();
+                            }
+
+                            Debug.LogError("No AOT support was generated for serialization formatter type '" + info.FormatterType.GetNiceFullName() + "' for the generic arguments <" + argsStr + ">, and no weak fallback formatter was specified.");
+                            throw aotEx;
+                        }
+                    }
+                    #endif
+                    IFormatter instance = GetFormatterInstance(formatterType);
 
                     if (instance == null) continue;
 

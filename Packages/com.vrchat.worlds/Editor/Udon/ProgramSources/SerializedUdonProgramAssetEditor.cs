@@ -48,7 +48,7 @@ namespace VRC.Udon.Editor.ProgramSources
                 {
                     SerializedUdonProgramAsset serializedUdonProgramAsset = (SerializedUdonProgramAsset)target;
                     IUdonProgram udonProgram = serializedUdonProgramAsset.RetrieveProgram();
-                    byte[] serializedBytes = SerializationUtility.SerializeValue(udonProgram, DataFormat.JSON, out List<UnityEngine.Object> _);
+                    byte[] serializedBytes = Serialization.OdinSerializer.SerializationUtility.SerializeValue(udonProgram, DataFormat.JSON, out List<UnityEngine.Object> _);
                     EditorGUILayout.TextArea(System.Text.Encoding.UTF8.GetString(serializedBytes));
                 }
             }

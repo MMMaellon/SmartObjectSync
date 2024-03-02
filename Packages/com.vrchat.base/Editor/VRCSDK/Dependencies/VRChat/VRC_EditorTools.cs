@@ -9,7 +9,9 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine.Rendering;
+#if !VRC_CLIENT
 using VRC.SDKBase.Editor.Api;
+#endif
 using File = UnityEngine.Windows.File;
 using Object = UnityEngine.Object;
 #if POST_PROCESSING_INCLUDED
@@ -463,7 +465,7 @@ namespace VRC.SDKBase
             for (int idx = 0; idx < property.arraySize; ++idx)
                 property.GetArrayElementAtIndex(idx).intValue = (int)bytes[idx];
         }
-
+#if !VRC_CLIENT
         internal static string CropImage(string sourcePath, float width, float height, bool centerCrop = true, bool forceLinear = false, bool forceGamma = false)
         {
             var bytes = File.ReadAllBytes(sourcePath);
@@ -592,11 +594,6 @@ namespace VRC.SDKBase
             return typeof(VRCSdkControlPanel).GetMethod("SetPanelUploading", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-        internal static MethodInfo GetClearClientMethod()
-        {
-            return typeof(VRCApi).GetMethod("ClearClient", BindingFlags.NonPublic | BindingFlags.Static);
-        }
-
         internal static void ToggleSdkTabsEnabled(VRCSdkControlPanel panel, bool value)
         {
             var tabsProp =
@@ -609,7 +606,7 @@ namespace VRC.SDKBase
             Assembly.GetAssembly(typeof(EditorWindow)).GetType("UnityEditor.ConsoleWindow")
                 .GetMethod("ShowConsoleWindow", BindingFlags.Static | BindingFlags.Public)?.Invoke(null, new object[] { false });
         }
-
+#endif
     }
 }
 #endif

@@ -1,5 +1,5 @@
-//-----------------------------------------------------------------------
-// <copyright file="SerializationOptions.cs" company="Sirenix IVS">
+﻿//-----------------------------------------------------------------------
+// <copyright file="SerializationConfig.cs" company="Sirenix IVS">
 // Copyright (c) 2018 Sirenix IVS
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using System;
-
 namespace VRC.Udon.Serialization.OdinSerializer
 {
+    using System;
+
     /// <summary>
     /// Defines the configuration during serialization and deserialization. This class is thread-safe.
     /// </summary>

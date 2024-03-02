@@ -18,7 +18,7 @@
 
 using VRC.Udon.Serialization.OdinSerializer;
 
-[assembly: RegisterFormatter(typeof(DerivedDictionaryFormatter<,,>))]
+[assembly: RegisterFormatter(typeof(DerivedDictionaryFormatter<,,>), priority: -1)]
 
 namespace VRC.Udon.Serialization.OdinSerializer
 {

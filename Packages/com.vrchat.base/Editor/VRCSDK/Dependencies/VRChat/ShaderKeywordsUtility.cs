@@ -103,7 +103,7 @@ public class ShaderKeywordsUtility : EditorWindow
         "AUTO_EXPOSURE"
     });
 
-    const string keywordDescription = "Unity has a global limit of 256 keywords. A lot (~60) are used internally by Unity.\n\nAny new keyword you encounter goes onto a global list, and will stay until you restart the client.\n\nKeywords are used to create compile time branches and remove code, to optimize a shader, however, because of the 256 keyword limit, using them in VRChat can cause other shaders which use keywords to break, as once you hit the limit, any new keyword will get ignored.\n\nIt's best in the confines of VRChat to stay away from using custom keywords if possible, as not to cause issues with (your) shaders breaking.\n\nFor the full list of internal keywords, see 'ShaderKeywordsUtility.cs'";
+    const string keywordDescription = "This utility lists all custom keywords enabled on your avatar's materials.\n\nFor the full list of internal keywords, see 'ShaderKeywordsUtility.cs'";
 
     private static bool avatarsDirty = true;
     private int loadedScenes = 0;

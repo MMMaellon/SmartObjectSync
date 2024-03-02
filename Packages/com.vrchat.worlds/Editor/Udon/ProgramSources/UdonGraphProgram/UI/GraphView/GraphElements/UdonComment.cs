@@ -45,7 +45,6 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
 
         private UdonComment(string jsonData, UdonGraph graph)
         {
-            title = "Comment";
             name = "comment";
             _graph = graph;
 

@@ -45,14 +45,14 @@ namespace VRC.Udon.Serialization.OdinSerializer
                     {
                         try
                         {
-                        // Ensure that the config instance is loaded before deserialization of anything occurs.
-                        // If we try to load it during deserialization, Unity will throw exceptions, as a lot of
-                        // the Unity API is disallowed during serialization and deserialization.
-                        GlobalSerializationConfig.LoadInstanceIfAssetExists();
+                            // Ensure that the config instance is loaded before deserialization of anything occurs.
+                            // If we try to load it during deserialization, Unity will throw exceptions, as a lot of
+                            // the Unity API is disallowed during serialization and deserialization.
+                            GlobalSerializationConfig.LoadInstanceIfAssetExists();
+                        
+                            CurrentPlatform = Application.platform;
 
-                        CurrentPlatform = Application.platform;
-
-                        if (Application.isEditor) return;
+                            if (Application.isEditor) return;
 
                             ArchitectureInfo.SetRuntimePlatform(CurrentPlatform);
 

@@ -1,12 +1,14 @@
 {
     "name": "VRC.SDK3.Editor",
+    "rootNamespace": "",
     "references": [
         "VRC.SDK3",
         "VRC.SDKBase.Editor",
         "VRC.Udon",
         "VRC.SDKBase",
         "UniTask",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.Postprocessing.Runtime"
     ],
     "includePlatforms": [
         "Editor"

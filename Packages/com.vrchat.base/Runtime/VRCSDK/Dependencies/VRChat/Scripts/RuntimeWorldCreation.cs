@@ -12,6 +12,7 @@ using System.IO;
 using VRC.SDK3.Image;
 #if UNITY_EDITOR
 using UnityEditor;
+using VRC.SDKBase;
 #endif
 
 namespace VRCSDK2
@@ -20,6 +21,8 @@ namespace VRCSDK2
     [Obsolete("Runtime uploads are deprecated. Use methods provided by the VRC.SDKBase.Editor.Api.VRCApi class for uploads")]
     public class RuntimeWorldCreation : RuntimeAPICreation
     {
+        public VRC_SceneDescriptor descriptor;
+        
         public GameObject waitingPanel;
         public GameObject blueprintPanel;
         public GameObject errorPanel;
@@ -80,8 +83,8 @@ namespace VRCSDK2
             IsCurrentWorldPubliclyPublished = false;
 
 
-            var desc = pipelineManager.GetComponent<VRC.SDKBase.VRC_SceneDescriptor>();
-            desc.PositionPortraitCamera(imageCapture.shotCamera.transform);
+            descriptor = pipelineManager.GetComponent<VRC.SDKBase.VRC_SceneDescriptor>();
+            descriptor.PositionPortraitCamera(imageCapture.shotCamera.transform);
 
             Application.runInBackground = true;
             UnityEngine.XR.XRSettings.enabled = false;
@@ -577,7 +580,8 @@ namespace VRCSDK2
                 releaseStatus = (releasePublic.isOn) ? ("public") : ("private"),
                 capacity = System.Convert.ToInt16(worldCapacity.text),
                 occupants = 0,
-                shouldAddToAuthor = true
+                shouldAddToAuthor = true,
+                udonProducts = descriptor.udonProducts
             };
 
             if (APIUser.CurrentUser.hasSuperPowers)
@@ -613,6 +617,7 @@ namespace VRCSDK2
             worldRecord.releaseStatus = (releasePublic.isOn) ? ("public") : ("private");
             worldRecord.unityPackageUrl = cloudFrontUnityPackageUrl;
             worldRecord.isCurated = contentFeatured.isOn || contentSDKExample.isOn;
+            worldRecord.udonProducts = descriptor.udonProducts;
 
             if (shouldUpdateImageToggle.isOn)
             {

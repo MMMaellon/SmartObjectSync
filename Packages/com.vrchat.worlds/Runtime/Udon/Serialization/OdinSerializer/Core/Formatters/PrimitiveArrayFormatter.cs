@@ -18,6 +18,10 @@
 
 namespace VRC.Udon.Serialization.OdinSerializer
 {
+    using Utilities;
+    using System;
+    using System.Collections.Generic;
+
     /// <summary>
     /// Formatter for all primitive one-dimensional arrays.
     /// </summary>
@@ -49,6 +53,10 @@ namespace VRC.Udon.Serialization.OdinSerializer
             {
                 reader.ReadPrimitiveArray(out value);
                 this.RegisterReferenceID(value, reader);
+            }
+            else
+            {
+                reader.SkipEntry();
             }
         }
 

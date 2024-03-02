@@ -63,7 +63,7 @@ namespace VRC.Udon
 
         public Networking.SyncType SyncMethod
         {
-            get
+            get 
             {
                 // Old Scene?
                 if(_syncMethod == Networking.SyncType.Unknown)
@@ -85,7 +85,7 @@ namespace VRC.Udon
 
                 // All synced UdonBehaviours on one GameObject must use the same sync method.
 #if VRC_CLIENT
-                using(gameObject.GetComponentsPooled(out IReadOnlyList<UdonBehaviour> behaviours))
+                using(gameObject.GetComponentsPooled(out List<UdonBehaviour> behaviours))
 #else
                 UdonBehaviour[] behaviours = gameObject.GetComponents<UdonBehaviour>();
 #endif
@@ -111,11 +111,11 @@ namespace VRC.Udon
         [SerializeField]
         private AbstractSerializedUdonProgramAsset serializedProgramAsset;
 
-        #if UNITY_EDITOR && !VRC_CLIENT
+#if UNITY_EDITOR && !VRC_CLIENT
         [SerializeField]
         public AbstractUdonProgramSource programSource;
 
-        #endif
+#endif
 
         #endregion
 
@@ -123,13 +123,13 @@ namespace VRC.Udon
 
         [PublicAPI]
         public static Action<UdonBehaviour, IUdonProgram> OnInit { get; set; } = null;
-
+                
         [PublicAPI]
         public static Action<UdonBehaviour> RequestSerializationHook { get; set; } = null;
 
         [PublicAPI]
         public static Action<UdonBehaviour, NetworkEventTarget, string> SendCustomNetworkEventHook { get; set; } = LoopbackSendCustomNetworkEvent;
-
+        
         [PublicAPI]
         public override bool DisableInteractive { get; set; }
 
@@ -140,7 +140,7 @@ namespace VRC.Udon
             get => _isNetworkingSupported;
             set
             {
-                if(_initialized)
+                if (_initialized)
                 {
                     throw new InvalidOperationException(
                         "IsNetworkingSupported cannot be changed after the UdonBehaviour has been initialized.");
@@ -151,7 +151,7 @@ namespace VRC.Udon
         }
 
         public override bool IsInteractive => _hasInteractiveEvents && !DisableInteractive;
-
+        
         // ReSharper disable once InconsistentNaming
         public const string ReturnVariableName = "__returnValue";
 
@@ -196,19 +196,19 @@ namespace VRC.Udon
 
         private static ProfilerMarker _managedFixedUpdateProfilerMarker =
             new ProfilerMarker("UdonBehaviour.ManagedFixedUpdate()");
-
+			
         private static ProfilerMarker _postLateUpdateProfilerMarker =
             new ProfilerMarker("UdonBehaviour.PostLateUpdate()");
 
         private readonly SortedDictionary<uint, (uint, uint)> _variableToChangeEvent = new SortedDictionary<uint, (uint, uint)>();
 
         private readonly List<AbstractUdonBehaviourEventProxy> _eventProxies = new List<AbstractUdonBehaviourEventProxy>();
-
+        
         #endregion
 
         #region Editor Only
 
-        #if UNITY_EDITOR && !VRC_CLIENT
+#if UNITY_EDITOR && !VRC_CLIENT
         public void RunEditorUpdate(ref bool dirty)
         {
             if (programSource == null)
@@ -226,7 +226,7 @@ namespace VRC.Udon
             EditorSceneManager.MarkSceneDirty(gameObject.scene);
         }
 
-        #endif
+#endif
 
         #endregion
 
@@ -234,7 +234,7 @@ namespace VRC.Udon
 
         private bool LoadProgram()
         {
-            if(serializedProgramAsset == null)
+            if (serializedProgramAsset == null)
             {
                 return false;
             }
@@ -246,30 +246,30 @@ namespace VRC.Udon
 
             IUdonSymbolTable symbolTable = _program?.SymbolTable;
             IUdonHeap heap = _program?.Heap;
-            if(symbolTable == null || heap == null)
+            if (symbolTable == null || heap == null)
             {
                 return false;
             }
 
-            foreach(string variableSymbol in publicVariables.VariableSymbols)
+            foreach (string variableSymbol in publicVariables.VariableSymbols)
             {
-                if(!symbolTable.HasAddressForSymbol(variableSymbol))
+                if (!symbolTable.HasAddressForSymbol(variableSymbol))
                 {
                     continue;
                 }
 
                 uint symbolAddress = symbolTable.GetAddressFromSymbol(variableSymbol);
 
-                if(!publicVariables.TryGetVariableType(variableSymbol, out Type declaredType))
+                if (!publicVariables.TryGetVariableType(variableSymbol, out Type declaredType))
                 {
                     continue;
                 }
 
                 publicVariables.TryGetVariableValue(variableSymbol, out object value);
-                if(declaredType == typeof(GameObject) || declaredType == typeof(UdonBehaviour) ||
-                   declaredType == typeof(Transform))
+                if (declaredType == typeof(GameObject) || declaredType == typeof(UdonBehaviour) ||
+                    declaredType == typeof(Transform))
                 {
-                    if(value == null)
+                    if (value == null)
                     {
                         value = new UdonGameObjectComponentHeapReference(declaredType);
                         declaredType = typeof(UdonGameObjectComponentHeapReference);
@@ -281,29 +281,29 @@ namespace VRC.Udon
 
             return true;
         }
-
+        
         private void RegisterEventProxy<T>() where T : AbstractUdonBehaviourEventProxy
         {
             // Exit early if we already have a match.
-            foreach(AbstractUdonBehaviourEventProxy existingProxy in _eventProxies)
+            foreach (AbstractUdonBehaviourEventProxy existingProxy in _eventProxies)
             {
-                if(!(existingProxy is T existingProxyAsT))
+                if (!(existingProxy is T existingProxyAsT))
                 {
                     continue;
                 }
 
-                if(existingProxyAsT.EventReceiver.Equals(this))
+                if (existingProxyAsT.EventReceiver.Equals(this))
                 {
                     return;
                 }
             }
 
             AbstractUdonBehaviourEventProxy proxy = gameObject.AddComponent<T>();
-            #if UNITY_EDITOR
-            proxy.hideFlags = HideFlags.HideInInspector |
-                              HideFlags.DontSaveInEditor |
+#if UNITY_EDITOR
+            proxy.hideFlags = HideFlags.HideInInspector | 
+                              HideFlags.DontSaveInEditor | 
                               HideFlags.DontSaveInBuild;
-            #endif
+#endif
             _udonManager.Blacklist(proxy, false);
             proxy.EventReceiver = this;
             proxy.enabled = enabled;
@@ -313,55 +313,55 @@ namespace VRC.Udon
 
         private void ProcessEntryPoints()
         {
-            if(_program.EntryPoints.HasExportedSymbol("_interact"))
+            if (_program.EntryPoints.HasExportedSymbol("_interact"))
             {
                 _hasInteractiveEvents = true;
             }
 
-            if(_program.EntryPoints.HasExportedSymbol("_update"))
+            if (_program.EntryPoints.HasExportedSymbol("_update"))
             {
                 _hasUpdateEvent = true;
             }
 
-            if(_program.EntryPoints.HasExportedSymbol("_lateUpdate"))
+            if (_program.EntryPoints.HasExportedSymbol("_lateUpdate"))
             {
                 _hasLateUpdateEvent = true;
             }
 
-            if(_program.EntryPoints.HasExportedSymbol("_fixedUpdate"))
+            if (_program.EntryPoints.HasExportedSymbol("_fixedUpdate"))
             {
                 _hasFixedUpdateEvent = true;
             }
-
-            if(_program.EntryPoints.HasExportedSymbol("_postLateUpdate"))
+            
+            if (_program.EntryPoints.HasExportedSymbol("_postLateUpdate"))
             {
                 _hasPostLateUpdateEvent = true;
             }
 
             DetectExistingProxies();
-            if(_program.EntryPoints.HasExportedSymbol("_onRenderObject"))
+            if (_program.EntryPoints.HasExportedSymbol("_onRenderObject"))
             {
                 RegisterEventProxy<OnRenderObjectProxy>();
             }
 
-            if(_program.EntryPoints.HasExportedSymbol("_onWillRenderObject"))
+            if (_program.EntryPoints.HasExportedSymbol("_onWillRenderObject"))
             {
                 RegisterEventProxy<OnWillRenderObjectProxy>();
             }
 
-            if(_program.EntryPoints.HasExportedSymbol("_onTriggerStay") ||
-               _program.EntryPoints.HasExportedSymbol("_onPlayerTriggerStay"))
+            if (_program.EntryPoints.HasExportedSymbol("_onTriggerStay") ||
+                _program.EntryPoints.HasExportedSymbol("_onPlayerTriggerStay"))
             {
                 RegisterEventProxy<OnTriggerStayProxy>();
             }
 
-            if(_program.EntryPoints.HasExportedSymbol("_onCollisionStay") ||
-               _program.EntryPoints.HasExportedSymbol("_onPlayerCollisionStay"))
+            if (_program.EntryPoints.HasExportedSymbol("_onCollisionStay") ||
+                _program.EntryPoints.HasExportedSymbol("_onPlayerCollisionStay"))
             {
                 RegisterEventProxy<OnCollisionStayProxy>();
             }
-
-            if(_program.EntryPoints.HasExportedSymbol("_onAnimatorMove"))
+            
+            if (_program.EntryPoints.HasExportedSymbol("_onAnimatorMove"))
             {
                 RegisterEventProxy<OnAnimatorMoveProxy>();
             }
@@ -374,11 +374,11 @@ namespace VRC.Udon
             RegisterUpdate();
 
             _eventTable.Clear();
-            foreach(string entryPoint in _program.EntryPoints.GetExportedSymbols())
+            foreach (string entryPoint in _program.EntryPoints.GetExportedSymbols())
             {
                 uint address = _program.EntryPoints.GetAddressFromSymbol(entryPoint);
 
-                if(!_eventTable.ContainsKey(entryPoint))
+                if (!_eventTable.ContainsKey(entryPoint))
                 {
                     _eventTable.Add(entryPoint, new List<uint>());
                 }
@@ -386,24 +386,24 @@ namespace VRC.Udon
                 _eventTable[entryPoint].Add(address);
 
                 _udonManager.RegisterInput(this, entryPoint, true);
-
+                
                 // check whether this is a variableChangedEvent
-                if(entryPoint.StartsWith(VariableChangedEvent.EVENT_PREFIX))
+                if (entryPoint.StartsWith(VariableChangedEvent.EVENT_PREFIX))
                 {
                     string variableName = entryPoint.Remove(0, VariableChangedEvent.EVENT_PREFIX.Length);
                     // ensure the variable with the matching name exists
-                    if(_program.SymbolTable.TryGetAddressFromSymbol(variableName, out uint variableAddress))
+                    if (_program.SymbolTable.TryGetAddressFromSymbol(variableName, out uint variableAddress))
                     {
                         // the old variable is only added if it's used, so just store default if it's not
                         _program.SymbolTable.TryGetAddressFromSymbol(string.Concat(VariableChangedEvent.OLD_VALUE_PREFIX, variableName), out uint oldVariableAddress);
-
+                        
                         // add variable > event address lookup
                         _variableToChangeEvent.Add(variableAddress, (address, oldVariableAddress));
                     }
                 }
             }
         }
-
+        
         // GameObjects may sometimes already have proxies for this UdonBehaviour.
         // For example if the GameObject was cloned from a scene GameObject,
         // or the component was for some reason added in the editor (this is not an expected workflow).
@@ -445,16 +445,16 @@ namespace VRC.Udon
         private bool ResolveUdonHeapReferences(IUdonSymbolTable symbolTable, IUdonHeap heap)
         {
             bool success = true;
-            foreach(string symbolName in symbolTable.GetSymbols())
+            foreach (string symbolName in symbolTable.GetSymbols())
             {
                 uint symbolAddress = symbolTable.GetAddressFromSymbol(symbolName);
                 object heapValue = heap.GetHeapVariable(symbolAddress);
-                if(!(heapValue is UdonBaseHeapReference udonBaseHeapReference))
+                if (!(heapValue is UdonBaseHeapReference udonBaseHeapReference))
                 {
                     continue;
                 }
 
-                if(!ResolveUdonHeapReference(heap, symbolAddress, udonBaseHeapReference))
+                if (!ResolveUdonHeapReference(heap, symbolAddress, udonBaseHeapReference))
                 {
                     success = false;
                 }
@@ -466,27 +466,27 @@ namespace VRC.Udon
         private bool ResolveUdonHeapReference(IUdonHeap heap, uint symbolAddress,
             UdonBaseHeapReference udonBaseHeapReference)
         {
-            switch(udonBaseHeapReference)
+            switch (udonBaseHeapReference)
             {
                 case UdonGameObjectComponentHeapReference udonGameObjectComponentHeapReference:
                 {
                     Type referenceType = udonGameObjectComponentHeapReference.type;
-                    if(referenceType == typeof(GameObject))
+                    if (referenceType == typeof(GameObject))
                     {
                         heap.SetHeapVariable(symbolAddress, gameObject);
                         return true;
                     }
-                    else if(referenceType == typeof(Transform))
+                    else if (referenceType == typeof(Transform))
                     {
                         heap.SetHeapVariable(symbolAddress, gameObject.transform);
                         return true;
                     }
-                    else if(referenceType == typeof(UdonBehaviour))
+                    else if (referenceType == typeof(UdonBehaviour) || referenceType == typeof(IUdonBehaviour))
                     {
                         heap.SetHeapVariable(symbolAddress, this);
                         return true;
                     }
-                    else if(referenceType == typeof(Object))
+                    else if (referenceType == typeof(Object))
                     {
                         heap.SetHeapVariable(symbolAddress, this);
                         return true;
@@ -519,14 +519,14 @@ namespace VRC.Udon
 
         internal void ManagedUpdate()
         {
-            using(_managedUpdateProfilerMarker.Auto())
+            using (_managedUpdateProfilerMarker.Auto())
             {
-                if(!_hasDoneStart && _isReady)
+                if (!_hasDoneStart && _isReady)
                 {
                     _hasDoneStart = true;
                     RunEvent("_onEnable");
                     RunEvent("_start");
-                    if(!_hasUpdateEvent)
+                    if (!_hasUpdateEvent)
                     {
                         _udonManager.UnregisterUdonBehaviourUpdate(this);
                     }
@@ -538,7 +538,7 @@ namespace VRC.Udon
 
         internal void ManagedLateUpdate()
         {
-            using(_managedLateUpdateProfilerMarker.Auto())
+            using (_managedLateUpdateProfilerMarker.Auto())
             {
                 RunEvent("_lateUpdate");
             }
@@ -546,7 +546,7 @@ namespace VRC.Udon
 
         internal void ManagedFixedUpdate()
         {
-            using(_managedFixedUpdateProfilerMarker.Auto())
+            using (_managedFixedUpdateProfilerMarker.Auto())
             {
                 RunEvent("_fixedUpdate");
             }
@@ -554,7 +554,7 @@ namespace VRC.Udon
 
         internal void PostLateUpdate()
         {
-            using(_postLateUpdateProfilerMarker.Auto())
+            using (_postLateUpdateProfilerMarker.Auto())
             {
                 RunEvent("_postLateUpdate");
             }
@@ -592,11 +592,11 @@ namespace VRC.Udon
         public void OnCollisionEnter(Collision other)
         {
             var player = VRCPlayerApi.GetPlayerByGameObject(other.gameObject);
-            if(player != null)
+            if (player != null)
             {
                 RunEvent("_onPlayerCollisionEnter", ("player", player));
             }
-            else if(!UdonManager.Instance.IsBlacklisted(other))
+             else if (!UdonManager.Instance.IsBlacklisted(other)) 
             {
                 RunEvent("_onCollisionEnter", ("other", other));
             }
@@ -604,7 +604,7 @@ namespace VRC.Udon
 
         public void OnCollisionEnter2D(Collision2D other)
         {
-            if(!UdonManager.Instance.IsBlacklisted(other))
+            if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onCollisionEnter2D", ("other", other));
             }
@@ -613,11 +613,11 @@ namespace VRC.Udon
         public void OnCollisionExit(Collision other)
         {
             var player = VRCPlayerApi.GetPlayerByGameObject(other.gameObject);
-            if(player != null)
+            if (player != null)
             {
                 RunEvent("_onPlayerCollisionExit", ("player", player));
             }
-            else if(!UdonManager.Instance.IsBlacklisted(other))
+            else if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onCollisionExit", ("other", other));
             }
@@ -625,7 +625,7 @@ namespace VRC.Udon
 
         public void OnCollisionExit2D(Collision2D other)
         {
-            if(!UdonManager.Instance.IsBlacklisted(other))
+            if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onCollisionExit2D", ("other", other));
             }
@@ -634,11 +634,11 @@ namespace VRC.Udon
         internal void ProxyOnCollisionStay(Collision other)
         {
             var player = VRCPlayerApi.GetPlayerByGameObject(other.gameObject);
-            if(player != null)
+            if (player != null)
             {
                 RunEvent("_onPlayerCollisionStay", ("player", player));
             }
-            else if(!UdonManager.Instance.IsBlacklisted(other))
+            else if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onCollisionStay", ("other", other));
             }
@@ -646,7 +646,7 @@ namespace VRC.Udon
 
         public void OnCollisionStay2D(Collision2D other)
         {
-            if(!UdonManager.Instance.IsBlacklisted(other))
+            if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onCollisionStay2D", ("other", other));
             }
@@ -661,8 +661,8 @@ namespace VRC.Udon
             {
                 return;
             }
-
-            foreach(string entryPoint in _program.EntryPoints.GetExportedSymbols())
+            
+            foreach (string entryPoint in _program.EntryPoints.GetExportedSymbols())
             {
                 _udonManager.RegisterInput(this, entryPoint, false);
             }
@@ -671,10 +671,10 @@ namespace VRC.Udon
 
             _udonVM = null;
             _program = null;
-
-            foreach(AbstractUdonBehaviourEventProxy proxy in _eventProxies)
+            
+            foreach (AbstractUdonBehaviourEventProxy proxy in _eventProxies)
             {
-                if(proxy)
+                if (proxy)
                 {
                     Destroy(proxy);
                 }
@@ -700,7 +700,7 @@ namespace VRC.Udon
 
         public void OnEnable()
         {
-            if(_initialized)
+            if (_initialized)
             {
                 RegisterUpdate();
             }
@@ -756,14 +756,14 @@ namespace VRC.Udon
         public void OnParticleCollision(GameObject other)
         {
             var player = VRCPlayerApi.GetPlayerByGameObject(other.gameObject);
-            if(player != null)
+            if (player != null)
             {
                 RunEvent("_onPlayerParticleCollision", ("player", player));
             }
             else
             {
-                RunEvent("_onParticleCollision", ("other", other));
-            }
+            RunEvent("_onParticleCollision", ("other", other));
+        }
         }
 
         public void OnParticleTrigger()
@@ -788,7 +788,7 @@ namespace VRC.Udon
 
         public void OnRenderImage(RenderTexture src, RenderTexture dest)
         {
-            if(!_eventTable.ContainsKey("_onRenderImage") || _eventTable["_onRenderImage"].Count == 0)
+            if (!_eventTable.ContainsKey("_onRenderImage") || _eventTable["_onRenderImage"].Count == 0)
             {
                 Graphics.Blit(src, dest);
                 return;
@@ -815,11 +815,11 @@ namespace VRC.Udon
         public void OnTriggerEnter(Collider other)
         {
             var player = VRCPlayerApi.GetPlayerByGameObject(other.gameObject);
-            if(player != null)
+            if (player != null)
             {
                 RunEvent("_onPlayerTriggerEnter", ("player", player));
             }
-            else if(!UdonManager.Instance.IsBlacklisted(other))
+            else if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onTriggerEnter", ("other", other));
             }
@@ -827,7 +827,7 @@ namespace VRC.Udon
 
         public void OnTriggerEnter2D(Collider2D other)
         {
-            if(!UdonManager.Instance.IsBlacklisted(other))
+            if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onTriggerEnter2D", ("other", other));
             }
@@ -836,11 +836,11 @@ namespace VRC.Udon
         public void OnTriggerExit(Collider other)
         {
             var player = VRCPlayerApi.GetPlayerByGameObject(other.gameObject);
-            if(player != null)
+            if (player != null)
             {
                 RunEvent("_onPlayerTriggerExit", ("player", player));
             }
-            else if(!UdonManager.Instance.IsBlacklisted(other))
+            else if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onTriggerExit", ("other", other));
             }
@@ -848,7 +848,7 @@ namespace VRC.Udon
 
         public void OnTriggerExit2D(Collider2D other)
         {
-            if(!UdonManager.Instance.IsBlacklisted(other))
+            if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onTriggerExit2D", ("other", other));
             }
@@ -857,11 +857,11 @@ namespace VRC.Udon
         internal void ProxyOnTriggerStay(Collider other)
         {
             var player = VRCPlayerApi.GetPlayerByGameObject(other.gameObject);
-            if(player != null)
+            if (player != null)
             {
                 RunEvent("_onPlayerTriggerStay", ("player", player));
             }
-            else if(!UdonManager.Instance.IsBlacklisted(other))
+            else if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onTriggerStay", ("other", other));
             }
@@ -869,7 +869,7 @@ namespace VRC.Udon
 
         public void OnTriggerStay2D(Collider2D other)
         {
-            if(!UdonManager.Instance.IsBlacklisted(other))
+            if (!UdonManager.Instance.IsBlacklisted(other))
             {
                 RunEvent("_onTriggerStay2D", ("other", other));
             }
@@ -913,13 +913,13 @@ namespace VRC.Udon
 
         #region VRCSDK Events
 
-        #if VRC_CLIENT
+#if VRC_CLIENT
         [PublicAPI]
         private void OnNetworkReady()
         {
             _isReady = true;
         }
-        #endif
+#endif
 
         //Called through Interactable interface
         public override void Interact()
@@ -990,7 +990,7 @@ namespace VRC.Udon
         [PublicAPI]
         public override void RunProgram(string eventName)
         {
-            if(_program == null)
+            if (_program == null)
             {
                 return;
             }
@@ -1006,12 +1006,12 @@ namespace VRC.Udon
 
         private void RunProgram(uint entryPoint)
         {
-            if(_hasError)
+            if (_hasError)
             {
                 return;
             }
 
-            if(_udonVM == null)
+            if (_udonVM == null)
             {
                 return;
             }
@@ -1027,7 +1027,7 @@ namespace VRC.Udon
             try
             {
                 uint result = _udonVM.Interpret();
-                if(result != 0)
+                if (result != 0)
                 {
                     Logger.LogError(
                         $"Udon VM execution errored, this UdonBehaviour will be halted.",
@@ -1038,7 +1038,7 @@ namespace VRC.Udon
                     enabled = false;
                 }
             }
-            catch(UdonVMException error)
+            catch (UdonVMException error)
             {
                 Logger.LogError(
                     $"An exception occurred during Udon execution, this UdonBehaviour will be halted.\n{error}",
@@ -1050,7 +1050,7 @@ namespace VRC.Udon
             }
 
             _udonManager.currentlyExecuting = originalExecuting;
-            if(originalAddress < 0xFFFFFFFC)
+            if (originalAddress < 0xFFFFFFFC)
             {
                 _udonVM.SetProgramCounter(originalAddress);
             }
@@ -1092,29 +1092,29 @@ namespace VRC.Udon
             ) ?? new UdonVariableTable();
 
             // Validate that the type of the value can actually be cast to the declaredType to avoid InvalidCastExceptions later.
-            foreach(string publicVariableSymbol in publicVariables.VariableSymbols.ToArray())
+            foreach (string publicVariableSymbol in publicVariables.VariableSymbols.ToArray())
             {
-                if(!publicVariables.TryGetVariableValue(publicVariableSymbol, out object value))
+                if (!publicVariables.TryGetVariableValue(publicVariableSymbol, out object value))
                 {
                     continue;
                 }
 
-                if(value == null)
+                if (value == null)
                 {
                     continue;
                 }
 
-                if(!publicVariables.TryGetVariableType(publicVariableSymbol, out Type declaredType))
+                if (!publicVariables.TryGetVariableType(publicVariableSymbol, out Type declaredType))
                 {
                     continue;
                 }
 
-                if(declaredType.IsInstanceOfType(value))
+                if (declaredType.IsInstanceOfType(value))
                 {
                     continue;
                 }
 
-                if(declaredType.IsValueType)
+                if (declaredType.IsValueType)
                 {
                     publicVariables.TrySetVariableValue(publicVariableSymbol, Activator.CreateInstance(declaredType));
                 }
@@ -1152,27 +1152,27 @@ namespace VRC.Udon
 
         private bool TryToInterrogateUdon<TOut, T0, T1>(string eventName, out TOut returnValue, (string symbolName, T0 value) parameter0, (string symbolName, T1 value) parameter1)
         {
-            if(!_initialized || !enabled || !_hasDoneStart)
+            if (!_initialized || !enabled || !_hasDoneStart)
             {
-                #if VRC_CLIENT || UNITY_EDITOR
-                if(UdonManager.Instance.DebugLogging)
+#if VRC_CLIENT || UNITY_EDITOR
+                if (UdonManager.Instance.DebugLogging)
                 {
                     Logger.Log($"{gameObject.name} not ready to respond to {eventName}: initialized={_initialized} enabled={enabled} hasStarted={_hasDoneStart}", _debugLevel);
                 }
-                #endif
+#endif
 
                 returnValue = default;
                 return false;
             }
-
-            if(!_eventTable.ContainsKey(eventName))
+            
+            if (!_eventTable.ContainsKey(eventName))
             {
-                #if VRC_CLIENT || UNITY_EDITOR
-                if(UdonManager.Instance.DebugLogging)
+#if VRC_CLIENT || UNITY_EDITOR
+                if (UdonManager.Instance.DebugLogging)
                 {
                     Logger.Log($"{gameObject.name} will not respond to {eventName}", _debugLevel);
                 }
-                #endif
+#endif
 
                 returnValue = default;
                 return false;
@@ -1180,12 +1180,12 @@ namespace VRC.Udon
 
             if(!RunEvent(eventName, parameter0, parameter1))
             {
-                #if VRC_CLIENT || UNITY_EDITOR
-                if(UdonManager.Instance.DebugLogging)
+#if VRC_CLIENT || UNITY_EDITOR
+                if (UdonManager.Instance.DebugLogging)
                 {
                     Logger.LogError($"{gameObject.name} failed to respond to {eventName}", _debugLevel);
                 }
-                #endif
+#endif
 
                 returnValue = default;
                 return false;
@@ -1374,33 +1374,33 @@ namespace VRC.Udon
                 return false;
             }
 
-            if(!_hasDoneStart)
+            if (!_hasDoneStart)
             {
                 return false;
             }
 
-            if(_hasError)
+            if (_hasError)
             {
                 return false;
             }
 
-            if(_udonVM == null)
+            if (_udonVM == null)
             {
                 return false;
             }
 
-            if(!_eventTable.TryGetValue(eventName, out List<uint> entryPoints))
+            if (!_eventTable.TryGetValue(eventName, out List<uint> entryPoints))
             {
                 return false;
             }
 
             //TODO: Replace with a non-boxing interface before exposing to users
-            foreach((string symbolName, object value) in programVariables)
+            foreach ((string symbolName, object value) in programVariables)
             {
                 SetEventVariable(eventName, symbolName, value);
             }
 
-            foreach(uint entryPoint in entryPoints)
+            foreach (uint entryPoint in entryPoints)
             {
                 RunProgram(entryPoint);
             }
@@ -1410,12 +1410,12 @@ namespace VRC.Udon
 
         public override void RunInputEvent(string eventName, UdonInputEventArgs args)
         {
-            if(!_isReady)
+            if (!_isReady)
             {
                 return;
             }
 
-            if(!_hasDoneStart)
+            if (!_hasDoneStart)
             {
                 return;
             }
@@ -1426,7 +1426,7 @@ namespace VRC.Udon
             }
 
             // Set value arg
-            switch(args.eventType)
+            switch (args.eventType)
             {
                 case UdonInputEventType.AXIS:
                     SetEventVariable(eventName, "floatValue", args.floatValue);
@@ -1443,7 +1443,7 @@ namespace VRC.Udon
 
         private void SetEventVariable<T>(string eventName, string symbolName, T value)
         {
-            if(!_symbolNameCache.TryGetValue((eventName, symbolName), out string newSymbolName))
+            if (!_symbolNameCache.TryGetValue((eventName, symbolName), out string newSymbolName))
             {
                 newSymbolName = $"{eventName.Substring(1)}{char.ToUpper(symbolName.First())}{symbolName.Substring(1)}";
                 _symbolNameCache.Add((eventName, symbolName), newSymbolName);
@@ -1568,7 +1568,7 @@ namespace VRC.Udon
         [PublicAPI]
         public void RunOnInit()
         {
-            if(OnInit == null)
+            if (OnInit == null)
             {
                 return;
             }
@@ -1577,7 +1577,7 @@ namespace VRC.Udon
             {
                 OnInit(this, _program);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 enabled = false;
                 Logger.LogError(
@@ -1590,37 +1590,37 @@ namespace VRC.Udon
 
         private void RegisterUpdate()
         {
-            if(_udonManager == null)
+            if (_udonManager == null)
             {
                 return;
             }
 
-            if(!isActiveAndEnabled)
+            if (!isActiveAndEnabled)
             {
                 return;
             }
 
-            if(_hasUpdateEvent || !_hasDoneStart)
+            if (_hasUpdateEvent || !_hasDoneStart)
             {
                 _udonManager.RegisterUdonBehaviourUpdate(this);
             }
 
-            if(_hasLateUpdateEvent)
+            if (_hasLateUpdateEvent)
             {
                 _udonManager.RegisterUdonBehaviourLateUpdate(this);
             }
 
-            if(_hasFixedUpdateEvent)
+            if (_hasFixedUpdateEvent)
             {
                 _udonManager.RegisterUdonBehaviourFixedUpdate(this);
             }
 
-            if(_hasPostLateUpdateEvent)
+            if (_hasPostLateUpdateEvent)
             {
                 _udonManager.RegisterUdonBehaviourPostLateUpdate(this);
             }
-
-            foreach(AbstractUdonBehaviourEventProxy proxy in _eventProxies)
+            
+            foreach (AbstractUdonBehaviourEventProxy proxy in _eventProxies)
             {
                 proxy.enabled = true;
             }
@@ -1628,32 +1628,32 @@ namespace VRC.Udon
 
         private void UnregisterUpdate()
         {
-            if(_udonManager == null)
+            if (_udonManager == null)
             {
                 return;
             }
 
-            if(_hasUpdateEvent)
+            if (_hasUpdateEvent)
             {
                 _udonManager.UnregisterUdonBehaviourUpdate(this);
             }
 
-            if(_hasLateUpdateEvent)
+            if (_hasLateUpdateEvent)
             {
                 _udonManager.UnregisterUdonBehaviourLateUpdate(this);
             }
 
-            if(_hasFixedUpdateEvent)
+            if (_hasFixedUpdateEvent)
             {
                 _udonManager.UnregisterUdonBehaviourFixedUpdate(this);
             }
 
-            if(_hasPostLateUpdateEvent)
+            if (_hasPostLateUpdateEvent)
             {
                 _udonManager.UnregisterUdonBehaviourPostLateUpdate(this);
             }
-
-            foreach(AbstractUdonBehaviourEventProxy proxy in _eventProxies)
+            
+            foreach (AbstractUdonBehaviourEventProxy proxy in _eventProxies)
             {
                 proxy.enabled = false;
             }
@@ -1692,7 +1692,7 @@ namespace VRC.Udon
         {
             RequestSerializationHook?.Invoke(this);
         }
-
+        
         public override void SendCustomEventDelayedSeconds(string eventName, float delaySeconds, EventTiming eventTiming = EventTiming.Update)
         {
             UdonManager.Instance.ScheduleDelayedEvent(this, eventName, delaySeconds, eventTiming);
@@ -1721,7 +1721,7 @@ namespace VRC.Udon
 
         public override Type GetProgramVariableType(string symbolName)
         {
-            if(!_program.SymbolTable.HasAddressForSymbol(symbolName))
+            if (!_program.SymbolTable.HasAddressForSymbol(symbolName))
             {
                 return null;
             }
@@ -1732,12 +1732,12 @@ namespace VRC.Udon
 
         public override void SetProgramVariable<T>(string symbolName, T value)
         {
-            if(_program == null)
+            if (_program == null)
             {
                 return;
             }
 
-            if(!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
+            if (!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
             {
                 return;
             }
@@ -1747,22 +1747,22 @@ namespace VRC.Udon
 
         public override void SetProgramVariable(string symbolName, object value)
         {
-            if(_program == null)
+            if (_program == null)
             {
                 return;
             }
 
-            if(!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
+            if (!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
             {
                 return;
             }
 
-            SetHeapVariable(symbolAddress, value);
+            SetHeapVariable( symbolAddress, value);
         }
 
         private void SetHeapVariable<T>(uint symbolAddress, T newValue)
         {
-            if(_variableToChangeEvent.TryGetValue(symbolAddress, out (uint eventAddress, uint oldVariableAddress) data))
+            if (_variableToChangeEvent.TryGetValue(symbolAddress, out (uint eventAddress, uint oldVariableAddress) data))
             {
                 // cache value before changing
                 T value = _program.Heap.GetHeapVariable<T>(symbolAddress);
@@ -1772,9 +1772,9 @@ namespace VRC.Udon
                 {
                     // change the variable on the heap
                     _program.Heap.SetHeapVariable(symbolAddress, newValue);
-
+                    
                     // change the old variable on the heap
-                    if(data.oldVariableAddress != uint.MaxValue)
+                    if (data.oldVariableAddress != uint.MaxValue)
                     {
                         _program.Heap.SetHeapVariable(data.oldVariableAddress, value);
                     }
@@ -1792,12 +1792,12 @@ namespace VRC.Udon
 
         public override T GetProgramVariable<T>(string symbolName)
         {
-            if(_program == null)
+            if (_program == null)
             {
                 return default;
             }
 
-            if(!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
+            if (!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
             {
                 return default;
             }
@@ -1807,16 +1807,16 @@ namespace VRC.Udon
 
         public override object GetProgramVariable(string symbolName)
         {
-            if(_program == null)
+            if (_program == null)
             {
                 return null;
             }
 
-            if(!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
+            if (!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
             {
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
                 Logger.LogError($"Could not find symbol {symbolName}; available: [{string.Join(",", _program.SymbolTable.GetSymbols())}]", _debugLevel);
-                #endif
+#endif
                 return null;
             }
 
@@ -1826,12 +1826,12 @@ namespace VRC.Udon
         public override bool TryGetProgramVariable<T>(string symbolName, out T value)
         {
             value = default;
-            if(_program == null)
+            if (_program == null)
             {
                 return false;
             }
 
-            if(!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
+            if (!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
             {
                 return false;
             }
@@ -1842,12 +1842,12 @@ namespace VRC.Udon
         public override bool TryGetProgramVariable(string symbolName, out object value)
         {
             value = null;
-            if(_program == null)
+            if (_program == null)
             {
                 return false;
             }
 
-            if(!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
+            if (!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
             {
                 return false;
             }
@@ -1866,7 +1866,7 @@ namespace VRC.Udon
         private void SetupLogging()
         {
             _debugLevel = GetType().GetHashCode();
-            if(Logger.DebugLevelIsDescribed(_debugLevel))
+            if (Logger.DebugLevelIsDescribed(_debugLevel))
             {
                 return;
             }

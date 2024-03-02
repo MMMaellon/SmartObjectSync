@@ -17,6 +17,13 @@ namespace VRC.SDK3.Editor
         private SerializedProperty enableSpatialProperty;
         private SerializedProperty useCurveProperty;
 
+        private bool _isInitialized;
+
+        private void OnEnable()
+        {
+            _isInitialized = false;
+        }
+
         public override void OnInspectorGUI()
         {
             gainProperty = serializedObject.FindProperty("Gain");
@@ -48,8 +55,11 @@ namespace VRC.SDK3.Editor
 
             EditorGUILayout.EndVertical();
 
-            if (source != null)
+            if (source != null && !_isInitialized)
+            {
                 source.spatialize = enableSp;
+                _isInitialized = true;
+            }
             serializedObject.ApplyModifiedProperties();
         }
     }

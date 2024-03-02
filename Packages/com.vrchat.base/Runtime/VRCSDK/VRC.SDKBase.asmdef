@@ -1,5 +1,6 @@
 {
     "name": "VRC.SDKBase",
+    "rootNamespace": "",
     "references": [
         "Unity.Timeline",
         "VRC.Enums.Validation.Performance"

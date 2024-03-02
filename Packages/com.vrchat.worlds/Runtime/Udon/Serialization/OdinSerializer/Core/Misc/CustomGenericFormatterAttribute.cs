@@ -30,6 +30,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
     /// <seealso cref="CustomFormatterAttribute" />
     [AttributeUsage(AttributeTargets.Class)]
     [Obsolete("Use a RegisterFormatterAttribute applied to the containing assembly instead.", true)]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public class CustomGenericFormatterAttribute : CustomFormatterAttribute
     {
         /// <summary>

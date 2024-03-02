@@ -1945,12 +1945,19 @@ namespace VRC.Udon.Serialization.OdinSerializer
                     }
                     else
                     {
+                        // VRCHAT - Modified to work around a compilation bug where this function inlined would result in bad writes of the upper-byte
                         // We do a slower but safer int-by-int write instead
+#if UNITY_2022_3_OR_NEWER
+                        int* toPtr = (int*)(basePtr + this.bufferIndex);
+                        toPtr[0] = (int)value;
+                        toPtr[1] = (int)(value >> 32);
+#else
                         int* fromPtr = (int*)&value;
                         int* toPtr = (int*)(basePtr + this.bufferIndex);
 
                         *toPtr++ = *fromPtr++;
                         *toPtr = *fromPtr;
+#endif
                     }
                 }
                 else

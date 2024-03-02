@@ -36,14 +36,17 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities.Editor
         /// Include the assembly in the build, but not in the editor.
         /// </summary>
         IncludeInBuildOnly,
+
         /// <summary>
         /// Include the assembly in the editor, but not in the build.
         /// </summary>
         IncludeInEditorOnly,
+
         /// <summary>
         /// Include the assembly in both the build and in the editor.
         /// </summary>
         IncludeInAll,
+
         /// <summary>
         /// Exclude the assembly from both the build and from the editor.
         /// </summary>
@@ -63,7 +66,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities.Editor
         /// <summary>
         /// All valid Unity BuildTarget platforms.
         /// </summary>
-        public static readonly ImmutableList<BuildTarget> Platforms; 
+        public static readonly ImmutableList<BuildTarget> Platforms;
 
         /// <summary>
         /// All valid Unity BuildTarget platforms that support Just In Time compilation.
@@ -104,9 +107,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities.Editor
                 {
                     BuildTarget.StandaloneWindows,
                     BuildTarget.StandaloneWindows64,
-                    BuildTarget.StandaloneLinux,
                     BuildTarget.StandaloneLinux64,
-                    BuildTarget.StandaloneLinuxUniversal,
                     BuildTarget.Android
                 })
                 .ToArray());
@@ -186,7 +187,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities.Editor
                 throw new InvalidOperationException("Failed to get PluginImporter for " + assemblyFilePath);
             }
 
-            bool updateImportSettings = 
+            bool updateImportSettings =
                 importer.GetCompatibleWithAnyPlatform() // If the 'any platform' flag is true, then reapply settings no matter what to ensure that everything is correct.
                 //|| Platforms.Any(p => importer.GetCompatibleWithPlatform(p) != includeInBuild)
                 || importer.GetCompatibleWithPlatform(platform) != includeInBuild 
@@ -211,7 +212,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities.Editor
         public static ScriptingImplementation GetCurrentScriptingBackend()
         {
             var buildGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
-
+			
             if (getScriptingBackendMethod != null)
             {
                 return (ScriptingImplementation)getScriptingBackendMethod.Invoke(null, new object[] { buildGroup });

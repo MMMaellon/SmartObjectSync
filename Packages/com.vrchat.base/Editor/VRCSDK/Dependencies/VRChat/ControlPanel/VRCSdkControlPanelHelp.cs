@@ -10,6 +10,7 @@ namespace VRC.SDKBase.Editor
     {
         public const string AVATAR_OPTIMIZATION_TIPS_URL = "https://creators.vrchat.com/avatars/avatar-optimizing-tips";
         public const string AVATAR_RIG_REQUIREMENTS_URL = "https://creators.vrchat.com/avatars/rig-requirements";
+        public const string AVATAR_WRITE_DEFAULTS_ON_STATES_URL = "https://creators.vrchat.com/avatars/#write-defaults-on-states";
         
         [MenuItem("VRChat SDK/Help/Developer FAQ")]
         public static void ShowDeveloperFAQ()

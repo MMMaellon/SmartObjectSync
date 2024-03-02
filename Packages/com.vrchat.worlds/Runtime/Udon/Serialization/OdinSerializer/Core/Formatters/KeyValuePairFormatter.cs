@@ -22,7 +22,9 @@ using VRC.Udon.Serialization.OdinSerializer;
 
 namespace VRC.Udon.Serialization.OdinSerializer
 {
+    using System;
     using System.Collections.Generic;
+    using System.Reflection;
 
     /// <summary>
     /// Custom generic formatter for the generic type definition <see cref="KeyValuePair{TKey, TValue}"/>.
@@ -60,4 +62,39 @@ namespace VRC.Udon.Serialization.OdinSerializer
             );
         }
     }
+    #if false //vrc security patch
+    public sealed class WeakKeyValuePairFormatter : WeakBaseFormatter
+    {
+        private readonly Serializer KeySerializer;
+        private readonly Serializer ValueSerializer;
+
+        private readonly PropertyInfo KeyProperty;
+        private readonly PropertyInfo ValueProperty;
+
+        public WeakKeyValuePairFormatter(Type serializedType) : base(serializedType)
+        {
+            var args = serializedType.GetGenericArguments();
+
+            this.KeySerializer = Serializer.Get(args[0]);
+            this.ValueSerializer = Serializer.Get(args[1]);
+
+            this.KeyProperty = serializedType.GetProperty("Key");
+            this.ValueProperty = serializedType.GetProperty("Value");
+        }
+
+        protected override void SerializeImplementation(ref object value, IDataWriter writer)
+        {
+            KeySerializer.WriteValueWeak(KeyProperty.GetValue(value, null), writer);
+            ValueSerializer.WriteValueWeak(ValueProperty.GetValue(value, null), writer);
+        }
+
+        protected override void DeserializeImplementation(ref object value, IDataReader reader)
+        {
+            value = Activator.CreateInstance(this.SerializedType, 
+                KeySerializer.ReadValueWeak(reader),
+                ValueSerializer.ReadValueWeak(reader)
+            );
+        }
+    }
+    #endif
 }

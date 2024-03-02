@@ -507,6 +507,7 @@ namespace VRC.SDKBase.Validation
             "VRChat/Mobile/Skybox",
             "VRChat/Mobile/Particles/Additive",
             "VRChat/Mobile/Particles/Multiply",
+            "VRChat/Mobile/World/Supersampled UI",
             "FX/MirrorReflection",
             "UI/Default",
         };
@@ -542,7 +543,7 @@ namespace VRC.SDKBase.Validation
         public static void RemoveIllegalComponents(List<GameObject> targets, WhiteListConfiguration config, bool retry = true, HashSet<Type> tagWhitelistedTypes = null)
         {
             ConfigureWhiteList(config);
-            
+
             HashSet<Type> whitelist = ValidationUtils.WhitelistedTypes($"world{config}", ComponentTypeWhiteList);
 
             // combine whitelist types from world tags with cached whitelist
@@ -655,7 +656,7 @@ namespace VRC.SDKBase.Validation
 
                 ScanGameObject(dropdownTemplate.transform.root.gameObject, whitelist, isSDK3);
             }
-            
+
             #if TextMeshPro
             TMP_Dropdown[] tmpDropdowns = target.GetComponentsInChildren<TMP_Dropdown>(true);
             foreach(TMP_Dropdown textMeshProDropdown in tmpDropdowns)
@@ -703,7 +704,7 @@ namespace VRC.SDKBase.Validation
         {
             // VideoPlayer objects with output mode set to "Direct" bypass client volume controls.
 
-            if (videoPlayer.audioOutputMode == UnityEngine.Video.VideoAudioOutputMode.Direct) 
+            if (videoPlayer.audioOutputMode == UnityEngine.Video.VideoAudioOutputMode.Direct)
             {
                 //if playback is happening (or will) you have to Stop() before you attach an AudioSource.
                 bool play_state = (videoPlayer.isPlaying || videoPlayer.playOnAwake);
@@ -718,7 +719,7 @@ namespace VRC.SDKBase.Validation
                 {
                     videoPlayer.SetTargetAudioSource(i,vp_src);
                 }
-                
+
                 if (play_state)
                 {
                     videoPlayer.Play();
