@@ -813,10 +813,8 @@ namespace MMMaellon
 
         public void SetSpawn()
         {
-            Debug.LogWarning("setspawn");
             if (worldSpaceTeleport)
             {
-                Debug.LogWarning("world space");
                 spawnPos = transform.position;
                 spawnRot = transform.rotation;
             }
