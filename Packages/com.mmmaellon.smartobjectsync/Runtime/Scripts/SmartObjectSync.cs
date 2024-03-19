@@ -1,8 +1,6 @@
 ﻿using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
-using VRC.Udon;
-using VRC.Udon.Common;
 
 #if !COMPILER_UDONSHARP && UNITY_EDITOR
 using VRC.SDKBase.Editor.BuildPipeline;
@@ -466,7 +464,7 @@ namespace MMMaellon
                 if (!IsLocalOwner())
                 {
                     state = value / 10;
-                    stateChangeCounter = (Mathf.Abs(value) % 10);
+                    stateChangeCounter = Mathf.Abs(value) % 10;
                 }
                 _print("stateData received " + value);
             }
@@ -661,6 +659,19 @@ namespace MMMaellon
             if (IsLocalOwner())
             {
                 Respawn();
+            }
+            else
+            {
+                //network sync happened, we have to walk it back and set up the starting state stuff first
+                if (startingState)
+                {
+                    state = STATE_CUSTOM + startingState.stateID;
+                }
+                if (lastSuccessfulNetworkSync >= 0)
+                {
+                    state = stateData / 10;
+                    stateChangeCounter = Mathf.Abs(_stateData) % 10;
+                }
             }
             startRan = true;
         }
