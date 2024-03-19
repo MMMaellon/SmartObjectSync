@@ -1002,9 +1002,32 @@ namespace MMMaellon
             stateData = stateData;
         }
 
+        float last_send_time = -1001;
+        Vector3 _cache_pos;
+        Quaternion _cache_rot;
+        Vector3 _cache_vel;
+        Vector3 _cache_spin;
+        int _cache_stateData;
         float lastSuccessfulNetworkSync = -1001f;
-        public override void OnDeserialization()
+        public override void OnDeserialization(VRC.Udon.Common.DeserializationResult result)
         {
+            if (result.sendTime < last_send_time)
+            {
+                //we fucking got updates out of order auuuuuuuuugghhhh
+                pos = _cache_pos;
+                rot = _cache_rot;
+                vel = _cache_vel;
+                spin = _cache_spin;
+                stateData = _cache_stateData;
+                return;
+            }
+
+            last_send_time = result.sendTime;
+            _cache_pos = pos;
+            _cache_rot = rot;
+            _cache_vel = vel;
+            _cache_spin = spin;
+            _cache_stateData = _stateData;
             // _print("OnDeserialization");
             StartInterpolation();
             lastSuccessfulNetworkSync = Time.timeSinceLevelLoad;
