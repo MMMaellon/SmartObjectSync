@@ -659,10 +659,6 @@ namespace MMMaellon
             if (IsLocalOwner())
             {
                 Respawn();
-            } else             if(lastSuccessfulNetworkSync < 0 && Utilities.IsValid(startingState)){
-                startingState.OnEnterState();
-                startingState.OnExitState();
-                //quickly simulate the starting state before we move on
             }
             else
             {
@@ -1010,11 +1006,6 @@ namespace MMMaellon
         public override void OnDeserialization()
         {
             // _print("OnDeserialization");
-            if(!startRan && Utilities.IsValid(startingState)){
-                startingState.OnEnterState();
-                startingState.OnExitState();
-                //quickly simulate the starting state before we move on
-            }
             StartInterpolation();
             lastSuccessfulNetworkSync = Time.timeSinceLevelLoad;
         }
