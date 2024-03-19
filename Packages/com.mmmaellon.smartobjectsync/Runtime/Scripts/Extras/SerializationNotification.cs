@@ -15,9 +15,9 @@ namespace MMMaellon
             base.OnPreSerialization();
             audioSource.Play();
         }
-        public override void OnDeserialization()
+        public override void OnDeserialization(VRC.Udon.Common.DeserializationResult result)
         {
-            base.OnDeserialization();
+            base.OnDeserialization(result);
             audioSource.Play();
         }
     }
