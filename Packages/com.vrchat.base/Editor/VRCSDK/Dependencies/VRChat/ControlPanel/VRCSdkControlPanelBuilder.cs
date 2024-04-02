@@ -96,6 +96,15 @@ public partial class VRCSdkControlPanel : EditorWindow
             }
             public int Compare(Issue b1, Issue b2)
             {
+                bool b1HasActions = b1.showThisIssue != null || b1.fixThisIssue != null;
+                bool b2HasActions = b2.showThisIssue != null || b2.fixThisIssue != null;
+
+                if (b1HasActions != b2HasActions)
+                {
+                    // Show messages with actions first
+                    return b1HasActions ? -1 : 1;
+                }
+
                 return string.Compare(b1.issueText, b2.issueText);
             }
             public int GetHashCode(Issue bx)
@@ -157,19 +166,19 @@ public partial class VRCSdkControlPanel : EditorWindow
         ResetIssues();
     }
 
-    public void OnGUIError(Object subject, string output, System.Action show, System.Action fix)
+    public void OnGUIError(Object subject, string output, System.Action show = null, System.Action fix = null)
     {
         AddToReport(GUIErrors, subject, output, show, fix);
     }
 
-    public void OnGUIWarning(Object subject, string output, System.Action show, System.Action fix)
+    public void OnGUIWarning(Object subject, string output, System.Action show = null, System.Action fix = null)
     {
         AddToReport(GUIWarnings, subject, output, show, fix);
     }
 
-    public void OnGUIInformation(Object subject, string output)
+    public void OnGUIInformation(Object subject, string output, System.Action show = null, System.Action fix = null)
     {
-        AddToReport(GUIInfos, subject, output, null, null);
+        AddToReport(GUIInfos, subject, output, show, fix);
     }
 
     public void OnGUILink(Object subject, string output, string link)
@@ -215,20 +224,24 @@ public partial class VRCSdkControlPanel : EditorWindow
         bool haveButtons = ((show != null) || (fix != null));
 
         GUIStyle style = new GUIStyle("HelpBox");
-        style.fixedWidth = (haveButtons ? (SdkWindowWidth - 110) : SdkWindowWidth - 20);
+        float width = haveButtons ? SdkWindowWidth - 110 : SdkWindowWidth - 20;
+        if (haveButtons)
+        {
+            style.fixedWidth = width;
+        }
         float minHeight = 40;
         
         EditorGUILayout.BeginHorizontal();
         if (icon != null)
         {
             GUIContent c = new GUIContent(message, icon);
-            float height = style.CalcHeight(c, style.fixedWidth);
+            float height = style.CalcHeight(c, width);
             GUILayout.Box(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
         }
         else
         {
             GUIContent c = new GUIContent(message);
-            float height = style.CalcHeight(c, style.fixedWidth);
+            float height = style.CalcHeight(c, width - 32); // Adjust for the width of the warning icon
             Rect rt = GUILayoutUtility.GetRect(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
             EditorGUI.HelpBox(rt, message, msgType);    // note: EditorGUILayout resulted in uneven button layout in this case
         }
@@ -282,8 +295,8 @@ public partial class VRCSdkControlPanel : EditorWindow
                 foreach (Issue error in GUIErrors[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
                     DrawIssueBox(MessageType.Error, null, error.issueText, error.showThisIssue, error.fixThisIssue);
             if (GUIWarnings.ContainsKey(subject))
-                foreach (Issue error in GUIWarnings[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                    DrawIssueBox(MessageType.Warning, null, error.issueText, error.showThisIssue, error.fixThisIssue);
+                foreach (Issue warning in GUIWarnings[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
+                    DrawIssueBox(MessageType.Warning, null, warning.issueText, warning.showThisIssue, warning.fixThisIssue);
 
             if (GUIStats.ContainsKey(subject))
             {
@@ -301,8 +314,8 @@ public partial class VRCSdkControlPanel : EditorWindow
             }
 
             if (GUIInfos.ContainsKey(subject))
-                foreach (Issue error in GUIInfos[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                    EditorGUILayout.HelpBox(error.issueText, MessageType.Info);
+                foreach (Issue info in GUIInfos[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
+                    DrawIssueBox(MessageType.Info, null, info.issueText, info.showThisIssue, info.fixThisIssue);
             if (GUILinks.ContainsKey(subject))
             {
                 EditorGUILayout.BeginVertical(style);

@@ -90,6 +90,7 @@ namespace VRC.SDKBase.Validation
             "VRC.SDK3.Avatars.Components.VRCStation",
             "VRC.SDK3.Avatars.Components.VRCImpostorSettings",
             "VRC.SDK3.Avatars.Components.VRCImpostorEnvironment",
+            "VRC.SDK3.Avatars.Components.VRCHeadChop",
             "VRC.SDK3.Dynamics.PhysBone.Components.VRCPhysBone",
             "VRC.SDK3.Dynamics.PhysBone.Components.VRCPhysBoneCollider",
             "VRC.SDK3.Dynamics.Contact.Components.VRCContactSender",

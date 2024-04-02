@@ -7,7 +7,7 @@ using System.Collections;
 public sealed class ONSPSettings : ScriptableObject
 {
     [SerializeField]
-    public int voiceLimit = 16; // very conservative fallback
+    public int voiceLimit = 100;
 
     private static ONSPSettings instance;
     public static ONSPSettings Instance
@@ -16,11 +16,7 @@ public sealed class ONSPSettings : ScriptableObject
         {
             if (instance == null)
             {
-#if UNITY_ANDROID || UNITY_IOS
-                instance = Resources.Load<ONSPSettings>("ONSPSettings-Android");
-#else
                 instance = Resources.Load<ONSPSettings>("ONSPSettings");
-#endif
 
                 // This can happen if the developer never input their App Id into the Unity Editor
                 // and therefore never created the OculusPlatformSettings.asset file
@@ -39,11 +35,7 @@ public sealed class ONSPSettings : ScriptableObject
 
                     string fullPath = System.IO.Path.Combine(
                         System.IO.Path.Combine("Assets", "Resources"),
-#if UNITY_ANDROID || UNITY_IOS
-                        "ONSPSettings-Android.asset");
-#else 
                         "ONSPSettings.asset");
-#endif
                     UnityEditor.AssetDatabase.CreateAsset(instance, fullPath);
 #endif
                 }

@@ -1,47 +1,50 @@
 {
-	"name" : "com.vrchat.worlds",
-	"displayName" : "VRChat SDK - Worlds",
-	"version" : "3.5.1",
-	"unity" : "2022.3",
-	"description" : "Tools for creating interactive VRChat worlds using Udon",
-	"dependencies" : {
-		"com.unity.cinemachine" : "2.9.7",
-		"com.unity.textmeshpro" : "3.0.6",
-		"com.unity.inputsystem" : "1.2.0"
-	},
-	"vpmDependencies" : {
-		"com.vrchat.base" : "3.5.1"
-	},
-	"author" : {
-		"name" : "VRChat",
-		"email" : "developer@vrchat.com",
-		"url" : "https://github.com/vrchat/packages"
-	},
-	"legacyFolders" : {
-		"Assets\\VRCSDK" : "",
-		"Assets\\Udon" : "",
-		"Assets\\VRChat Examples" : "",
-		"Packages\\com.vrchat.vrcsdk3" : "",
-		"Assets\\UdonSharp" : "b031f928e5c709b4887f6513084aaa51",
-		"Assets\\Gizmos\\UdonSharp" : "6e940dfc89ce4ca41b651e05bc21be6b",
-		"Assets\\CyanEmu" : "91b9a83a129504741a363d9a324de958"
-	},
-	"legacyPackages" : [ "com.vrchat.clientsim", "com.vrchat.udonsharp" ],
-	"samples" : [
-		{
-			"displayName" : "UdonExampleScene",
-			"description" : "Basic Udon Examples for Learning",
-			"path" : "Samples/UdonExampleScene"
-		},
-		{
-			"displayName" : "UdonSharp CustomInspectors",
-			"description" : "Custom Inspector Example",
-			"path" : "Integrations/UdonSharp/Samples~/CustomInspectors"
-		},
-		{
-			"displayName" : "UdonSharp Tutorials",
-			"description" : "Tutorials Example",
-			"path" : "Integrations/UdonSharp/Samples~/Tutorials"
-		}
-	]
+  "name": "com.vrchat.worlds",
+  "displayName": "VRChat SDK - Worlds",
+  "version": "3.5.2",
+  "unity": "2022.3",
+  "description": "Tools for creating interactive VRChat worlds using Udon",
+  "dependencies": {
+    "com.unity.cinemachine": "2.9.7",
+    "com.unity.textmeshpro": "3.0.6",
+    "com.unity.inputsystem": "1.2.0"
+  },
+  "vpmDependencies": {
+    "com.vrchat.base": "3.5.2"
+  },
+  "author": {
+    "name": "VRChat",
+    "email": "developer@vrchat.com",
+    "url": "https://github.com/vrchat/packages"
+  },
+  "legacyFolders": {
+    "Assets\\VRCSDK": "",
+    "Assets\\Udon": "",
+    "Assets\\VRChat Examples": "",
+    "Packages\\com.vrchat.vrcsdk3": "",
+    "Assets\\UdonSharp": "b031f928e5c709b4887f6513084aaa51",
+    "Assets\\Gizmos\\UdonSharp": "6e940dfc89ce4ca41b651e05bc21be6b",
+    "Assets\\CyanEmu": "91b9a83a129504741a363d9a324de958"
+  },
+  "legacyPackages": [
+    "com.vrchat.clientsim",
+    "com.vrchat.udonsharp"
+  ],
+  "samples": [
+    {
+      "displayName": "UdonExampleScene",
+      "description": "Basic Udon Examples for Learning",
+      "path": "Samples/UdonExampleScene"
+    },
+    {
+      "displayName": "UdonSharp CustomInspectors",
+      "description": "Custom Inspector Example",
+      "path": "Integrations/UdonSharp/Samples~/CustomInspectors"
+    },
+    {
+      "displayName": "UdonSharp Tutorials",
+      "description": "Tutorials Example",
+      "path": "Integrations/UdonSharp/Samples~/Tutorials"
+    }
+  ]
 }

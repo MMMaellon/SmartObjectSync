@@ -1,12 +1,15 @@
-﻿using VRC.SDKBase.Editor.BuildPipeline;
+﻿#if VRC_SDK_VRCSDK3
+using VRC.SDKBase.Editor.BuildPipeline;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 
 namespace VRWorldToolkit.Editor
 {
-    public class DisableOnBuildCallback : IVRCSDKBuildRequestedCallback
+    public class DisableOnBuildCallback : IVRCSDKBuildRequestedCallback, IProcessSceneWithReport
     {
         public int callbackOrder => 1;
 
@@ -16,6 +19,12 @@ namespace VRWorldToolkit.Editor
             DisableOnBuildManager.ToggleObjectsUsingTag("EnableOnBuild", true, false);
 
             return true;
+        }
+
+        public void OnProcessScene(Scene scene, BuildReport report)
+        {
+            DisableOnBuildManager.ToggleObjectsUsingTag("DisableOnBuild", false, false);
+            DisableOnBuildManager.ToggleObjectsUsingTag("EnableOnBuild", true, false);
         }
     }
 
@@ -128,3 +137,4 @@ namespace VRWorldToolkit.Editor
         }
     }
 }
+#endif

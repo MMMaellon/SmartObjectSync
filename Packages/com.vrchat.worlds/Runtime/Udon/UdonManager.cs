@@ -32,6 +32,7 @@ namespace VRC.Udon
     public class UdonManager : MonoBehaviour, IUdonClientInterface
     {
         public static event Action<IUdonProgram> OnUdonProgramLoaded;
+        public static event Action OnUdonReady;
 
         public UdonBehaviour currentlyExecuting;
 
@@ -157,6 +158,9 @@ namespace VRC.Udon
 
         [PublicAPI]
         public const string UDON_LOOK_HORIZONTAL = "_inputLookHorizontal";
+        
+        [PublicAPI]
+        public const string UDON_EVENT_ONINPUTMETHODCHANGED = "_onInputMethodChanged";
 
         #endregion
 
@@ -603,6 +607,7 @@ namespace VRC.Udon
             {
                 PurgeSerializationCaches();
                 Logger.Log($"UdonManager.OnSceneLoaded took '{timer.Elapsed.TotalSeconds:N3}'");
+                OnUdonReady?.Invoke();
             }
         }
 

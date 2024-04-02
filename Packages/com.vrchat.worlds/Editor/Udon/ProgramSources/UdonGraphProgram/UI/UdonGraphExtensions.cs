@@ -337,6 +337,10 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
                 typeString = typeString.Replace("Array", "[]");
             }
 
+			typeString = typeString.Replace("SDK3PlayerData", "PlayerData"); // Should SDK3 just be removed always?
+            typeString = typeString.Replace("Getstring", "GetString");
+            typeString = typeString.Replace("Setstring", "SetString");
+
             typeString = typeString.Replace("SDK3VideoComponentsBaseBase", "");
             typeString = typeString.Replace("SDK3stringLoading", "");
             typeString = typeString.Replace("SDK3Image", "");

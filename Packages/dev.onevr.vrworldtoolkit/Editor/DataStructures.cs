@@ -15,6 +15,7 @@ namespace VRWorldToolkit.Editor
         public static GUIStyle TreeViewLabel { get; internal set; }
         public static GUIStyle TreeViewLabelSelected { get; internal set; }
         public static GUIStyle CenteredLabel { get; internal set; }
+        public static GUIStyle BuildReportStatsLabel { get; internal set; }
         public static GUIStyle Center { get; internal set; }
 
         static Styles()
@@ -89,6 +90,11 @@ namespace VRWorldToolkit.Editor
                     textColor = new Color(0.33f, 0.33f, 0.33f),
                 }
             };
+            
+            BuildReportStatsLabel = new GUIStyle("Label")
+            {
+                alignment = TextAnchor.MiddleRight,
+            };
 
             Center = new GUIStyle()
             {
@@ -101,7 +107,7 @@ namespace VRWorldToolkit.Editor
     {
         /// <summary>
         /// Sourced from the whitelist included in the VRCSDK
-        /// https://docs.vrchat.com/docs/quest-content-limitations
+        /// https://creators.vrchat.com/platforms/android/quest-content-limitations/
         /// </summary>
         public static readonly string[] WorldShaderWhiteList =
         {
@@ -121,9 +127,9 @@ namespace VRWorldToolkit.Editor
 
         /// <summary>
         /// Sourced from Unity documentation at:
-        /// https://docs.unity3d.com/2018.4/Documentation/Manual/class-TextureImporterOverride.html
+        /// https://docs.unity3d.com/2022.3/Documentation/Manual/class-TextureImporterOverride.html
         /// </summary>
-        public static readonly TextureImporterFormat[] UnsupportedCompressionFormatsQuest =
+        public static readonly TextureImporterFormat[] UnsupportedCompressionFormatsAndroid =
         {
             TextureImporterFormat.DXT1,
             TextureImporterFormat.DXT5,

@@ -37,16 +37,16 @@ namespace VRWorldToolkit.Editor
         {
             public string AssetType { get; set; }
             public string FullPath { get; set; }
-            public int Size { get; set; }
+            public ulong Size { get; set; }
             public double Percentage { get; set; }
 
             public BuildListAsset()
             {
             }
 
-            public BuildListAsset(string assetType, string fullPath, int size)
+            public BuildListAsset(Type assetType, string fullPath, ulong size)
             {
-                AssetType = assetType;
+                AssetType = assetType.Name;
                 FullPath = fullPath;
                 Size = size;
             }
@@ -58,10 +58,10 @@ namespace VRWorldToolkit.Editor
             public string assetType { get; set; }
             public string path { get; set; }
             public string extension { get; set; }
-            public int size { get; set; }
+            public ulong size { get; set; }
             public double percentage { get; set; }
 
-            public BuildReportItem(int id, int depth, Texture previewIcon, string assetType, string displayName, string path, string extension, int size, double percentage) : base(id, depth, displayName)
+            public BuildReportItem(int id, int depth, Texture previewIcon, string assetType, string displayName, string path, string extension, ulong size, double percentage) : base(id, depth, displayName)
             {
                 this.previewIcon = previewIcon;
                 this.assetType = assetType;
@@ -77,42 +77,18 @@ namespace VRWorldToolkit.Editor
         {
             var root = new TreeViewItem {id = -1, depth = -1};
 
-            var serializedReport = new SerializedObject(report);
+            var packedAssets = report.packedAssets;
 
             var bl = new List<BuildListAsset>();
 
-            var appendices = serializedReport.FindProperty("m_Appendices");
-
-            for (var i = 0; i < appendices.arraySize; i++)
+            for (var i = 0; i < packedAssets.Length; i++)
             {
-                var appendix = appendices.GetArrayElementAtIndex(i);
-
-                if (appendix.objectReferenceValue.GetType() != typeof(PackedAssets)) continue;
-
-                var serializedAppendix = new SerializedObject(appendix.objectReferenceValue);
-
-                if (serializedAppendix.FindProperty("m_ShortPath") is null) continue;
-
-                var contents = serializedAppendix.FindProperty("m_Contents");
-
-                for (var j = 0; j < contents.arraySize; j++)
+                var packedAssetInfos = packedAssets[i].contents;
+                for (int j = 0; j < packedAssetInfos.Length; j++)
                 {
-                    var entry = contents.GetArrayElementAtIndex(j);
-
-                    var fullPath = entry.FindPropertyRelative("buildTimeAssetPath").stringValue;
-
-                    var assetImporter = AssetImporter.GetAtPath(fullPath);
-
-                    var type = assetImporter != null ? assetImporter.GetType().Name : "Unknown";
-
-                    if (type.EndsWith("Importer"))
-                    {
-                        type = type.Remove(type.Length - 8);
-                    }
-
-                    var byteSize = entry.FindPropertyRelative("packedSize").intValue;
-
-                    var asset = new BuildListAsset(type, fullPath, byteSize);
+                    var packedAssetInfo = packedAssetInfos[j];
+                    
+                    var asset = new BuildListAsset(packedAssetInfo.type, packedAssetInfo.sourceAssetPath, packedAssetInfo.packedSize);
 
                     bl.Add(asset);
                 }
@@ -124,7 +100,7 @@ namespace VRWorldToolkit.Editor
                 {
                     AssetType = cx.First().AssetType,
                     FullPath = cx.First().FullPath,
-                    Size = cx.Sum(x => x.Size),
+                    Size = cx.Aggregate(0UL, (total, x) => total + x.Size),
                 })
                 .OrderByDescending(x => x.Size)
                 .ToList();
@@ -175,7 +151,7 @@ namespace VRWorldToolkit.Editor
         private struct CategoryStats
         {
             public string Name;
-            public int Size;
+            public ulong Size;
         }
 
         /// <summary>
@@ -187,14 +163,14 @@ namespace VRWorldToolkit.Editor
             {
                 var stats = base.GetRows().Cast<BuildReportItem>().ToList();
 
-                var totalSize = stats.Sum(x => x.size);
+                var totalSize = stats.Aggregate(0UL, (total, x) => total + x.size);
 
                 var grouped = stats
                     .GroupBy(x => x.assetType)
                     .Select(cx => new CategoryStats()
                     {
                         Name = cx.First().assetType,
-                        Size = cx.Sum(x => x.size),
+                        Size = cx.Aggregate(0UL, (total, x) => total + x.size),
                     }).OrderByDescending(x => x.Size)
                     .ToArray();
 
@@ -225,7 +201,17 @@ namespace VRWorldToolkit.Editor
                             break;
                     }
 
-                    if (GUILayout.Button(name + " -  " + EditorUtility.FormatBytes(item.Size) + " - " + ((double) item.Size / totalSize).ToString("P"), EditorStyles.label))
+                    var rect = GUILayoutUtility.GetRect(GUIContent.none, EditorStyles.label);
+                    var barGraphRect = rect;
+
+                    barGraphRect.width *= (float)((double)item.Size / totalSize);
+                    EditorGUI.DrawRect(barGraphRect, new Color(0.28f, 0.37f, 0.51f, 0.6f));
+                    EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
+                    
+                    GUI.Label(rect , name + " - " + EditorUtility.FormatBytes((long)item.Size), EditorStyles.label);
+                    GUI.Label(rect, ((double)item.Size / totalSize).ToString("P"), Styles.BuildReportStatsLabel);
+
+                    if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
                     {
                         searchString = item.Name;
                     }
@@ -406,7 +392,7 @@ namespace VRWorldToolkit.Editor
                         //EditorGUI.LabelField(rect, buildReportItem.extension, labelStyle);
                         break;
                     case TreeColumns.Size:
-                        EditorGUI.LabelField(rect, EditorUtility.FormatBytes(buildReportItem.size), labelStyle);
+                        EditorGUI.LabelField(rect, EditorUtility.FormatBytes((long)buildReportItem.size), labelStyle);
                         break;
                     case TreeColumns.Percentage:
                         EditorGUI.LabelField(rect, buildReportItem.percentage.ToString("P"), labelStyle);
@@ -451,6 +437,7 @@ namespace VRWorldToolkit.Editor
             // Create the menu items
             menu.AddItem(new GUIContent("Copy Name"), false, ReplaceClipboard, clickedItem.displayName + clickedItem.extension);
             menu.AddItem(new GUIContent("Copy Path"), false, ReplaceClipboard, clickedItem.path);
+            menu.AddItem(new GUIContent("Select in Assets"), false, SelectAssetsInProjectWindow);
 
             // Show the menu
             menu.ShowAsContext();
@@ -460,6 +447,31 @@ namespace VRWorldToolkit.Editor
             {
                 EditorGUIUtility.systemCopyBuffer = (string) input;
             }
+        }
+        
+        /// <summary>
+        /// Selects assets in the Project window based on the currently selected BuildReportItems.
+        /// This is useful for quickly selecting a batch of assets to modify their import settings or other properties in bulk.
+        /// </summary>
+        private void SelectAssetsInProjectWindow()
+        {
+            // Retrieve the IDs of currently selected items
+            var selectedItems = GetSelection();
+            var assetPaths = new List<string>();
+
+            // Iterate over each selected item and collect their asset paths
+            foreach (var itemId in selectedItems)
+            {
+                var item = FindItem(itemId, rootItem) as BuildReportItem;
+                if (item != null && !string.IsNullOrEmpty(item.path))
+                {
+                    assetPaths.Add(item.path);
+                }
+            }
+
+            // Load and select the assets in the Project window
+            var assets = assetPaths.Select(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>).ToArray();
+            Selection.objects = assets;
         }
 
         /// <summary>

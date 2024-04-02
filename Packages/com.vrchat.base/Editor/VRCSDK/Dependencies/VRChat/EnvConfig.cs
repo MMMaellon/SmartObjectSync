@@ -1058,7 +1058,7 @@ namespace VRC.Editor
             #pragma warning restore 618
             }
             
-            #if (UNITY_ANDROID || UNITY_IOS) && VRC_ENABLE_MOBILE_GRAPHICS_JOBS
+            #if (UNITY_ANDROID || UNITY_IOS) && !VRC_DISABLE_MOBILE_GRAPHICS_JOBS
             PlayerSettings.graphicsJobs = true;
             #else
             PlayerSettings.graphicsJobs = false;

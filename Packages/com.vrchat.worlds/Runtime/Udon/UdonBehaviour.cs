@@ -16,6 +16,7 @@ using VRC.Udon.Serialization.OdinSerializer;
 using VRC.Udon.VM;
 using Logger = VRC.Core.Logger;
 using Object = UnityEngine.Object;
+using SyncType = VRC.SDKBase.Networking.SyncType;
 
 #if VRC_CLIENT
 using VRC.Core;
@@ -59,17 +60,17 @@ namespace VRC.Udon
 
         // ReSharper disable once InconsistentNaming
         [SerializeField]
-        private Networking.SyncType _syncMethod = Networking.SyncType.Unknown;
+        private SyncType _syncMethod = SyncType.Unknown;
 
-        public Networking.SyncType SyncMethod
+        public SyncType SyncMethod
         {
             get 
             {
                 // Old Scene?
-                if(_syncMethod == Networking.SyncType.Unknown)
+                if(_syncMethod == SyncType.Unknown)
                 {
 #pragma warning disable 618
-                    _syncMethod = Reliable ? Networking.SyncType.Manual : Networking.SyncType.Continuous;
+                    _syncMethod = Reliable ? SyncType.Manual : SyncType.Continuous;
 #pragma warning restore 618
                 }
 
@@ -78,7 +79,7 @@ namespace VRC.Udon
             set
             {
                 _syncMethod = value;
-                if(value == Networking.SyncType.None)
+                if(value == SyncType.None)
                 {
                     return;
                 }
@@ -92,7 +93,7 @@ namespace VRC.Udon
                 {
                     foreach(UdonBehaviour ub in behaviours)
                     {
-                        if(ub != null && ub._syncMethod != Networking.SyncType.None)
+                    if(ub != null && ub._syncMethod != SyncType.None)
                         {
                             ub._syncMethod = value;
                         }
@@ -101,8 +102,8 @@ namespace VRC.Udon
             }
         }
 
-        public bool SyncIsContinuous => SyncMethod == Networking.SyncType.Continuous;
-        public bool SyncIsManual => SyncMethod == Networking.SyncType.Manual;
+        public bool SyncIsContinuous => SyncMethod == SyncType.Continuous;
+        public bool SyncIsManual => SyncMethod == SyncType.Manual;
 
         #endregion
 
@@ -951,7 +952,7 @@ namespace VRC.Udon
         [PublicAPI]
         public void OnPreSerialization()
         {
-            if(_syncMethod == Networking.SyncType.None)
+            if(_syncMethod == SyncType.None)
             {
                 return;
             }
@@ -963,7 +964,7 @@ namespace VRC.Udon
         [PublicAPI]
         public void OnPostSerialization(SerializationResult result)
         {
-            if(_syncMethod == Networking.SyncType.None)
+            if(_syncMethod == SyncType.None)
             {
                 return;
             }
@@ -975,7 +976,7 @@ namespace VRC.Udon
         [PublicAPI]
         public void OnDeserialization(DeserializationResult result)
         {
-            if(_syncMethod == Networking.SyncType.None)
+            if(_syncMethod == SyncType.None)
             {
                 return;
             }
@@ -1040,8 +1041,9 @@ namespace VRC.Udon
             }
             catch (UdonVMException error)
             {
+                string errorStr = error.ToString();
                 Logger.LogError(
-                    $"An exception occurred during Udon execution, this UdonBehaviour will be halted.\n{error}",
+                    "An exception occurred during Udon execution, this UdonBehaviour will be halted.\n" + errorStr,
                     _debugLevel,
                     this);
 
@@ -1676,7 +1678,7 @@ namespace VRC.Udon
         private static void LoopbackSendCustomNetworkEvent(UdonBehaviour target, NetworkEventTarget netTarget,
             string eventName)
         {
-            if(target == null || target.SyncMethod == Networking.SyncType.None || string.IsNullOrEmpty(eventName))
+            if(target == null || target.SyncMethod == SyncType.None || string.IsNullOrEmpty(eventName))
                 return;
 
             if(eventName[0] == '_')

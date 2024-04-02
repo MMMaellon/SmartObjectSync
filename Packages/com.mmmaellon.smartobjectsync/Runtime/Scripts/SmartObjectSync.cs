@@ -29,6 +29,7 @@ namespace MMMaellon
         SerializedProperty m_worldSpacePhysics;
         SerializedProperty m_preventStealWhileAttachedToPlayer;
         SerializedProperty m_startingState;
+        SerializedProperty m_checkSyncTimes;
         void OnEnable()
         {
             m_printDebugMessages = serializedObject.FindProperty("printDebugMessages");
@@ -42,6 +43,7 @@ namespace MMMaellon
             m_worldSpacePhysics = serializedObject.FindProperty("worldSpacePhysics");
             m_preventStealWhileAttachedToPlayer = serializedObject.FindProperty("preventStealWhileAttachedToPlayer");
             m_startingState = serializedObject.FindProperty("startingState");
+            m_checkSyncTimes = serializedObject.FindProperty("checkSyncTimes");
         }
 
         public static void _print(SmartObjectSync sync, string message)
@@ -257,6 +259,7 @@ namespace MMMaellon
                 EditorGUILayout.PropertyField(m_worldSpacePhysics);
                 EditorGUILayout.PropertyField(m_preventStealWhileAttachedToPlayer);
                 EditorGUILayout.PropertyField(m_startingState);
+                EditorGUILayout.PropertyField(m_checkSyncTimes);
                 serializedObject.ApplyModifiedProperties();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
@@ -304,6 +307,8 @@ namespace MMMaellon
         public bool respawnIntoStartingState = true;
         [HideInInspector]
         public SmartObjectSyncState startingState = null;
+        [HideInInspector]
+        public bool checkSyncTimes = false;
         [HideInInspector]
         public VRC_Pickup pickup;
         [HideInInspector]
@@ -1011,7 +1016,7 @@ namespace MMMaellon
         float lastSuccessfulNetworkSync = -1001f;
         public override void OnDeserialization(VRC.Udon.Common.DeserializationResult result)
         {
-            if (result.sendTime < last_send_time)
+            if (checkSyncTimes && result.sendTime < last_send_time)
             {
                 //we fucking got updates out of order auuuuuuuuugghhhh
                 pos = _cache_pos;
