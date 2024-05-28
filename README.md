@@ -1,3 +1,7 @@
+# DEPRECATED
+Use [LightSync](https://github.com/MMMaellon/LightSync) instead.
+SmartObjectSync still works as of May 2024. I just won't be adding any new features or fixing bugs because LightSync does the same thing but better.
+
 # SmartObjectSync
 
 ## Ask questions on my Discord Server: <https://discord.gg/S5sDC4PnFp>
