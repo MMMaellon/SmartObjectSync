@@ -1263,6 +1263,10 @@ namespace MMMaellon
             Networking.SetOwner(Networking.LocalPlayer, gameObject);
         }
 
+        public void _TakeOwnership(){
+            TakeOwnership(false);
+        }
+
         //STATES
         //If Udon supported custom classes that aren't subclasses of UdonBehaviour, these would be in separate files
         //Look at the 2.0 Prerelease on the github if you want to see what I mean
