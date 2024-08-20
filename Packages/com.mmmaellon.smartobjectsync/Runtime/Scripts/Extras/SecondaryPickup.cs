@@ -93,7 +93,7 @@ namespace MMMaellon
 
         public override void OnChangeOwner(SmartObjectSync s, VRCPlayerApi oldPlayer, VRCPlayerApi newPlayer)
         {
-            if (allowDifferentPickupOwners || !newPlayer.isLocal)
+            if (allowDifferentPickupOwners || !Utilities.IsValid(newPlayer) || !newPlayer.isLocal)
             {
                 return;
             }
