@@ -1,7 +1,7 @@
-# DEPRECATED
+# STABLE BUT DEPRECATED
 SmartObjectSync still works as of May 2024, and if you've been using it in your projects, I would continue to use it.
 I just won't be adding any new features or fixing bugs because LightSync aims to do the same thing but better.
-If it has been a long time since May 2024, you should probably use [LightSync](https://github.com/MMMaellon/LightSync) instead.
+If it has been a long time since May 2024, you should probably check the status of [LightSync](https://github.com/MMMaellon/LightSync). That prefab is still getting new features and may be unstable, but it'll have new features
 
 # SmartObjectSync
 
