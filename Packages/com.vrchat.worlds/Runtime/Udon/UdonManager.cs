@@ -3,10 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using JetBrains.Annotations;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VRC.SDK3.Components;
 using VRC.Udon.ClientBindings;
 using VRC.Udon.ClientBindings.Interfaces;
 using VRC.Udon.Common;
@@ -14,12 +16,14 @@ using VRC.Udon.Common.Enums;
 using VRC.Udon.Common.Interfaces;
 using VRC.Udon.Serialization.OdinSerializer;
 using VRC.Udon.Serialization.OdinSerializer.Utilities;
+using VRC.Udon.VM;
 using Logger = VRC.Core.Logger;
 using Object = UnityEngine.Object;
 
 #if VRC_CLIENT
 using VRC.Core;
 using VRC.Core.Pool;
+using System.Collections.Concurrent;
 #endif
 
 #if ENABLE_PARALLEL_PRELOAD
@@ -36,6 +40,8 @@ namespace VRC.Udon
 
         public UdonBehaviour currentlyExecuting;
 
+        public bool HasLoaded { get; private set; } = false;
+        
         #region Singleton
 
         private static UdonManager _instance;
@@ -66,9 +72,16 @@ namespace VRC.Udon
 
         private bool _isUdonEnabled = true;
 
+        private bool _isRunningEvent;
+
         private readonly Dictionary<Scene, Dictionary<GameObject, HashSet<UdonBehaviour>>>
             _sceneUdonBehaviourDirectories =
                 new Dictionary<Scene, Dictionary<GameObject, HashSet<UdonBehaviour>>>();
+
+        private readonly HashSet<UdonBehaviour> _udonBehavioursToRegister = new HashSet<UdonBehaviour>();
+        
+        // depth counter is unique to each thread
+        private ThreadLocal<int> _udonRunProgramDepth; 
 
         #region Private Update Data
 
@@ -117,7 +130,28 @@ namespace VRC.Udon
         public const string UDON_EVENT_ONPLAYERRESPAWN = "_onPlayerRespawn";
         
         [PublicAPI]
+        public const string UDON_EVENT_ONPLAYERDATAUPDATED = "_onPlayerDataUpdated";
+        
+        [PublicAPI]
+        public const string UDON_EVENT_ONPLAYERRESTORED = "_onPlayerRestored";
+        
+        [PublicAPI]
+        public const string UDON_EVENT_ONINSTANCERESTORED = "_onInstanceRestored";
+        
+        [PublicAPI]
+        public const string UDON_EVENT_ONDESERIALIZATION = "_onDeserialization";
+        
+        [PublicAPI]
         public const string UDON_EVENT_ONSCREENUPDATE = "_onScreenUpdate";
+        
+        private const int UDON_MAX_RUNPROGRAM_DEPTH = 1000;
+
+        [PublicAPI]
+        public const string UDON_EVENT_ONPOSTSERIALIZATION = "_onPostSerialization";
+
+        [PublicAPI]
+        public const string UDON_EVENT_ONPRESERIALIZATION = "_onPreSerialization";
+        
 
         #region Input Actions and Axes
 
@@ -158,12 +192,18 @@ namespace VRC.Udon
 
         [PublicAPI]
         public const string UDON_LOOK_HORIZONTAL = "_inputLookHorizontal";
-        
+
         [PublicAPI]
         public const string UDON_EVENT_ONINPUTMETHODCHANGED = "_onInputMethodChanged";
 
+        [PublicAPI]
+        public const string UDON_EVENT_ONLANGUAGECHANGED = "_onLanguageChanged";
+        
         #endregion
 
+        [PublicAPI]
+        public const string UDON_EVENT_ONVRCPLUSMASSGIFT = "_onVRCPlusMassGift";
+        
         #endregion
 
         private readonly IUdonClientInterface _udonClientInterface = new UdonClientInterface();
@@ -196,9 +236,46 @@ namespace VRC.Udon
                     }
                 }
             }
+            
+            udonManager.HasLoaded = true;
         }
         #endif
 
+        #endregion
+
+        #region Signature Verification
+        #if VRC_CLIENT
+
+        private int _signatureVerificationFailed;
+        public int SignatureVerificationFailed => _signatureVerificationFailed;
+        private int _signatureVerificationSuccess;
+        public int SignatureVerificationSuccess => _signatureVerificationSuccess;
+        private int _signatureVerificationSkipped;
+        public int SignatureVerificationSkipped => _signatureVerificationSkipped;
+
+        public bool SignatureVerificationEnabled { get; private set; }
+        private VRCFastCrypto_Client.VerifyKey _signatureVerificationKey;
+
+        // used as thread-safe HashSet for signature holders, since we loop behaviours but verify programs
+        private readonly ConcurrentDictionary<IUdonSignatureHolder, byte> _verificationCache = new();
+
+        public void ResetSignatureVerification()
+        {
+            SignatureVerificationEnabled = false;
+            _signatureVerificationKey = default;
+            _signatureVerificationFailed = 0;
+            _signatureVerificationSuccess = 0;
+            _signatureVerificationSkipped = 0;
+            _verificationCache.Clear();
+        }
+
+        public void EnableSignatureVerification(byte[] key)
+        {
+            SignatureVerificationEnabled = true;
+            _signatureVerificationKey = new VRCFastCrypto_Client.VerifyKey(key);
+        }
+
+        #endif
         #endregion
 
         #region Unity Event Methods
@@ -228,6 +305,7 @@ namespace VRC.Udon
 
             _udonTimeSource = new UdonTimeSource();
             _udonEventScheduler = new UdonEventScheduler(_udonTimeSource);
+            _udonRunProgramDepth = new ThreadLocal<int>();
             _postLateUpdater = gameObject.AddComponent<PostLateUpdater>();
             _postLateUpdater.udonManager = this;
             if(!Application.isPlaying)
@@ -399,10 +477,29 @@ namespace VRC.Udon
                 _postLateUpdateUdonBehaviours.RemoveWhere(o => o == null);
             }
         }
-
+        
+        private void OnDestroy()
+        {
+            _udonRunProgramDepth?.Dispose();
+            _udonRunProgramDepth = null;
+        }
         #endregion
 
         #region Input Methods
+
+        public T GetWrapperModule<T>(string wrapperModuleName) where T : IUdonWrapperModule
+        {
+            try
+            {
+                return (T)_udonClientInterface.GetWrapper().GetWrapperModuleByName(wrapperModuleName);
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogException(e);
+            }
+
+            return default(T);
+        }
 
         [PublicAPI]
         public void RegisterInput(UdonBehaviour udonBehaviour, string udonEventName, bool doRegister)
@@ -611,6 +708,26 @@ namespace VRC.Udon
             }
         }
 
+        internal void VerifySignature(IUdonSignatureHolder signatureHolder)
+        {
+#if VRC_CLIENT
+            if (SignatureVerificationEnabled && signatureHolder != null && !signatureHolder.IsInternallyValidated && _verificationCache.TryAdd(signatureHolder, 0))
+            {
+                var data = signatureHolder.SignedData;
+                var signature = signatureHolder.Signature;
+                var result = VRCFastCrypto_Client.VerifyMessage(_signatureVerificationKey, data, signature);
+                if (result is VRCFastCrypto_Client.LibResult.Success)
+                    Interlocked.Increment(ref _signatureVerificationSuccess);
+                else
+                    Interlocked.Increment(ref _signatureVerificationFailed);
+            }
+            else
+            {
+                Interlocked.Increment(ref _signatureVerificationSkipped);
+            }
+#endif
+        }
+
         [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void ProcessUdonProgram(IUdonProgram udonProgram)
         {
@@ -706,6 +823,33 @@ namespace VRC.Udon
             _isUdonEnabled = isEnabled;
         }
 
+        public void IncrementDepthCount()
+        {
+            // avoid accessing disposed or null value 
+            if (_udonRunProgramDepth != null)
+            {
+                _udonRunProgramDepth.Value++;
+                if (_udonRunProgramDepth.Value == UDON_MAX_RUNPROGRAM_DEPTH)
+                {
+                    _udonRunProgramDepth.Value = 0;
+                    throw new UdonVMException(
+                        $"Stack overflow detected. Recursion depth of UdonBehaviour exceeded the limit.");
+                }
+            }
+        }
+
+        public void DecrementDepthCount()
+        {
+            // avoid accessing disposed or null value 
+            if (_udonRunProgramDepth != null)
+            {
+                _udonRunProgramDepth.Value--;
+                if (_udonRunProgramDepth.Value < 0)
+                {
+                    _udonRunProgramDepth.Value = 0;
+                }
+            }
+        }
         #endregion
 
         #region IUdonClientInterface Methods
@@ -766,6 +910,16 @@ namespace VRC.Udon
         [PublicAPI]
         public void RegisterUdonBehaviour(UdonBehaviour udonBehaviour)
         {
+            // if an event is currently being processed, wait till after to add it to our dictionaries
+            // we still need to call InitializeUdonContent though, so code in the event executing can access the behaviour immediately
+            // InitializeUdonContent can be called multiple times with no issue
+            if (_isRunningEvent)
+            {
+                udonBehaviour.InitializeUdonContent();
+                _udonBehavioursToRegister.Add(udonBehaviour);
+                return;
+            }
+            
             GameObject udonBehaviourGameObject = udonBehaviour.gameObject;
             Scene udonBehaviourScene = udonBehaviourGameObject.scene;
             if(!_sceneUdonBehaviourDirectories.TryGetValue(
@@ -790,6 +944,31 @@ namespace VRC.Udon
 
             udonBehaviour.InitializeUdonContent();
         }
+        
+        [PublicAPI]
+        public void UnregisterUdonBehaviour(UdonBehaviour udonBehaviour)
+        {
+            GameObject udonBehaviourGameObject = udonBehaviour.gameObject;
+            Scene udonBehaviourScene = udonBehaviourGameObject.scene;
+            if(!_sceneUdonBehaviourDirectories.TryGetValue(
+                   udonBehaviourScene,
+                   out Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory))
+            {
+                return;
+            }
+            sceneUdonBehaviourDirectory.Remove(udonBehaviourGameObject);
+            _udonBehavioursToRegister.Remove(udonBehaviour);
+        }
+
+        
+        private void CheckUdonBehavioursToRegister()
+        {
+            if (_udonBehavioursToRegister.Count > 0)
+            {
+                _udonBehavioursToRegister.ForEach(RegisterUdonBehaviour);
+                _udonBehavioursToRegister.Clear();
+            }
+        }
 
         public List<UdonBehaviour> UdonBehavioursInScene = new List<UdonBehaviour>();
         [PublicAPI]
@@ -797,7 +976,7 @@ namespace VRC.Udon
         {
             UdonBehavioursInScene.Clear();
             foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in
-                    _sceneUdonBehaviourDirectories.Values)
+                _sceneUdonBehaviourDirectories.Values)
             {
                 foreach(HashSet<UdonBehaviour> udonBehaviourList in sceneUdonBehaviourDirectory.Values)
                 {
@@ -819,8 +998,9 @@ namespace VRC.Udon
         [PublicAPI]
         public void RunEvent(string eventName)
         {
+            _isRunningEvent = true;
             foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in
-                    _sceneUdonBehaviourDirectories.Values)
+                _sceneUdonBehaviourDirectories.Values)
             {
                 foreach(HashSet<UdonBehaviour> udonBehaviourList in sceneUdonBehaviourDirectory.Values)
                 {
@@ -833,11 +1013,14 @@ namespace VRC.Udon
                     }
                 }
             }
+            _isRunningEvent = false;
+            CheckUdonBehavioursToRegister();
         }
 
         [PublicAPI]
         public void RunEvent<T0>(string eventName, (string symbolName, T0 value) parameter0)
         {
+            _isRunningEvent = true;
             foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in
                 _sceneUdonBehaviourDirectories.Values)
             {
@@ -852,11 +1035,14 @@ namespace VRC.Udon
                     }
                 }
             }
+            _isRunningEvent = false;
+            CheckUdonBehavioursToRegister();
         }
 
         [PublicAPI]
         public void RunEvent<T0, T1>(string eventName, (string symbolName, T0 value) parameter0, (string symbolName, T1 value) parameter1)
         {
+            _isRunningEvent = true;
             foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in
                 _sceneUdonBehaviourDirectories.Values)
             {
@@ -871,11 +1057,14 @@ namespace VRC.Udon
                     }
                 }
             }
+            _isRunningEvent = false;
+            CheckUdonBehavioursToRegister();
         }
 
         [PublicAPI]
         public void RunEvent<T0, T1, T2>(string eventName, (string symbolName, T0 value) parameter0, (string symbolName, T1 value) parameter1, (string symbolName, T2 value) parameter2)
         {
+            _isRunningEvent = true;
             foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in
                 _sceneUdonBehaviourDirectories.Values)
             {
@@ -890,11 +1079,14 @@ namespace VRC.Udon
                     }
                 }
             }
+            _isRunningEvent = false;
+            CheckUdonBehavioursToRegister();
         }
 
         [PublicAPI]
         public void RunEvent(string eventName, params (string symbolName, object value)[] eventParameters)
         {
+            _isRunningEvent = true;
             foreach(Dictionary<GameObject, HashSet<UdonBehaviour>> sceneUdonBehaviourDirectory in
                 _sceneUdonBehaviourDirectories.Values)
             {
@@ -909,6 +1101,8 @@ namespace VRC.Udon
                     }
                 }
             }
+            _isRunningEvent = false;
+            CheckUdonBehavioursToRegister();
         }
 
         //Run an udon event on a specific gameObject

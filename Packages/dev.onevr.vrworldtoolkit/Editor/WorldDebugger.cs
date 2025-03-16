@@ -1,5 +1,15 @@
 ﻿#if VRC_SDK_VRCSDK3
 #define VRWT_IS_VRC
+using VRC.Core;
+using VRC.SDKBase;
+#endif
+
+#if UNITY_EDITOR_WIN
+using Microsoft.Win32;
+#endif
+
+#if UNITY_POST_PROCESSING_STACK_V2
+using UnityEngine.Rendering.PostProcessing;
 #endif
 
 using System;
@@ -12,27 +22,16 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-#if UNITY_EDITOR_WIN
-using Microsoft.Win32;
-#endif
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.IMGUI.Controls;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
-#if UNITY_POST_PROCESSING_STACK_V2
-using UnityEngine.Rendering.PostProcessing;
-#endif
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-#if VRWT_IS_VRC
-using VRC.Core;
-using VRC.SDKBase;
-#endif
 using Object = UnityEngine.Object;
 using Debug = UnityEngine.Debug;
 
@@ -1105,66 +1104,7 @@ namespace VRWorldToolkit.Editor
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
             };
         }
-
-#if VRWT_IS_VRC
-        public static Action FixVRCProjectSettings(VRCProjectSettings settings)
-        {
-            return () =>
-            {
-                // TODO: Cleaner solution to storing these
-                var newLayers = new[] { "Default", "TransparentFX", "Ignore Raycast", "", "Water", "UI", "", "", "Interactive", "Player", "PlayerLocal", "Environment", "UiMenu", "Pickup", "PickupNoEnvironment", "StereoLeft", "StereoRight", "Walkthrough", "MirrorReflection", "reserved2", "reserved3", "reserved4" };
-
-                var newCollisionArr = new[]
-                {
-                    true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
-                    false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, false, false, false, false, false, true,
-                    true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, false, false, false, false, false, true, true, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, false, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, true, true, true, false,
-                    false, true, false, true, true, true, true, true, false, false, false, false, true, true, true, true, true, true, true, true, true, true, false, false, false, true, false, false, true, true, false, false, false, false, false, true, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false,
-                    false, true, true, true, true, true, false, true, true, true, false, false, true, false, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, false, false, true, false, true, true, false, false, true, true, true, true, true, false,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false,
-                    true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true,
-                    false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, true, false, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true
-                };
-
-                var so = new SerializedObject(settings);
-
-                var layersSerializedProperty = so.FindProperty("layers");
-
-                layersSerializedProperty.arraySize = newLayers.Length;
-                for (var i = 0; i < newLayers.Length; i++)
-                {
-                    layersSerializedProperty.GetArrayElementAtIndex(i).stringValue = newLayers[i];
-                }
-
-                so.FindProperty("numLayers").intValue = 22;
-
-                var collisionArr = so.FindProperty("layerCollisionArr");
-
-                collisionArr.arraySize = newCollisionArr.Length;
-                for (var i = 0; i < newCollisionArr.Length; i++)
-                {
-                    collisionArr.GetArrayElementAtIndex(i).boolValue = newCollisionArr[i];
-                }
-
-                so.ApplyModifiedProperties();
-
-                var systemType = Assembly.Load("VRCCore-Editor").GetType("UpdateLayers");
-                var setupLayersToSet = systemType.GetMethod("SetupLayersToSet", BindingFlags.Static | BindingFlags.NonPublic);
-                Assert.IsNotNull(setupLayersToSet);
-                setupLayersToSet.Invoke(null, null);
-            };
-        }
-#endif
-
+        
         public static Action SetErrorPause(bool enabled)
         {
             return () => { ConsoleFlagUtil.SetConsoleErrorPause(enabled); };
@@ -1180,14 +1120,7 @@ namespace VRWorldToolkit.Editor
         {
             return UpdateLayers.SetupCollisionLayerMatrix;
         }
-#endif
 
-        public static Action SetFutureProofPublish(bool state)
-        {
-            return () => { EditorPrefs.SetBool("futureProofPublish", state); };
-        }
-
-#if VRWT_IS_VRC
         public static Action SetReferenceCamera(VRC_SceneDescriptor descriptor, Camera camera)
         {
             return () =>
@@ -1272,10 +1205,6 @@ namespace VRWorldToolkit.Editor
 
         private const string DifferingSanitizedBuildPath = "The last build path differs from the one seen by the VRCSDK. This can happen with certain characters that get stripped from the path only during Build & Publish. The build path is created using the Company and Product name in the projects Player Settings.";
 
-        private const string ImproperlySetupVRCProjectSettings = "Improperly setup VRCProjectSettings detected. This will cause the Control Panel Builder tab to appear empty.";
-
-        private const string VRCProjectSettingsMissing = "VRCProjectSettings not found. The SDK needs it, and missing it will cause the SDK to error out. To fix the problem, reimport the SDK.";
-
         private const string LastBuildFailed = "Last build failed! Check the Console for compile errors to find the cause. If the error script is in the SDK, try reimporting it. Otherwise, remove or update the problem asset.";
 
         private const string NoSpawnPointSet = "There are no spawn points set in your Scene Descriptor. Spawning into a world with no spawn point will cause you to get thrown back to your homeworld.";
@@ -1353,8 +1282,10 @@ namespace VRWorldToolkit.Editor
         private const string NoLightmapUV = "The model found in the scene \"{0}\" is set to be lightmapped, but does not have Lightmap UVs.";
         private const string NoLightmapUVCombined = "The current scene has {0} models set to be lightmapped that do not have Lightmap UVs.";
         private const string NoLightmapUVInfo = "This can cause issues when baking lighting if the main UV is not suitable for lightmapping. You can enable generating Lightmap UVs in the model's import settings.";
-
+        
         private const string LightsNotBaked = "The current scene is using realtime lighting. Consider baked lighting for improved performance.";
+        
+        private const string NoLightingSettingsAsset = "The current scene is using baked lighting but does not have a Lighting Settings Asset.";
 
         private const string ConsiderLargerLightmaps = "Possibly unoptimized lighting setup detected with a high amount of separate lightmaps compared to the currently set Lightmap Size.\nConsider increasing Lightmap Size from {0} to 2048 or larger and adjusting the individual Scale In Lightmap value on mesh renderers to fit things on a smaller amount of lightmaps.";
 
@@ -1364,7 +1295,9 @@ namespace VRWorldToolkit.Editor
         private const string NonBakedBakedLightCombined = "The scene contains {0} baked/mixed lights that have not been baked!";
         private const string NonBakedBakedLightInfo = "Baked lights that have not been baked yet function as realtime lights in-game.";
 
-        private const string LightingDataAssetInfo = "The current scene's lighting data asset takes up {0} MB of the world's size. This contains the scene's light probe data and realtime GI data.";
+        private const string LightingDataAssetInfo = "The current scene's lighting data asset takes up {0} MB of the world's size. It contains the lighting information for the scene, such as light probe data and realtime GI data.";
+        
+        private const string NoLightingDataAsset = "You appear to are using baked lighting but your scene does not have a Lighting Data Asset currently. Bake your lights to generate one.";
 
         private const string NoLightProbes = "No light probes found in the current scene. Without light probes, baked lights are not able to affect dynamic objects such as players and pickups.";
 
@@ -1376,7 +1309,7 @@ namespace VRWorldToolkit.Editor
 
         private const string OverlappingLightProbes = "Light Probe Group \"{0}\" has {1} overlapping light probes.";
         private const string OverlappingLightProbesCombined = "Found {0} Light Probe Groups with overlapping light probes.";
-        private const string OverlappingLightProbesInfo = "These can cause a slowdown in the editor and will not get baked because Unity will skip any extra overlapping probes.";
+        private const string OverlappingLightProbesInfo = "These will not get baked because Unity will skip any extra overlapping probes and can cause an unnecessary slowdown in the editor.";
 
         private const string NoReflectionProbes = "The current scene has no active reflection probes. Reflection probes are needed to have proper reflections on reflective materials.";
 
@@ -1386,6 +1319,8 @@ namespace VRWorldToolkit.Editor
         private const string ReflectionProbeCountText = "The current scene has {0} reflection probes.";
 
         private const string PostProcessingImportedButNotSetup = "The current project has Post Processing imported, but you have not set it up yet.";
+
+        private const string PostProcessingNotSupported = "Post Processing is not supported in VRChat when building for the currently selected platform.";
 
         private const string PostProcessingGenericProjectNotice = "Post Processing checks are not currently implemented for projects without the VRChat worlds SDK, as they were written with VRChat content creation in mind.";
 
@@ -1434,6 +1369,7 @@ namespace VRWorldToolkit.Editor
 
         private const string NoProblemsFoundInPp = "No problems were found in your post-processing setup. In some cases where post-processing is working in the editor but not in-game, some imported assets may be causing it not to function correctly.";
 
+#if BAKERY_INCLUDED && VRWT_IS_VRC
         private const string BakeryLightNotSetEditorOnly = "Your Bakery light named \"{0}\" is not set to be EditorOnly.";
         private const string BakeryLightNotSetEditorOnlyCombined = "You have {0} Bakery lights are not set to be EditorOnly.";
         private const string BakeryLightNotSetEditorOnlyInfo = "This causes unnecessary errors in the output log loading into a world in VRChat because external scripts get removed in the upload process.";
@@ -1441,6 +1377,9 @@ namespace VRWorldToolkit.Editor
         private const string BakeryLightUnityLight = "Your Bakery light named \"{0}\" has an active Unity Light component on it.";
         private const string BakeryLightUnityLightCombined = "You have {0} Bakery lights that have an active Unity Light component on it.";
         private const string BakeryLightUnityLightInfo = "These will not get baked with Bakery and will keep acting as realtime lights even if set to baked.";
+
+        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. These directional modes are not supported in VRChat by default, it's highly recommended to use Mono SH instead. Otherwise the usage of an extension such as UdonBakeryAdapter by z3y is needed for compatibility with VRChat.";
+#endif
 
         private const string AndroidLightmapCompressionOverride = "Lightmap \"{0}\" does not have a platform-specific override set for Android.";
         private const string AndroidLightmapCompressionOverrideCombined = "No platform-specific override set on {0} lightmaps for Android.";
@@ -1462,9 +1401,7 @@ namespace VRWorldToolkit.Editor
         private const string MaterialWithGrabPassShaderCombined = "Found {0} materials in the scene using a GrabPass.";
         private const string MaterialWithGrabPassShaderInfoPC = "A GrabPass will halt the rendering to copy the screen's contents into a texture for the shader to read. This has a notable effect on performance.";
         private const string MaterialWithGrabPassShaderInfoAndroid = "Please change the shader for this material. When a shader uses a GrabPass on Android, it will cause painful visual artifacts to occur, as they are not supported.";
-
-        private const string ShrnmDirectionalModeBakeryError = "SH or RNM directional mode detected in Bakery. Using SH directional mode is not supported in VRChat by default. It requires the usage of VRC Bakery Adapter by Merlin for it to function in-game.";
-
+        
         private const string BuildANDTestBrokenError = "VRChat link association has not been set up, and the VRChat client path has not been set in the VRCSDK settings. Without one of these settings set, Build & Test will not function.";
 
         private const string BuildANDTestForceNonVRError = "VRChat client path has not been set to point directly to the VRChat executable in the VRCSDK settings. The Force Non-VR setting for Build & Test will not work.";
@@ -1483,10 +1420,6 @@ namespace VRWorldToolkit.Editor
         private const string ScrollRectWithScrollSensitivityNotZeroCombined = "Found {0} ScrollRect components with their Scroll Sensitivity not set to 0.";
         private const string ScrollRectWithScrollSensitivityNotZeroInfo = "Setting Scroll Sensitivity not set to 0 on ScrollRect components can stop accidental interactions with them while trying to walk around.";
 
-        private const string NullTriggerReceiver = "Null receiver found on trigger {0}.";
-        private const string NullTriggerReceiverCombined = "Found {0} null receivers in scene triggers.";
-        private const string NullTriggerReceiverInfo = "This causes the trigger to target itself, which can sometimes be intentional.";
-
         private const string TextMeshLightmapStatic = "Text Mesh \"{0}\" marked as lightmap static.";
         private const string TextMeshLightmapStaticCombined = "Found {0} Text Meshes marked as lightmap static.";
         private const string TextMeshLightmapStaticInfo = "This will cause warnings as the mesh has no normals.";
@@ -1496,8 +1429,6 @@ namespace VRWorldToolkit.Editor
         private const string UnsupportedCompressionFormatAndroidInfo = "These will appear fine in editor but black in game.";
 
         private const string HeyYouFoundABug = "Hey, you found a bug! Please send it my way so I can fix it! Check About VRWorld Toolkit to find all the ways to contact me. \"{0}\" on line {1}.";
-
-        private const string FutureProofPublishEnabled = "Future Proof Publish is currently enabled. This is a legacy feature that has no planned functions as of right now. Having it enabled will increase upload times and sometimes cause uploading to fail.";
 
         #endregion
 
@@ -1532,8 +1463,8 @@ namespace VRWorldToolkit.Editor
 
         private class CheckedShaderProperties
         {
-            public bool IncludesGrabPass = false;
-            public readonly List<string> GrabPassLightModeTags = new List<string>();
+            public bool IncludesGrabPass;
+            public readonly List<string> GrabPassLightModeTags = new();
         }
 
         private void CheckScene()
@@ -1600,33 +1531,18 @@ namespace VRWorldToolkit.Editor
                 }
 
 #if VRWT_IS_VRC
-                var vrcProjectSettings = Resources.Load<VRCProjectSettings>("VRCProjectSettings");
-                if (vrcProjectSettings)
+                if (!UpdateLayers.AreLayersSetup())
                 {
-                    if (vrcProjectSettings.layers is null || vrcProjectSettings.layers.Length == 0 || vrcProjectSettings.layerCollisionArr is null || vrcProjectSettings.layerCollisionArr.Length == 0)
-                    {
-                        general.AddMessageGroup(new MessageGroup(ImproperlySetupVRCProjectSettings, MessageType.Error).SetGroupAutoFix(FixVRCProjectSettings(vrcProjectSettings)));
-                    }
-                    else
-                    {
-                        if (!UpdateLayers.AreLayersSetup())
-                        {
-                            general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
-                        }
-
-                        if (!UpdateLayers.IsCollisionLayerMatrixSetup())
-                        {
-                            general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
-                        }
-                    }
+                    general.AddMessageGroup(new MessageGroup(LayersNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatLayers()));
                 }
-                else
+
+                if (!UpdateLayers.IsCollisionLayerMatrixSetup())
                 {
-                    general.AddMessageGroup(new MessageGroup(VRCProjectSettingsMissing, MessageType.Error).SetDocumentation("https://creators.vrchat.com/sdk/updating-the-sdk/"));
+                    general.AddMessageGroup(new MessageGroup(CollisionMatrixNotSetup, MessageType.Error).SetGroupAutoFix(SetVRChatCollisionMatrix()));
                 }
 #endif
 
-                if (buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed || buildReportAndroid != null && buildReportAndroid.summary.result == BuildResult.Failed)
+                if ((buildReportWindows != null && buildReportWindows.summary.result == BuildResult.Failed) || (buildReportAndroid != null && buildReportAndroid.summary.result == BuildResult.Failed) || (buildReportiOS != null && buildReportiOS.summary.result == BuildResult.Failed) )
                 {
                     general.AddMessageGroup(new MessageGroup(LastBuildFailed, MessageType.Error).SetDocumentation("https://github.com/oneVR/VRWorldToolkit/wiki/Fixing-Build-Problems"));
                 }
@@ -1635,11 +1551,6 @@ namespace VRWorldToolkit.Editor
                 if (SceneManager.sceneCount > 1)
                 {
                     general.AddMessageGroup(new MessageGroup(MultipleScenesLoaded, MessageType.Error));
-                }
-
-                if (EditorPrefs.GetBool("futureProofPublish", true))
-                {
-                    general.AddMessageGroup(new MessageGroup(FutureProofPublishEnabled, MessageType.Error).SetGroupAutoFix(SetFutureProofPublish(false)));
                 }
 
                 // Check if console has error pause on
@@ -1710,7 +1621,6 @@ namespace VRWorldToolkit.Editor
                 if (sceneDescriptor.spawns != null && sceneDescriptor.spawns.Length > 0)
                 {
                     var spawns = sceneDescriptor.spawns.Where(s => s != null).ToArray();
-
                     var spawnsLength = sceneDescriptor.spawns.Length;
                     var emptySpawns = spawnsLength != spawns.Length;
 
@@ -1724,11 +1634,9 @@ namespace VRWorldToolkit.Editor
                     var colliderUnderSpawnTrigger = general.AddMessageGroup(new MessageGroup(ColliderUnderSpawnIsTrigger, ColliderUnderSpawnIsTriggerCombined, ColliderUnderSpawnIsTriggerInfo, MessageType.Error));
                     var respawnHeightAboveCollider = general.AddMessageGroup(new MessageGroup(RespawnHeightAboveCollider, RespawnHeightAboveColliderCombined, RespawnHeightAboveColliderInfo, MessageType.Error));
 
-                    for (var i = 0; i < sceneDescriptor.spawns.Length; i++)
+                    for (var i = 0; i < spawns.Length; i++)
                     {
-                        if (sceneDescriptor.spawns[i] == null) continue;
-
-                        var spawn = sceneDescriptor.spawns[i];
+                        var spawn = spawns[i];
 
                         if (spawn.position.y < sceneDescriptor.RespawnHeightY)
                         {
@@ -1870,10 +1778,9 @@ namespace VRWorldToolkit.Editor
                 var bakedLighting = false;
                 var xatlasUnwrapper = false;
 
-#if BAKERY_INCLUDED
+#if BAKERY_INCLUDED && VRWT_IS_VRC
                 var bakeryLights = new List<GameObject>();
-                // TODO: Investigate whether or not these should be included
-                // bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
+                bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryDirectLight)) as BakeryDirectLight[], s => s.gameObject));
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakeryPointLight)) as BakeryPointLight[], s => s.gameObject));
                 bakeryLights.AddRange(Array.ConvertAll(FindObjectsOfType(typeof(BakerySkyLight)) as BakerySkyLight[], s => s.gameObject));
 
@@ -1883,16 +1790,17 @@ namespace VRWorldToolkit.Editor
                 {
                     case ftRenderLightmap.RenderDirMode.RNM:
                     case ftRenderLightmap.RenderDirMode.SH:
-                        const string className = "Merlin.VRCBakeryAdapter";
+                        const string merlinBakeryAdapter = "Merlin.VRCBakeryAdapter";
+                        const string udonBakeryAdapter = "UdonBakeryAdapter";
 
-                        if (Helper.GetTypeFromName(className) is null)
+                        if (Helper.GetTypeFromName(merlinBakeryAdapter) is null && Helper.GetTypeFromName(udonBakeryAdapter) is null)
                         {
-                            lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/Merlin-san/VRC-Bakery-Adapter"));
+                            lighting.AddMessageGroup(new MessageGroup(ShrnmDirectionalModeBakeryError, MessageType.Error).SetDocumentation("https://github.com/z3y/UdonBakeryAdapter"));
                         }
 
                         break;
                 }
-
+                
                 if (bakerySettings.renderSettingsUnwrapper == 1)
                 {
                     xatlasUnwrapper = true;
@@ -1940,7 +1848,7 @@ namespace VRWorldToolkit.Editor
                             unityLightGroup.AddSingleMessage(new SingleMessage(item.name).SetAutoFix(DisableComponent(item.GetComponent<Light>())).SetSelectObject(item));
                         }
 
-                        lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
+                        lighting.AddMessageGroup(unityLightGroup.SetGroupAutoFix(DisableComponent(Array.ConvertAll<GameObject, Behaviour>(unityLightOnBakeryLight.ToArray(), s => s.GetComponent<Light>()))));
                     }
                 }
 #endif
@@ -1993,47 +1901,52 @@ namespace VRWorldToolkit.Editor
                     }
                 }
 
-                var probes = LightmapSettings.lightProbes;
-
                 // If the scene has baked lights complain about stuff important to baked lighting missing
-                if (bakedLighting && Lightmapping.lightingDataAsset != null)
+                if (bakedLighting)
                 {
-                    // Count lightmaps and suggest to use bigger lightmaps if needed
-                    var lightMapSize = Lightmapping.lightingSettings.lightmapMaxSize;
-                    if (lightMapSize < 2048 && LightmapSettings.lightmaps.Length >= 4)
+                    if (Lightmapping.TryGetLightingSettings(out var lightingSettings))
                     {
-                        if (LightmapSettings.lightmaps[0] != null)
+                        // Count lightmaps and suggest to use bigger lightmaps if needed
+                        var lightMapSize = lightingSettings.lightmapMaxSize;
+                        if (lightMapSize < 2048 && LightmapSettings.lightmaps.Length >= 4)
                         {
-                            var lightmap = LightmapSettings.lightmaps[0];
-
-                            if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
+                            if (LightmapSettings.lightmaps[0] != null)
                             {
-                                lighting.AddMessageGroup(new MessageGroup(ConsiderLargerLightmaps, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString())));
+                                var lightmap = LightmapSettings.lightmaps[0];
+
+                                if (lightmap.lightmapColor != null && lightmap.lightmapColor.height != 4096)
+                                {
+                                    lighting.AddMessageGroup(new MessageGroup(ConsiderLargerLightmaps, MessageType.Tips).AddSingleMessage(new SingleMessage(lightMapSize.ToString())));
+                                }
                             }
                         }
-                    }
 
-                    if (Lightmapping.lightingSettings.lightmapper.Equals(LightingSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
+                        if (lightingSettings.lightmapper.Equals(LightingSettings.Lightmapper.ProgressiveGPU) && lightMapSize == 4096 && SystemInfo.graphicsMemorySize < 12000)
+                        {
+                            lighting.AddMessageGroup(new MessageGroup(ConsiderSmallerLightmaps, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
+                        }
+                    }
+                    else
                     {
-                        lighting.AddMessageGroup(new MessageGroup(ConsiderSmallerLightmaps, MessageType.Warning).AddSingleMessage(new SingleMessage(lightMapSize.ToString()).SetAutoFix(SetLightmapSize(2048))));
+                        lighting.AddMessageGroup(new MessageGroup(NoLightingSettingsAsset, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/class-LightingSettings.html"));
                     }
-
+                    
                     // Count how many light probes the scene has
                     long probeCounter = 0;
+                    var probes = LightmapSettings.lightProbes;
                     long bakedProbes = probes != null ? probes.count : 0;
-
-                    var lightprobegroups = FindObjectsOfType<LightProbeGroup>();
-
+                    
                     var overlappingLightProbesGroup = new MessageGroup(OverlappingLightProbes, OverlappingLightProbesCombined, OverlappingLightProbesInfo, MessageType.Info);
-
-                    for (var i = 0; i < lightprobegroups.Length; i++)
+                    
+                    var lightProbeGroups = FindObjectsOfType<LightProbeGroup>();
+                    for (var i = 0; i < lightProbeGroups.Length; i++)
                     {
-                        if (lightprobegroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
+                        if (lightProbeGroups[i].probePositions.GroupBy(p => p).Any(g => g.Count() > 1))
                         {
-                            overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightprobegroups[i].name, (lightprobegroups[i].probePositions.Length - lightprobegroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightprobegroups[i].gameObject).SetAutoFix(RemoveOverlappingLightProbes(lightprobegroups[i])));
+                            overlappingLightProbesGroup.AddSingleMessage(new SingleMessage(lightProbeGroups[i].name, (lightProbeGroups[i].probePositions.Length - lightProbeGroups[i].probePositions.Distinct().ToArray().Length).ToString()).SetSelectObject(lightProbeGroups[i].gameObject).SetAutoFix(RemoveOverlappingLightProbes(lightProbeGroups[i])));
                         }
 
-                        probeCounter += lightprobegroups[i].probePositions.Length;
+                        probeCounter += lightProbeGroups[i].probePositions.Length;
                     }
 
                     if (probeCounter > 0)
@@ -2053,30 +1966,33 @@ namespace VRWorldToolkit.Editor
                                 lighting.AddMessageGroup(new MessageGroup(LightProbeCount, MessageType.Info).AddSingleMessage(new SingleMessage(probeCounter.ToString("n0"))));
                             }
                         }
-                    }
-
-                    if (overlappingLightProbesGroup.GetTotalCount() > 0)
-                    {
-                        if (overlappingLightProbesGroup.GetTotalCount() > 1)
+                        
+                        if (overlappingLightProbesGroup.GetTotalCount() > 0)
                         {
-                            overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightProbes(lightprobegroups));
+                            if (overlappingLightProbesGroup.GetTotalCount() > 1)
+                            {
+                                overlappingLightProbesGroup.SetGroupAutoFix(RemoveOverlappingLightProbes(lightProbeGroups));
+                            }
+
+                            lighting.AddMessageGroup(overlappingLightProbesGroup);
                         }
 
-                        lighting.AddMessageGroup(overlappingLightProbesGroup);
+                        if (Lightmapping.lightingDataAsset != null)
+                        {
+                            // Check lighting data asset size
+                            var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
+                            var length = new FileInfo(pathTo).Length;
+                            lighting.AddMessageGroup(new MessageGroup(LightingDataAssetInfo, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightmapSnapshot.html"));
+                        }
+                        else
+                        {
+                            lighting.AddMessageGroup(new MessageGroup(NoLightingDataAsset, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightmapSnapshot.html"));
+                        }
                     }
-
-                    // Since the scene has baked lights complain if there's no lightprobes
-                    else if (probes == null && probeCounter == 0)
+                    // Since the scene has baked lights complain if there's no light probes
+                    else
                     {
                         lighting.AddMessageGroup(new MessageGroup(NoLightProbes, MessageType.Info).SetDocumentation("https://docs.unity3d.com/2022.3/Documentation/Manual/LightProbes.html"));
-                    }
-
-                    // Check lighting data asset size if it exists
-                    if (Lightmapping.lightingDataAsset != null)
-                    {
-                        var pathTo = AssetDatabase.GetAssetPath(Lightmapping.lightingDataAsset);
-                        var length = new FileInfo(pathTo).Length;
-                        lighting.AddMessageGroup(new MessageGroup(LightingDataAssetInfo, MessageType.Info).AddSingleMessage(new SingleMessage((length / 1024.0f / 1024.0f).ToString("F2"))));
                     }
 
                     if (nonBakedLights.Count != 0)
@@ -2092,19 +2008,18 @@ namespace VRWorldToolkit.Editor
                 }
                 else
                 {
-                    lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? AndroidBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips)
-                        .SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Light-Baking"));
+                    lighting.AddMessageGroup(new MessageGroup(androidBuildPlatform ? AndroidBakedLightingWarning : LightsNotBaked, androidBuildPlatform ? MessageType.Warning : MessageType.Tips).SetDocumentation("https://gitlab.com/s-ilent/SCSS/-/wikis/Other/Light-Baking"));
                 }
 
                 // ReflectionProbes
-                var reflectionprobes = FindObjectsOfType<ReflectionProbe>();
-                var unbakedprobes = new List<GameObject>();
-                var reflectionProbeCount = reflectionprobes.Count();
-                for (var i = 0; i < reflectionprobes.Length; i++)
+                var reflectionProbes = FindObjectsOfType<ReflectionProbe>();
+                var unbakedProbes = new List<GameObject>();
+                var reflectionProbeCount = reflectionProbes.Count();
+                for (var i = 0; i < reflectionProbes.Length; i++)
                 {
-                    if (!reflectionprobes[i].bakedTexture && reflectionprobes[i].mode == ReflectionProbeMode.Baked)
+                    if (!reflectionProbes[i].bakedTexture && reflectionProbes[i].mode == ReflectionProbeMode.Baked)
                     {
-                        unbakedprobes.Add(reflectionprobes[i].gameObject);
+                        unbakedProbes.Add(reflectionProbes[i].gameObject);
                     }
                 }
 
@@ -2116,11 +2031,11 @@ namespace VRWorldToolkit.Editor
                 {
                     lighting.AddMessageGroup(new MessageGroup(ReflectionProbeCountText, MessageType.Info).AddSingleMessage(new SingleMessage(reflectionProbeCount.ToString())));
 
-                    if (unbakedprobes.Count > 0)
+                    if (unbakedProbes.Count > 0)
                     {
                         var probesUnbakedGroup = new MessageGroup(ReflectionProbesSomeUnbaked, ReflectionProbesSomeUnbakedCombined, MessageType.Warning);
 
-                        foreach (var item in unbakedprobes)
+                        foreach (var item in unbakedProbes)
                         {
                             probesUnbakedGroup.AddSingleMessage(new SingleMessage(item.name).SetSelectObject(item));
                         }
@@ -2334,6 +2249,8 @@ namespace VRWorldToolkit.Editor
                         postProcessing.AddMessageGroup(new MessageGroup(NoProblemsFoundInPp, MessageType.Info));
                     }
                 }
+#elif VRWT_IS_VRC && (UNITY_IOS || UNITY_ANDROID)
+                postProcessing.AddMessageGroup(new MessageGroup(PostProcessingNotSupported, MessageType.Info));
 #else
                 postProcessing.AddMessageGroup(new MessageGroup(PostProcessingGenericProjectNotice, MessageType.Info));
 #endif
@@ -2680,9 +2597,11 @@ namespace VRWorldToolkit.Editor
         private const string LastBuildReportPath = "Assets/_LastBuild/LastBuild.buildreport";
         private const string WindowsBuildReportPath = "Assets/_LastBuild/LastWindowsBuild.buildreport";
         private const string AndroidBuildReportPath = "Assets/_LastBuild/LastAndroidBuild.buildreport";
+        private const string iOSBuildReportPath = "Assets/_LastBuild/LastiOSBuild.buildreport";
 
         [SerializeField] private BuildReport buildReportWindows;
         [SerializeField] private BuildReport buildReportAndroid;
+        [SerializeField] private BuildReport buildReportiOS;
 
         [SerializeField] private TreeViewState treeViewState;
         [SerializeField] private MultiColumnHeaderState multiColumnHeaderState;
@@ -2727,6 +2646,15 @@ namespace VRWorldToolkit.Editor
                         }
 
                         break;
+                    case BuildTarget.iOS:
+                        if (File.GetLastWriteTime(LastBuildReportPath) > File.GetLastWriteTime(iOSBuildReportPath))
+                        {
+                            AssetDatabase.CopyAsset(LastBuildReportPath, iOSBuildReportPath);
+                            buildReportiOS = (BuildReport)AssetDatabase.LoadAssetAtPath(iOSBuildReportPath, typeof(BuildReport));
+                            newBuildSet = true;
+                        }
+
+                        break;
                 }
             }
 
@@ -2739,6 +2667,11 @@ namespace VRWorldToolkit.Editor
             {
                 buildReportAndroid = (BuildReport)AssetDatabase.LoadAssetAtPath(AndroidBuildReportPath, typeof(BuildReport));
             }
+            
+            if (buildReportiOS is null && File.Exists(iOSBuildReportPath))
+            {
+                buildReportiOS = (BuildReport)AssetDatabase.LoadAssetAtPath(iOSBuildReportPath, typeof(BuildReport));
+            }
 
             if (buildReportInitDone)
             {
@@ -2750,23 +2683,31 @@ namespace VRWorldToolkit.Editor
                     {
                         case RuntimePlatform.WindowsPlayer:
                             report = buildReportWindows;
-                            selectedBuildReport = 0;
+                            selectedBuildReport = BuildReportType.Windows;
                             break;
                         case RuntimePlatform.Android:
                             report = buildReportAndroid;
-                            selectedBuildReport = 1;
+                            selectedBuildReport = BuildReportType.Android;
+                            break;
+                        case RuntimePlatform.IPhonePlayer:
+                            report = buildReportiOS;
+                            selectedBuildReport = BuildReportType.iOS;
                             break;
                     }
                 }
                 else
                 {
-                    if (selectedBuildReport == 1 && buildReportAndroid != null)
+                    if (selectedBuildReport == BuildReportType.iOS && buildReportiOS != null)
+                    {
+                        report = buildReportiOS;
+                    }
+                    else if (selectedBuildReport == BuildReportType.Android && buildReportAndroid != null)
                     {
                         report = buildReportAndroid;
                     }
                     else
                     {
-                        selectedBuildReport = 0;
+                        selectedBuildReport = BuildReportType.Windows;
                         report = buildReportWindows;
                     }
                 }
@@ -2848,13 +2789,17 @@ namespace VRWorldToolkit.Editor
                 }
 
                 BuildReport report;
-                if (selectedBuildReport == 1 && buildReportAndroid != null)
+                if (selectedBuildReport == BuildReportType.iOS && buildReportiOS != null)
+                {
+                    report = buildReportiOS;
+                }
+                else if (selectedBuildReport == BuildReportType.Android && buildReportAndroid != null)
                 {
                     report = buildReportAndroid;
                 }
                 else
                 {
-                    selectedBuildReport = 0;
+                    selectedBuildReport = BuildReportType.Windows;
                     report = buildReportWindows;
                 }
 
@@ -2910,27 +2855,7 @@ namespace VRWorldToolkit.Editor
                 recheck = false;
             }
         }
-
-        private enum BuildReportType
-        {
-            Windows = 0,
-            Android = 1
-        }
-
-        private static readonly string[] BuildReportToolbar =
-        {
-            "Windows", "Android"
-        };
-
-        private static readonly string[] MainToolbar =
-        {
-            "Messages", "Build Report"
-        };
-
-        [SerializeField] private int selectedBuildReport;
-        [SerializeField] private bool overallStatsFoldout;
-        [SerializeField] private bool buildReportMessagesFoldout;
-
+        
         private enum ProjectType
         {
             NotDetected,
@@ -2940,6 +2865,27 @@ namespace VRWorldToolkit.Editor
         }
 
         private ProjectType projectType = ProjectType.NotDetected;
+
+        private static readonly string[] MainToolbar =
+        {
+            "Messages", "Build Report"
+        };
+
+        private enum BuildReportType
+        {
+            Windows = 0,
+            Android = 1,
+            iOS = 2
+        }
+        
+        private static readonly string[] BuildReportSelectionDropdown =
+        {
+            "Windows", "Android", "iOS"
+        };
+        
+        [SerializeField] private BuildReportType selectedBuildReport;
+        [SerializeField] private bool overallStatsFoldout;
+        [SerializeField] private bool buildReportMessagesFoldout;
         
         // This is used to delay when the first scene check happens since for some reason
         // doing it too early in Unity 2022 causes noticeable lag especially in bigger scenes
@@ -2990,27 +2936,39 @@ namespace VRWorldToolkit.Editor
             {
                 if (buildReportWindows)
                 {
-                    DrawOverview(buildReportWindows, "Windows");
+                    DrawOverview(buildReportWindows, BuildReportType.Windows);
                 }
 
                 if (buildReportAndroid)
                 {
-                    DrawOverview(buildReportAndroid, "Android");
+                    DrawOverview(buildReportAndroid, BuildReportType.Android);
+                }
+                
+                if (buildReportiOS)
+                {
+                    DrawOverview(buildReportiOS, BuildReportType.iOS);
                 }
             }
 
-            void DrawOverview(BuildReport report, string platform)
+            void DrawOverview(BuildReport report, BuildReportType type)
             {
                 using (var verticalScope = new EditorGUILayout.VerticalScope())
                 {
-                    GUILayout.Label($"Last found {platform} build:", EditorStyles.boldLabel);
+                    GUILayout.Label($"Last {type.ToString()} build:", EditorStyles.boldLabel);
 
                     using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
                     {
                         GUILayout.Label("<b>Build size:</b> " + EditorUtility.FormatBytes((long)report.summary.totalSize), Styles.LabelRichText);
 
-                        GUILayout.Label("<b>Build done:</b> " + report.summary.buildEndedAt.ToLocalTime(), Styles.LabelRichText);
+                        var currentCulture = CultureInfo.CurrentCulture;
+                        var dateTimeFormat = currentCulture.DateTimeFormat;
+                        
+                        GUILayout.Label("<b>Build date:</b> " + report.summary.buildEndedAt.ToLocalTime().ToString(dateTimeFormat.ShortDatePattern), Styles.LabelRichText);
+                        
+                        GUILayout.Label("<b>Build time:</b> " + report.summary.buildEndedAt.ToLocalTime().ToString(dateTimeFormat.ShortTimePattern), Styles.LabelRichText);
 
+                        GUILayout.Label("<b>Build duration:</b> " + (report.summary.buildEndedAt - report.summary.buildStartedAt).ToString(@"hh\:mm\:ss"), Styles.LabelRichText);
+                        
                         GUILayout.Label("<b>Errors during build:</b> " + report.summary.totalErrors, Styles.LabelRichText);
 
                         GUILayout.Label("<b>Warnings during build:</b> " + report.summary.totalWarnings, Styles.LabelRichText);
@@ -3018,23 +2976,14 @@ namespace VRWorldToolkit.Editor
                         GUILayout.Label("<b>Build result:</b> " + report.summary.result, Styles.LabelRichText);
                     }
 
-                    if (current.type == EventType.ContextClick && verticalScope.rect.Contains(current.mousePosition))
+                    if (current.type == EventType.MouseUp && verticalScope.rect.Contains(current.mousePosition))
                     {
-                        var path = report.summary.outputPath;
-                        var menu = new GenericMenu();
-
-                        if (File.Exists(path))
-                        {
-                            menu.AddItem(new GUIContent("Show in Explorer"), false, () => EditorUtility.RevealInFinder(report.summary.outputPath));
-                        }
-                        else
-                        {
-                            menu.AddDisabledItem(new GUIContent("Show in Explorer"));
-                        }
-
-                        menu.ShowAsContext();
+                        tab = 1;
+                        selectedBuildReport = type;
                     }
                 }
+
+                EditorGUIUtility.AddCursorRect(GUILayoutUtility.GetLastRect(), MouseCursor.Link);
             }
         }
 
@@ -3109,34 +3058,34 @@ namespace VRWorldToolkit.Editor
                 GUILayout.BeginVertical();
 
                 GUILayout.BeginHorizontal(EditorStyles.toolbar);
+                
+                EditorGUI.BeginChangeCheck();
 
-                if (buildReportWindows && buildReportAndroid)
+                selectedBuildReport = (BuildReportType)EditorGUILayout.Popup((int)selectedBuildReport, BuildReportSelectionDropdown, EditorStyles.toolbarPopup);
+
+                if (EditorGUI.EndChangeCheck())
                 {
-                    EditorGUI.BeginChangeCheck();
-
-                    selectedBuildReport = GUILayout.Toolbar(selectedBuildReport, BuildReportToolbar, EditorStyles.toolbarButton);
-
-                    if (EditorGUI.EndChangeCheck())
+                    switch (selectedBuildReport)
                     {
-                        switch ((BuildReportType)selectedBuildReport)
-                        {
-                            case BuildReportType.Windows:
-                                buildReportTreeView.SetReport(buildReportWindows);
-                                break;
-                            case BuildReportType.Android:
-                                buildReportTreeView.SetReport(buildReportAndroid);
-                                break;
-                        }
+                        case BuildReportType.Windows:
+                            buildReportTreeView.SetReport(buildReportWindows);
+                            break;
+                        case BuildReportType.Android:
+                            buildReportTreeView.SetReport(buildReportAndroid);
+                            break;
+                        case BuildReportType.iOS:
+                            buildReportTreeView.SetReport(buildReportiOS);
+                            break;
                     }
-
-                    GUILayout.Space(10);
                 }
+                
+                GUILayout.Space(10);
+                
+                GUILayout.FlexibleSpace();
 
                 overallStatsFoldout = GUILayout.Toggle(overallStatsFoldout, "Stats", EditorStyles.toolbarButton);
 
                 buildReportMessagesFoldout = GUILayout.Toggle(buildReportMessagesFoldout, "Messages", EditorStyles.toolbarButton);
-
-                GUILayout.Space(10);
 
                 if (GUILayout.Button("Refresh", EditorStyles.toolbarButton))
                 {
@@ -3156,12 +3105,18 @@ namespace VRWorldToolkit.Editor
                         {
                             buildReportTreeView.SetReport(buildReportAndroid);
                         }
+                        else if (buildReportiOS != null)
+                        {
+                            buildReportTreeView.SetReport(buildReportiOS);
+                        }
                     }
                 }
-
-                GUILayout.FlexibleSpace();
+                
+                GUILayout.Space(5);
 
                 buildReportTreeView.searchString = searchField.OnToolbarGUI(buildReportTreeView.searchString);
+                
+                GUILayout.Space(5);
 
                 GUILayout.EndHorizontal();
 
@@ -3194,7 +3149,7 @@ namespace VRWorldToolkit.Editor
                         }
                         else
                         {
-                            EditorGUILayout.LabelField($"Last {BuildReportToolbar[selectedBuildReport]} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
+                            EditorGUILayout.LabelField($"Last {selectedBuildReport.ToString()} Build Failed", Styles.CenteredLabel, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true), GUILayout.Height(40));
                         }
 
                         GUILayout.FlexibleSpace();

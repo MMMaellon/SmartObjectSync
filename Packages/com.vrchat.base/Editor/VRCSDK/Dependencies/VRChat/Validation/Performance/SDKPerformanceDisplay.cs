@@ -9,11 +9,13 @@ namespace VRC.SDKBase.Validation.Performance
         public static void GetSDKPerformanceInfoText(
             AvatarPerformanceStats perfStats,
             AvatarPerformanceCategory perfCategory,
-            out string text,
+            out string statText, // Stat text that's always shown, required
+            out string errorText, // Unique error text shown alongside the stat text, optional
             out PerformanceInfoDisplayLevel displayLevel
         )
         {
-            text = "";
+            statText = string.Empty;
+            errorText = string.Empty;
             displayLevel = PerformanceInfoDisplayLevel.None;
             bool isMobilePlatform = ValidationEditorHelpers.IsMobilePlatform();
 
@@ -28,14 +30,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Info;
-                            text = string.Format("Overall Performance: {0}", AvatarPerformanceStats.GetPerformanceRatingDisplayName(rating));
+                            statText = string.Format("Overall Performance: {0}", AvatarPerformanceStats.GetPerformanceRatingDisplayName(rating));
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Overall Performance: {0} - This avatar may not perform well on many systems." +
                                 " See additional warnings for suggestions on how to improve performance. Click 'Avatar Optimization Tips' below for more information.",
                                 AvatarPerformanceStats.GetPerformanceRatingDisplayName(rating)
@@ -48,7 +50,7 @@ namespace VRC.SDKBase.Validation.Performance
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
                             if(ValidationEditorHelpers.IsMobilePlatform())
                             {
-                                text = string.Format(
+                                statText = string.Format(
                                     "Overall Performance: {0} - This avatar does not meet minimum performance requirements for VRChat. " +
                                     "It will be blocked by default on VRChat for Quest, and will not show unless a user chooses to show your avatar." +
                                     " See additional warnings for suggestions on how to improve performance. Click 'Avatar Optimization Tips' below for more information.",
@@ -56,7 +58,7 @@ namespace VRC.SDKBase.Validation.Performance
                             }
                             else
                             {
-                                text = string.Format(
+                                statText = string.Format(
                                     "Overall Performance: {0} - This avatar does not meet minimum performance requirements for VRChat. " +
                                     "It may be blocked by users depending on their Performance settings." +
                                     " See additional warnings for suggestions on how to improve performance. Click 'Avatar Optimization Tips' below for more information.",
@@ -76,20 +78,20 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Excellent:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Info;
-                            text = string.Format("Triangles: {0}", perfStats.polyCount);
+                            statText = string.Format("Triangles: {0}", perfStats.polyCount);
                             break;
                         }
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Info;
-                            text = string.Format("Triangles: {0} (Recommended: {1})", perfStats.polyCount, AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).polyCount);
+                            statText = string.Format("Triangles: {0} (Recommended: {1})", perfStats.polyCount, AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).polyCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Triangles: {0} - Please try to reduce your avatar triangle count to less than {1} (Recommended: {2})",
                                 perfStats.polyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Good, isMobilePlatform).polyCount,
@@ -100,7 +102,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Triangles: {0} - This avatar has too many triangles. " +
                                 (ValidationEditorHelpers.IsMobilePlatform()
                                     ? "It will be blocked by default on VRChat for Quest, and will not show unless a user chooses to show your avatar."
@@ -123,7 +125,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Excellent:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Bounding box (AABB) size: {0}", perfStats.aabb.GetValueOrDefault().size.ToString());
+                            statText = string.Format("Bounding box (AABB) size: {0}", perfStats.aabb.GetValueOrDefault().size.ToString());
                             break;
                         }
                         case PerformanceRating.Good:
@@ -131,7 +133,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Bounding box (AABB) size: {0} (Recommended: {1})",
                                 perfStats.aabb.GetValueOrDefault().size.ToString(),
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).aabb.size.ToString());
@@ -141,7 +143,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "This avatar's bounding box (AABB) is too large on at least one axis. Current size: {0}, Maximum size: {1}",
                                 perfStats.aabb.GetValueOrDefault().size.ToString(),
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).aabb.size.ToString());
@@ -160,14 +162,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Skinned Mesh Renderers: {0}", perfStats.skinnedMeshCount);
+                            statText = string.Format("Skinned Mesh Renderers: {0}", perfStats.skinnedMeshCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Skinned Mesh Renderers: {0} (Recommended: {1}) - Combine multiple skinned meshes for optimal performance.",
                                 perfStats.skinnedMeshCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).skinnedMeshCount);
@@ -177,7 +179,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Skinned Mesh Renderers: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many skinned meshes." +
                                 " Combine multiple skinned meshes for optimal performance.",
                                 perfStats.skinnedMeshCount,
@@ -198,14 +200,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Mesh Renderers: {0}", perfStats.meshCount);
+                            statText = string.Format("Mesh Renderers: {0}", perfStats.meshCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Mesh Renderers: {0} (Recommended: {1}) - Combine multiple meshes for optimal performance.",
                                 perfStats.meshCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).meshCount);
@@ -215,7 +217,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Mesh Renderers: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many meshes. Combine multiple meshes for optimal performance.",
                                 perfStats.meshCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).meshCount,
@@ -235,14 +237,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Material Slots: {0}", perfStats.materialCount);
+                            statText = string.Format("Material Slots: {0}", perfStats.materialCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Material Slots: {0} (Recommended: {1}) - Combine materials and atlas textures for optimal performance.",
                                 perfStats.materialCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).materialCount);
@@ -252,7 +254,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Material Slots: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many materials. Combine materials and atlas textures for optimal performance.",
                                 perfStats.materialCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).materialCount,
@@ -272,14 +274,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Animator Count: {0}", perfStats.animatorCount);
+                            statText = string.Format("Animator Count: {0}", perfStats.animatorCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Animator Count: {0} (Recommended: {1}) - Avoid using extra Animators for optimal performance.",
                                 perfStats.animatorCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).animatorCount);
@@ -289,7 +291,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Animator Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many Animators. Avoid using extra Animators for optimal performance.",
                                 perfStats.animatorCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).animatorCount,
@@ -309,14 +311,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Bones: {0}", perfStats.boneCount);
+                            statText = string.Format("Bones: {0}", perfStats.boneCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Bones: {0} (Recommended: {1}) - Reduce number of bones for optimal performance.",
                                 perfStats.boneCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).boneCount);
@@ -326,7 +328,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Bones: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many bones. Reduce number of bones for optimal performance.",
                                 perfStats.boneCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).boneCount,
@@ -346,14 +348,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Lights: {0}", perfStats.lightCount);
+                            statText = string.Format("Lights: {0}", perfStats.lightCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Lights: {0} (Recommended: {1}) - Avoid use of dynamic lights for optimal performance.",
                                 perfStats.lightCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).lightCount);
@@ -363,7 +365,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Lights: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many dynamic lights. Avoid use of dynamic lights for optimal performance.",
                                 perfStats.lightCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).lightCount,
@@ -383,14 +385,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Particle Systems: {0}", perfStats.particleSystemCount);
+                            statText = string.Format("Particle Systems: {0}", perfStats.particleSystemCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Particle Systems: {0} (Recommended: {1}) - Reduce number of particle systems for better performance.",
                                 perfStats.particleSystemCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).particleSystemCount);
@@ -400,7 +402,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Particle Systems: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many particle systems." +
                                 " Reduce number of particle systems for better performance.",
                                 perfStats.particleSystemCount,
@@ -421,14 +423,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Total Combined Max Particle Count: {0}", perfStats.particleTotalCount);
+                            statText = string.Format("Total Combined Max Particle Count: {0}", perfStats.particleTotalCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Total Combined Max Particle Count: {0} (Recommended: {1}) - Reduce 'Max Particles' across all particle systems for better performance.",
                                 perfStats.particleTotalCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).particleTotalCount);
@@ -438,7 +440,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Total Combined Max Particle Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar uses too many particles." +
                                 " Reduce 'Max Particles' across all particle systems for better performance.",
                                 perfStats.particleTotalCount,
@@ -459,14 +461,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Mesh Particle Total Max Poly Count: {0}", perfStats.particleMaxMeshPolyCount);
+                            statText = string.Format("Mesh Particle Total Max Poly Count: {0}", perfStats.particleMaxMeshPolyCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Mesh Particle Total Max Poly Count: {0} (Recommended: {1}) - Reduce number of triangles in particle meshes, and reduce 'Max Particles' for better performance.",
                                 perfStats.particleMaxMeshPolyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).particleMaxMeshPolyCount);
@@ -476,7 +478,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Mesh Particle Total Max Poly Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar uses too many mesh particle triangles." +
                                 " Reduce number of triangles in particle meshes, and reduce 'Max Particles' for better performance.",
                                 perfStats.particleMaxMeshPolyCount,
@@ -497,7 +499,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Particle Trails Enabled: {0}", perfStats.particleTrailsEnabled);
+                            statText = string.Format("Particle Trails Enabled: {0}", perfStats.particleTrailsEnabled);
                             break;
                         }
                         case PerformanceRating.Medium:
@@ -505,7 +507,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Particle Trails Enabled: {0} (Recommended: {1}) - Avoid particle trails for better performance.",
                                 perfStats.particleTrailsEnabled,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).particleTrailsEnabled);
@@ -524,7 +526,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Particle Collision Enabled: {0}", perfStats.particleCollisionEnabled);
+                            statText = string.Format("Particle Collision Enabled: {0}", perfStats.particleCollisionEnabled);
                             break;
                         }
                         case PerformanceRating.Medium:
@@ -532,7 +534,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Particle Collision Enabled: {0} (Recommended: {1}) - Avoid particle collision for better performance.",
                                 perfStats.particleCollisionEnabled,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).particleCollisionEnabled);
@@ -551,14 +553,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Trail Renderers: {0}", perfStats.trailRendererCount);
+                            statText = string.Format("Trail Renderers: {0}", perfStats.trailRendererCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Trail Renderers: {0} (Recommended: {1}) - Reduce number of TrailRenderers for better performance.",
                                 perfStats.trailRendererCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).trailRendererCount);
@@ -568,7 +570,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Trail Renderers: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many TrailRenderers. Reduce number of TrailRenderers for better performance.",
                                 perfStats.trailRendererCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).trailRendererCount,
@@ -588,14 +590,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Line Renderers: {0}", perfStats.lineRendererCount);
+                            statText = string.Format("Line Renderers: {0}", perfStats.lineRendererCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Line Renderers: {0} (Recommended: {1}) - Reduce number of LineRenderers for better performance.",
                                 perfStats.lineRendererCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).lineRendererCount);
@@ -605,164 +607,11 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Line Renderers: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many LineRenderers. Reduce number of LineRenderers for better performance.",
                                 perfStats.lineRendererCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).lineRendererCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).lineRendererCount);
-
-                            break;
-                        }
-                    }
-
-                    break;
-                }
-                case AvatarPerformanceCategory.DynamicBoneComponentCount:
-                {
-                    switch(rating)
-                    {
-                        case PerformanceRating.Excellent:
-                        case PerformanceRating.Good:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Dynamic Bone Components: {0}", perfStats.dynamicBone?.componentCount);
-                            break;
-                        }
-                        case PerformanceRating.Medium:
-                        case PerformanceRating.Poor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Components: {0} (Recommended: {1}) - Reduce number of DynamicBone components for better performance.",
-                                perfStats.dynamicBone?.componentCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.componentCount);
-
-                            break;
-                        }
-                        case PerformanceRating.VeryPoor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Components: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many DynamicBone components." +
-                                " Reduce number of DynamicBone components for better performance.",
-                                perfStats.dynamicBone?.componentCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).dynamicBone.componentCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.componentCount);
-
-                            break;
-                        }
-                    }
-
-                    break;
-                }
-                case AvatarPerformanceCategory.DynamicBoneSimulatedBoneCount:
-                {
-                    switch(rating)
-                    {
-                        case PerformanceRating.Excellent:
-                        case PerformanceRating.Good:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Dynamic Bone Simulated Bone Count: {0}", perfStats.dynamicBone?.transformCount);
-                            break;
-                        }
-                        case PerformanceRating.Medium:
-                        case PerformanceRating.Poor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Simulated Bone Count: {0} (Recommended: {1}) - " +
-                                "Reduce number of transforms in hierarchy under DynamicBone components, or set EndLength or EndOffset to zero to reduce the number of simulated bones.",
-                                perfStats.dynamicBone?.transformCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.transformCount);
-
-                            break;
-                        }
-                        case PerformanceRating.VeryPoor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Simulated Bone Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many bones simulated by DynamicBone." +
-                                " Reduce number of transforms in hierarchy under DynamicBone components, or set EndLength or EndOffset to zero to reduce the number of simulated bones.",
-                                perfStats.dynamicBone?.transformCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).dynamicBone.transformCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.transformCount);
-
-                            break;
-                        }
-                    }
-
-                    break;
-                }
-                case AvatarPerformanceCategory.DynamicBoneColliderCount:
-                {
-                    switch(rating)
-                    {
-                        case PerformanceRating.Excellent:
-                        case PerformanceRating.Good:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Dynamic Bone Collider Count: {0}", perfStats.dynamicBone?.colliderCount);
-                            break;
-                        }
-                        case PerformanceRating.Medium:
-                        case PerformanceRating.Poor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Collider Count: {0} (Recommended: {1}) - Avoid use of DynamicBoneColliders for better performance.",
-                                perfStats.dynamicBone?.colliderCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.colliderCount);
-
-                            break;
-                        }
-                        case PerformanceRating.VeryPoor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Collider Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many DynamicBoneColliders." +
-                                " Avoid use of DynamicBoneColliders for better performance.",
-                                perfStats.dynamicBone?.colliderCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).dynamicBone.colliderCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.colliderCount);
-
-                            break;
-                        }
-                    }
-
-                    break;
-                }
-                case AvatarPerformanceCategory.DynamicBoneCollisionCheckCount:
-                {
-                    switch(rating)
-                    {
-                        case PerformanceRating.Excellent:
-                        case PerformanceRating.Good:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Dynamic Bone Collision Check Count: {0}", perfStats.dynamicBone?.collisionCheckCount);
-                            break;
-                        }
-                        case PerformanceRating.Medium:
-                        case PerformanceRating.Poor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Collision Check Count: {0} (Recommended: {1}) - Avoid use of DynamicBoneColliders for better performance.",
-                                perfStats.dynamicBone?.collisionCheckCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.collisionCheckCount);
-
-                            break;
-                        }
-                        case PerformanceRating.VeryPoor:
-                        {
-                            displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Dynamic Bone Collision Check Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many DynamicBoneColliders." +
-                                " Avoid use of DynamicBoneColliders for better performance.",
-                                perfStats.dynamicBone?.collisionCheckCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).dynamicBone.collisionCheckCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.collisionCheckCount);
 
                             break;
                         }
@@ -775,9 +624,7 @@ namespace VRC.SDKBase.Validation.Performance
                     //Max limits
                     if(perfStats.physBone?.componentCount > AvatarValidation.MAX_AVD_PHYSBONES_PER_AVATAR)
                     {
-                        displayLevel = PerformanceInfoDisplayLevel.Error;
-                        text = $"Phys Bone Components: {perfStats.physBone?.componentCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_PHYSBONES_PER_AVATAR}) of this component type.  Reduce the number of VRCPhysBone components on this avatar.";
-                        break;
+                        errorText = $"Phys Bone Components: {perfStats.physBone?.componentCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_PHYSBONES_PER_AVATAR}) of this component type.  Reduce the number of VRCPhysBone components on this avatar.";
                     }
 
                     switch(rating)
@@ -786,15 +633,15 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Phys Bone Components: {0}", perfStats.physBone?.componentCount);
+                            statText = string.Format("Phys Bone Components: {0}", perfStats.physBone?.componentCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Phys Bone Components: {0} (Recommended: {1}) - Reduce number of VRCPhysBone components for better performance.",
+                            statText = string.Format(
+                                "Phys Bone Components: {0} (Recommended: {1}) - Reduce the number of VRCPhysBone components for better performance.",
                                 perfStats.physBone?.componentCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physBone.componentCount);
 
@@ -803,13 +650,13 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = isMobilePlatform ? PerformanceInfoDisplayLevel.Error : PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Phys Bone Components: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many VRCPhysBone components." +
                                 " {3}",
                                 perfStats.physBone?.componentCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).physBone.componentCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physBone.componentCount,
-                                (isMobilePlatform) ? "All PhysBone components will be removed at runtime." : "Reduce number of VRCPhysBone components for better performance.");
+                                (isMobilePlatform) ? "All PhysBone components will be removed at runtime." : "Reduce the number of VRCPhysBone components for better performance.");
 
                             break;
                         }
@@ -825,14 +672,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Phys Bone Transform Count: {0}", perfStats.physBone?.transformCount);
+                            statText = string.Format("Phys Bone Transform Count: {0}", perfStats.physBone?.transformCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Phys Bone Transform Count: {0} (Recommended: {1}) - This avatar has many VRCPhysBone transforms and may perform poorly." +
                                 "Reduce number of transforms in hierarchy under VRCPhysBone components.",
                                 perfStats.physBone?.transformCount,
@@ -843,7 +690,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = isMobilePlatform ? PerformanceInfoDisplayLevel.Error : PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Phys Bone Transform Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many VRCPhysBone transforms and will perform poorly." +
                                 " {3}",
                                 perfStats.physBone?.transformCount,
@@ -862,9 +709,7 @@ namespace VRC.SDKBase.Validation.Performance
                     //Max limits
                     if(perfStats.physBone?.colliderCount > AvatarValidation.MAX_AVD_COLLIDERS_PER_AVATAR)
                     {
-                        displayLevel = PerformanceInfoDisplayLevel.Error;
-                        text = $"Phys Bone Colliders: {perfStats.physBone?.colliderCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_COLLIDERS_PER_AVATAR}) of this component type.  Reduce the number of VRCPhysBoneCollider components on this avatar.";
-                        break;
+                        errorText = $"Phys Bone Colliders: {perfStats.physBone?.colliderCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_COLLIDERS_PER_AVATAR}) of this component type.  Reduce the number of VRCPhysBoneCollider components on this avatar.";
                     }
 
                     switch(rating)
@@ -873,15 +718,15 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Phys Bone Collider Count: {0}", perfStats.physBone?.colliderCount);
+                            statText = string.Format("Phys Bone Collider Count: {0}", perfStats.physBone?.colliderCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Phys Bone Collider Count: {0} (Recommended: {1}) - Reduce the usage of VRCPhysBoneColliders for better performance.",
+                            statText = string.Format(
+                                "Phys Bone Collider Count: {0} (Recommended: {1}) - Reduce the number of VRCPhysBoneColliders for better performance.",
                                 perfStats.physBone?.colliderCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physBone.colliderCount);
 
@@ -890,13 +735,13 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = isMobilePlatform ? PerformanceInfoDisplayLevel.Error : PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Phys Bone Collider Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many VRCPhysBoneColliders." +
                                 " {3}",
-                                perfStats.dynamicBone?.colliderCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).dynamicBone.colliderCount,
-                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).dynamicBone.colliderCount,
-                                (isMobilePlatform) ? "All PhysBone colliders will be removed at runtime." : "Reduce number of VRCPhysBone colliders for better performance.");
+                                perfStats.physBone?.colliderCount,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).physBone.colliderCount,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physBone.colliderCount,
+                                (isMobilePlatform) ? "All PhysBone colliders will be removed at runtime." : "Reduce the number of VRCPhysBoneColliders for better performance.");
 
                             break;
                         }
@@ -912,15 +757,15 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Phys Bone Collision Check Count: {0}", perfStats.physBone?.collisionCheckCount);
+                            statText = string.Format("Phys Bone Collision Check Count: {0}", perfStats.physBone?.collisionCheckCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Phys Bone Collision Check Count: {0} (Recommended: {1}) - Reduce the usage of VRCPhysBoneColliders for better performance.",
+                            statText = string.Format(
+                                "Phys Bone Collision Check Count: {0} (Recommended: {1}) - Reduce the number of VRCPhysBoneColliders for better performance.",
                                 perfStats.physBone?.collisionCheckCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physBone.collisionCheckCount);
 
@@ -929,13 +774,13 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = isMobilePlatform ? PerformanceInfoDisplayLevel.Error : PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Phys Bone Collision Check Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many VRCPhysBoneColliders." +
                                 " {3}",
                                 perfStats.physBone?.collisionCheckCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).physBone.collisionCheckCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physBone.collisionCheckCount,
-                                (isMobilePlatform) ? "All PhysBone colliders will be removed at runtime." : "Reduce number of VRCPhysBone colliders for better performance.");
+                                (isMobilePlatform) ? "All PhysBone colliders will be removed at runtime." : "Reduce the number of VRCPhysBoneColliders for better performance.");
 
                             break;
                         }
@@ -946,11 +791,9 @@ namespace VRC.SDKBase.Validation.Performance
                 case AvatarPerformanceCategory.ContactCount:
                 {
                     //Max limits
-                    if(perfStats.contactCount > AvatarValidation.MAX_AVD_CONTACTS_PER_AVATAR)
+                    if(perfStats.contactCompleteCount > AvatarValidation.MAX_AVD_CONTACTS_PER_AVATAR)
                     {
-                        displayLevel = PerformanceInfoDisplayLevel.Error;
-                        text = $"Contact Component Count: {perfStats.contactCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_CONTACTS_PER_AVATAR}) of this component type.  Reduce the number VRCContact components on this avatar.";
-                        break;
+                        errorText = $"Contact Component Count: {perfStats.contactCompleteCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_CONTACTS_PER_AVATAR}) of this component type. Reduce the number of VRCContact components on this avatar.";
                     }
 
                     switch(rating)
@@ -959,15 +802,15 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Contact Component Count: {0}", perfStats.contactCount);
+                            statText = string.Format("Non-Local Contact Component Count: {0}", perfStats.contactCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Contact Component Count: {0} (Recommended: {1}) - Reduce the usage of VRCContact components for optimal performance.",
+                            statText = string.Format(
+                                "Non-Local Contact Component Count: {0} (Recommended: {1}) - Reduce the number of VRCContact components for optimal performance, or mark contact receivers as local only where possible.",
                                 perfStats.contactCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).contactCount);
 
@@ -976,12 +819,94 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = isMobilePlatform ? PerformanceInfoDisplayLevel.Error : PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
-                                "Contact Component Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many VRCContact components. {3}",
+                            statText = string.Format(
+                                "Non-Local Contact Component Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many non-local VRCContact components. {3}",
                                 perfStats.contactCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).contactCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).contactCount,
-                                (isMobilePlatform) ? "All VRCContact components will be removed at runtime." : "Reduce number of VRCContact components for optimal performance.");
+                                (isMobilePlatform) ? "All VRCContact components will be removed at runtime." : "Reduce the number of VRCContact components for optimal performance, or mark contact receivers as local only where possible.");
+
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+                case AvatarPerformanceCategory.ConstraintsCount:
+                {
+                    //Max limits
+                    if(perfStats.constraintsCount > AvatarValidation.MAX_AVD_CONSTRAINTS_PER_AVATAR)
+                    {
+                        errorText = $"Constraint Component Count: {perfStats.constraintsCount} - Avatar exceeds the maximum limit ({AvatarValidation.MAX_AVD_CONSTRAINTS_PER_AVATAR}) of this component type.  Reduce the number of constraint components on this avatar.";
+                    }
+
+                    switch(rating)
+                    {
+                        case PerformanceRating.Excellent:
+                        case PerformanceRating.Good:
+                        {
+                            displayLevel = PerformanceInfoDisplayLevel.Verbose;
+                            statText = string.Format("Constraint Component Count: {0}", perfStats.constraintsCount);
+                            break;
+                        }
+                        case PerformanceRating.Medium:
+                        case PerformanceRating.Poor:
+                        {
+                            displayLevel = PerformanceInfoDisplayLevel.Warning;
+                            statText = string.Format(
+                                "Constraint Component Count: {0} (Recommended: {1}) - Reduce the number of constraint components for optimal performance.",
+                                perfStats.constraintsCount,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).constraintsCount);
+
+                            break;
+                        }
+                        case PerformanceRating.VeryPoor:
+                        {
+                            displayLevel = isMobilePlatform ? PerformanceInfoDisplayLevel.Error : PerformanceInfoDisplayLevel.Warning;
+                            statText = string.Format(
+                                "Constraint Component Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many constraint components. {3}",
+                                perfStats.constraintsCount,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).constraintsCount,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).constraintsCount,
+                                (isMobilePlatform) ? "All constraint components will be removed at runtime." : "Reduce the number of constraint components for optimal performance.");
+
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+                case AvatarPerformanceCategory.ConstraintDepth:
+                {
+                    switch(rating)
+                    {
+                        case PerformanceRating.Excellent:
+                        case PerformanceRating.Good:
+                        {
+                            displayLevel = PerformanceInfoDisplayLevel.Verbose;
+                            statText = string.Format("Constraint Depth: {0}", perfStats.constraintDepth);
+                            break;
+                        }
+                        case PerformanceRating.Medium:
+                        case PerformanceRating.Poor:
+                        {
+                            displayLevel = PerformanceInfoDisplayLevel.Warning;
+                            statText = string.Format(
+                                "Constraint Depth: {0} (Recommended: {1}) - Reorganize your constraints to reduce dependencies for optimal performance.",
+                                perfStats.constraintDepth,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).constraintDepth);
+
+                            break;
+                        }
+                        case PerformanceRating.VeryPoor:
+                        {
+                            displayLevel = isMobilePlatform ? PerformanceInfoDisplayLevel.Error : PerformanceInfoDisplayLevel.Warning;
+                            statText = string.Format(
+                                "Constraint Depth: {0} (Maximum: {1}, Recommended: {2}) - This avatar's constraints are nested too deeply. {3}",
+                                perfStats.constraintDepth,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).constraintDepth,
+                                AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).constraintDepth,
+                                (isMobilePlatform) ? "All VRCConstraint components will be removed at runtime." : "Reorganize your constraints to reduce dependencies for optimal performance.");
 
                             break;
                         }
@@ -997,14 +922,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Cloth Component Count: {0}", perfStats.clothCount);
+                            statText = string.Format("Cloth Component Count: {0}", perfStats.clothCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Cloth Component Count: {0} (Recommended: {1}) - Avoid use of cloth for optimal performance.",
                                 perfStats.clothCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).clothCount);
@@ -1014,7 +939,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Cloth Component Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many Cloth components. Avoid use of cloth for optimal performance.",
                                 perfStats.clothCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).clothCount,
@@ -1034,14 +959,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Cloth Total Vertex Count: {0}", perfStats.clothMaxVertices);
+                            statText = string.Format("Cloth Total Vertex Count: {0}", perfStats.clothMaxVertices);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Cloth Total Vertex Count: {0} (Recommended: {1}) - Reduce number of vertices in cloth meshes for improved performance.",
                                 perfStats.clothMaxVertices,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).clothMaxVertices);
@@ -1051,7 +976,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Cloth Total Vertex Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many vertices in cloth meshes." +
                                 " Reduce number of vertices in cloth meshes for improved performance.",
                                 perfStats.clothMaxVertices,
@@ -1072,14 +997,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Physics Collider Count: {0}", perfStats.physicsColliderCount);
+                            statText = string.Format("Physics Collider Count: {0}", perfStats.physicsColliderCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Physics Collider Count: {0} (Recommended: {1}) - Avoid use of colliders for optimal performance.",
                                 perfStats.physicsColliderCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physicsColliderCount);
@@ -1089,7 +1014,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Physics Collider Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many colliders. Avoid use of colliders for optimal performance.",
                                 perfStats.physicsColliderCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).physicsColliderCount,
@@ -1109,14 +1034,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Physics Rigidbody Count: {0}", perfStats.physicsRigidbodyCount);
+                            statText = string.Format("Physics Rigidbody Count: {0}", perfStats.physicsRigidbodyCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Physics Rigidbody Count: {0} (Recommended: {1}) - Avoid use of rigidbodies for optimal performance.",
                                 perfStats.physicsRigidbodyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).physicsRigidbodyCount);
@@ -1126,7 +1051,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Physics Rigidbody Count: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many rigidbodies. Avoid use of rigidbodies for optimal performance.",
                                 perfStats.physicsRigidbodyCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).physicsRigidbodyCount,
@@ -1146,14 +1071,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Audio Sources: {0}", perfStats.audioSourceCount);
+                            statText = string.Format("Audio Sources: {0}", perfStats.audioSourceCount);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Audio Sources: {0} (Recommended: {1}) - Reduce number of audio sources for better performance.",
                                 perfStats.audioSourceCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).audioSourceCount);
@@ -1163,7 +1088,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Audio Sources: {0} (Maximum: {1}, Recommended: {2}) - This avatar has too many audio sources. Reduce number of audio sources for better performance.",
                                 perfStats.audioSourceCount,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Poor, isMobilePlatform).audioSourceCount,
@@ -1183,14 +1108,14 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.Good:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Verbose;
-                            text = string.Format("Texture Memory Usage: {0} MB", perfStats.textureMegabytes);
+                            statText = string.Format("Texture Memory Usage: {0} MB", perfStats.textureMegabytes);
                             break;
                         }
                         case PerformanceRating.Medium:
                         case PerformanceRating.Poor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Texture Memory Usage: {0} MB (Recommended: {1} MB) - Lower the resolution of your textures in the texture import settings.",
                                 perfStats.textureMegabytes,
                                 AvatarPerformanceStats.GetStatLevelForRating(PerformanceRating.Excellent, isMobilePlatform).textureMegabytes);
@@ -1200,7 +1125,7 @@ namespace VRC.SDKBase.Validation.Performance
                         case PerformanceRating.VeryPoor:
                         {
                             displayLevel = PerformanceInfoDisplayLevel.Warning;
-                            text = string.Format(
+                            statText = string.Format(
                                 "Texture Memory Usage: {0} MB (Maximum: {1} MB, Recommended: {2} MB) - This avatar's total texture resolution is too high. " +
                                 "Lower the resolution of your largest textures in the texture import settings. " +
                                 (
@@ -1220,7 +1145,7 @@ namespace VRC.SDKBase.Validation.Performance
                 }
                 default:
                 {
-                    text = "";
+                    statText = string.Empty;
                     displayLevel = PerformanceInfoDisplayLevel.None;
                     break;
                 }

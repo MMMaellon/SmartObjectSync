@@ -8,12 +8,28 @@ namespace VRC.SDKBase.Editor
     public class VRCPackageSettings : ISaveable
     {
         private static string PackageSettingsPath = Path.Combine(new DirectoryInfo(Application.dataPath).Parent?.FullName, "ProjectSettings", "Packages");
+        private static VRC.SDKBase.Editor.VRCPackageSettings _instance;
         public bool samplesImported = false;
         public bool allowVRCPackageChanges = false;
         public bool samplesHintCreated = false;
         public bool debugVCCConnection = false;
+        public bool dpidMipmaps = false;
+        public bool dpidConservative = true;
 
-        protected internal static VRCPackageSettings Create()
+        public static VRC.SDKBase.Editor.VRCPackageSettings Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = Create();
+                }
+
+                return _instance;
+            }
+        }
+
+        private static VRCPackageSettings Create()
         {
             var result = new VRCPackageSettings();
             result.Load();

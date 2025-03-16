@@ -1,7 +1,7 @@
 {
   "name": "com.vrchat.base",
   "displayName": "VRChat SDK - Base",
-  "version": "3.5.2",
+  "version": "3.7.6",
   "unity": "2022.3",
   "description": "Base for VRChat SDK",
   "author": {
@@ -17,6 +17,7 @@
     "com.unity.timeline": "1.7.6",
     "com.unity.xr.management": "4.3.3",
     "com.unity.xr.oculus": "4.0.0",
-    "com.unity.postprocessing": "3.2.2"
+    "com.unity.postprocessing": "3.2.2",
+    "com.unity.ugui": "1.0.0"
   }
 }

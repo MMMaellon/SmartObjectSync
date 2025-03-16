@@ -1776,340 +1776,104 @@ namespace VRC.Udon.Serialization.OdinSerializer
             base.FlushToStream();
         }
 
+	// VRChat Start - Changes to serialization to avoid unaligned reads/writes on arm64 architectures [PER-795]
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
-        private void UNSAFE_WriteToBuffer_2_Char(char value)
+        private void WriteValueTypeToBuffer<T>(T value) where T : unmanaged
         {
-            fixed (byte* basePtr = this.buffer)
+            int sizeInBytes = sizeof(T);
+
+            if (BitConverter.IsLittleEndian)
             {
-                if (BitConverter.IsLittleEndian)
+                if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
                 {
-                    *(char*)(basePtr + this.bufferIndex) = value;
+                    fixed (byte* basePtr = this.buffer)
+                    {
+                        // We can write directly to the buffer, safe in the knowledge that any potential unaligned writes will work
+                        *(T*)(basePtr + this.bufferIndex) = value;
+                    }
                 }
                 else
                 {
+                    // Avoid any alignment requirement for this write
+                    Unsafe.WriteUnaligned<T>(ref this.buffer[this.bufferIndex], value);
+                }
+            }
+            else
+            {
+                fixed (byte* basePtr = this.buffer)
+                {
                     byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 1;
+                    int lastByteIndex = sizeInBytes - 1;
+                    byte* ptrFrom = (byte*)&value + lastByteIndex;
 
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
+                    for (int i = 0; i < sizeInBytes; ++i)
+                    {
+                        ptrTo[i] = ptrFrom[lastByteIndex - i];
+                    }
                 }
             }
 
-            this.bufferIndex += 2;
+            this.bufferIndex += sizeInBytes;
+         }
+
+        [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
+        private void UNSAFE_WriteToBuffer_2_Char(char value)
+        {
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_2_Int16(short value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    *(short*)(basePtr + this.bufferIndex) = value;
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 1;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 2;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_2_UInt16(ushort value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    *(ushort*)(basePtr + this.bufferIndex) = value;
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 1;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 2;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_4_Int32(int value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    *(int*)(basePtr + this.bufferIndex) = value;
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 3;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 4;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_4_UInt32(uint value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    *(uint*)(basePtr + this.bufferIndex) = value;
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 3;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 4;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_4_Float32(float value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                    {
-                        // We can write directly to the buffer, safe in the knowledge that any potential unaligned writes will work
-                        *(float*)(basePtr + this.bufferIndex) = value;
-                    }
-                    else
-                    {
-                        // We do a slower but safer byte-by-byte write instead.
-                        // Apparently doing this bit through an int pointer alias can also crash sometimes.
-                        // Hence, we just do a byte-by-byte write to be safe.
-                        byte* from = (byte*)&value;
-                        byte* to = basePtr + this.bufferIndex;
-
-                        *to++ = *from++;
-                        *to++ = *from++;
-                        *to++ = *from++;
-                        *to = *from;
-                    }
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 3;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 4;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_8_Int64(long value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                    {
-                        // We can write directly to the buffer, safe in the knowledge that any potential unaligned writes will work
-                        *(long*)(basePtr + this.bufferIndex) = value;
-                    }
-                    else
-                    {
-                        // VRCHAT - Modified to work around a compilation bug where this function inlined would result in bad writes of the upper-byte
-                        // We do a slower but safer int-by-int write instead
-#if UNITY_2022_3_OR_NEWER
-                        int* toPtr = (int*)(basePtr + this.bufferIndex);
-                        toPtr[0] = (int)value;
-                        toPtr[1] = (int)(value >> 32);
-#else
-                        int* fromPtr = (int*)&value;
-                        int* toPtr = (int*)(basePtr + this.bufferIndex);
-
-                        *toPtr++ = *fromPtr++;
-                        *toPtr = *fromPtr;
-#endif
-                    }
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 7;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 8;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_8_UInt64(ulong value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                    {
-                        // We can write directly to the buffer, safe in the knowledge that any potential unaligned writes will work
-                        *(ulong*)(basePtr + this.bufferIndex) = value;
-                    }
-                    else
-                    {
-                        // We do a slower but safer int-by-int write instead
-                        int* fromPtr = (int*)&value;
-                        int* toPtr = (int*)(basePtr + this.bufferIndex);
-
-                        *toPtr++ = *fromPtr++;
-                        *toPtr = *fromPtr;
-                    }
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 7;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 8;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_8_Float64(double value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                    {
-                        // We can write directly to the buffer, safe in the knowledge that any potential unaligned writes will work
-                        *(double*)(basePtr + this.bufferIndex) = value;
-                    }
-                    else
-                    {
-                        // We do a slower but safer int-by-int write instead
-                        int* fromPtr = (int*)&value;
-                        int* toPtr = (int*)(basePtr + this.bufferIndex);
-
-                        *toPtr++ = *fromPtr++;
-                        *toPtr = *fromPtr;
-                    }
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 7;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 8;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void UNSAFE_WriteToBuffer_16_Decimal(decimal value)
         {
-            fixed (byte* basePtr = this.buffer)
-            {
-                if (BitConverter.IsLittleEndian)
-                {
-                    if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                    {
-                        // We can write directly to the buffer, safe in the knowledge that any potential unaligned writes will work
-                        *(decimal*)(basePtr + this.bufferIndex) = value;
-                    }
-                    else
-                    {
-                        // We do a slower but safer int-by-int write instead
-                        int* fromPtr = (int*)&value;
-                        int* toPtr = (int*)(basePtr + this.bufferIndex);
-
-                        *toPtr++ = *fromPtr++;
-                        *toPtr++ = *fromPtr++;
-                        *toPtr++ = *fromPtr++;
-                        *toPtr = *fromPtr;
-                    }
-                }
-                else
-                {
-                    byte* ptrTo = basePtr + this.bufferIndex;
-                    byte* ptrFrom = (byte*)&value + 15;
-
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo++ = *ptrFrom--;
-                    *ptrTo = *ptrFrom;
-                }
-            }
-
-            this.bufferIndex += 16;
+            WriteValueTypeToBuffer(value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
@@ -2120,29 +1884,13 @@ namespace VRC.Udon.Serialization.OdinSerializer
             // See http://stackoverflow.com/questions/10190817/guid-byte-order-in-net
 
             // TODO: Test if this actually works on big-endian architecture. Where the hell do we find that?
-
-            fixed (byte* basePtr = this.buffer)
+            if (BitConverter.IsLittleEndian)
             {
-                if (BitConverter.IsLittleEndian)
-                {
-                    if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                    {
-                        // We can write directly to the buffer, safe in the knowledge that any potential unaligned writes will work
-                        *(Guid*)(basePtr + this.bufferIndex) = value;
-                    }
-                    else
-                    {
-                        // We do a slower but safer int-by-int write instead
-                        int* fromPtr = (int*)&value;
-                        int* toPtr = (int*)(basePtr + this.bufferIndex);
-
-                        *toPtr++ = *fromPtr++;
-                        *toPtr++ = *fromPtr++;
-                        *toPtr++ = *fromPtr++;
-                        *toPtr = *fromPtr;
-                    }
-                }
-                else
+                WriteValueTypeToBuffer(value);
+            }
+            else
+            {
+                fixed (byte* basePtr = this.buffer)
                 {
                     byte* ptrTo = basePtr + this.bufferIndex;
                     byte* ptrFrom = (byte*)&value;
@@ -2167,11 +1915,12 @@ namespace VRC.Udon.Serialization.OdinSerializer
                     *ptrTo++ = *ptrFrom--;
                     *ptrTo = *ptrFrom;
                 }
+
+                this.bufferIndex += 16;
             }
-
-            this.bufferIndex += 16;
         }
-
+	// VRChat End - Changes to serialization to avoid unaligned reads/writes on arm64 architectures [PER-795]
+	
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private void EnsureBufferSpace(int space)
         {

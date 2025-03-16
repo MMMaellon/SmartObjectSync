@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using JetBrains.Annotations;
@@ -9,15 +10,15 @@ using UnityEngine;
 using UnityEditor;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEditor.SceneManagement;
-using UnityEditor.UIElements;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
-using UnityEngine.UIElements.Experimental;
 using VRC.Core;
-using VRC.Editor;
 using VRC.SDKBase.Validation.Performance;
 using Object = UnityEngine.Object;
 using VRC.SDKBase.Editor;
 using VRC.SDKBase;
+using VRC.SDKBase.Editor.Elements;
+using Task = System.Threading.Tasks.Task;
 
 /// This file handles the Build tab of the SDK Panel
 /// It finds currently available builder via an attribute and a common interface, checks its validity and displays its UI
@@ -47,6 +48,8 @@ public partial class VRCSdkControlPanel : EditorWindow
         {"ios", "iOS"}
     };
 
+    private Texture2D _defaultHeaderImage;
+
     #region Validations
     
     private VisualElement _validationsContainer;
@@ -60,6 +63,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     static Texture _bannerImage;
     
     public const int MAX_SDK_TEXTURE_SIZE = 8192;
+    const int buildSectionHeightCollapseThreshold = 80;
 
     public void ResetIssues()
     {
@@ -104,7 +108,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                     // Show messages with actions first
                     return b1HasActions ? -1 : 1;
                 }
-
+                
                 return string.Compare(b1.issueText, b2.issueText);
             }
             public int GetHashCode(Issue bx)
@@ -128,6 +132,17 @@ public partial class VRCSdkControlPanel : EditorWindow
     public bool NoGuiErrorsOrIssues()
     {
         return GUIErrors.Count == 0 && CheckedForIssues;
+    }
+
+    public int GUIAlertCount(Object item)
+    {
+        GUIErrors.TryGetValue(item, out var guiError);
+        GUIWarnings.TryGetValue(item, out var guiWarning);
+        GUIInfos.TryGetValue(item, out var guiInfo);
+        GUILinks.TryGetValue(item, out var guiLink);
+        GUIStats.TryGetValue(item, out var guiStat);
+        
+        return (guiError?.Count ?? 0) + (guiWarning?.Count ?? 0) + (guiInfo?.Count ?? 0) + (guiLink?.Count ?? 0) + (guiStat?.Count ?? 0);
     }
 
     // Null objects (i.e. (Object) null) are allowed here, those correspond to project-wide issues which we should also report
@@ -218,133 +233,187 @@ public partial class VRCSdkControlPanel : EditorWindow
             return lightmapStripping.enumValueIndex == 0;
         }
     }
-
-    void DrawIssueBox(MessageType msgType, Texture icon, string message, System.Action show, System.Action fix)
+    
+    private VisualElement CreateIssueBoxGUI(Object subject, Issue issue, HelpBoxMessageType messageType = HelpBoxMessageType.None, Texture icon = null)
     {
-        bool haveButtons = ((show != null) || (fix != null));
-
-        GUIStyle style = new GUIStyle("HelpBox");
-        float width = haveButtons ? SdkWindowWidth - 110 : SdkWindowWidth - 20;
-        if (haveButtons)
-        {
-            style.fixedWidth = width;
-        }
-        float minHeight = 40;
+        var haveButtons = ((issue.showThisIssue != null) || (issue.fixThisIssue != null));
         
-        EditorGUILayout.BeginHorizontal();
+        var container = new VisualElement();
+        container.AddToClassList("row");
+        container.AddToClassList("align-items-stretch");
+
+        VisualElement message;
         if (icon != null)
         {
-            GUIContent c = new GUIContent(message, icon);
-            float height = style.CalcHeight(c, width);
-            GUILayout.Box(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
+            message = new HelpBox(issue.issueText, HelpBoxMessageType.None);
+            var iconElement = new Image { image = icon };
+            iconElement.AddToClassList("mr-2");
+            message.Insert(0, iconElement);
         }
         else
         {
-            GUIContent c = new GUIContent(message);
-            float height = style.CalcHeight(c, width - 32); // Adjust for the width of the warning icon
-            Rect rt = GUILayoutUtility.GetRect(c, style, GUILayout.MinHeight(Mathf.Max(minHeight, height)));
-            EditorGUI.HelpBox(rt, message, msgType);    // note: EditorGUILayout resulted in uneven button layout in this case
+            message = new HelpBox(issue.issueText, messageType);
         }
 
-        if (haveButtons)
+        // Expand the b
+        if (!haveButtons)
         {
-            EditorGUILayout.BeginVertical();
-            float buttonHeight = ((show == null || fix == null) ? minHeight : (minHeight * 0.5f));
-            if ((show != null) && GUILayout.Button("Select", GUILayout.Height(buttonHeight)))
-                show();
-            if ((fix != null) && GUILayout.Button("Auto Fix", GUILayout.Height(buttonHeight)))
-            {
-                fix();
-                EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-                CheckedForIssues = false;
-                Repaint();
-            }
-            EditorGUILayout.EndVertical();
+            message.AddToClassList("flex-1");
+            container.Add(message);
+            return container;
         }
-
-        EditorGUILayout.EndHorizontal();
-    }
-
-    public void OnGuiFixIssuesToBuildOrTest()
-    {
-        EditorGUILayout.Space(5);
-        GUIStyle s = new GUIStyle(EditorStyles.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true };
-        GUILayout.BeginVertical(boxGuiStyle, GUILayout.Height(WARNING_ICON_SIZE));
-        GUILayout.FlexibleSpace();
-        EditorGUILayout.BeginHorizontal();
-        var textDimensions = s.CalcSize(new GUIContent(FIX_ISSUES_TO_BUILD_OR_TEST_WARNING_STRING));
-        GUILayout.Label(new GUIContent(warningIconGraphic), GUILayout.Width(WARNING_ICON_SIZE), GUILayout.Height(WARNING_ICON_SIZE));
-        EditorGUILayout.LabelField(FIX_ISSUES_TO_BUILD_OR_TEST_WARNING_STRING, s, GUILayout.Height(WARNING_ICON_SIZE));
-        EditorGUILayout.EndHorizontal();
-        GUILayout.FlexibleSpace();
-        GUILayout.EndVertical();
-    }
-
-    public void OnGUIShowIssues(Object subject = null)
-    {
-        try
+        
+        message.AddToClassList("flex-10");
+        var buttonsContainer = new VisualElement();
+        buttonsContainer.AddToClassList("flex-2");
+        buttonsContainer.style.minWidth = 50;
+        if (issue.showThisIssue != null)
         {
-            if (subject == null)
-                subject = this;
-
-            EditorGUI.BeginChangeCheck();
-
-            GUIStyle style = GUI.skin.GetStyle("HelpBox");
-
-            if (GUIErrors.ContainsKey(subject))
-                foreach (Issue error in GUIErrors[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                    DrawIssueBox(MessageType.Error, null, error.issueText, error.showThisIssue, error.fixThisIssue);
-            if (GUIWarnings.ContainsKey(subject))
-                foreach (Issue warning in GUIWarnings[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                    DrawIssueBox(MessageType.Warning, null, warning.issueText, warning.showThisIssue, warning.fixThisIssue);
-
-            if (GUIStats.ContainsKey(subject))
+            var button = new Button(issue.showThisIssue)
             {
-                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.VeryPoor))
-                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
-
-                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Poor))
-                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
-
-                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Medium))
-                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
-
-                foreach (var kvp in GUIStats[subject].Where(k => k.performanceRating == PerformanceRating.Good || k.performanceRating == PerformanceRating.Excellent))
-                    DrawIssueBox(MessageType.Warning, GetPerformanceIconForRating(kvp.performanceRating), kvp.issueText, kvp.showThisIssue, kvp.fixThisIssue);
-            }
-
-            if (GUIInfos.ContainsKey(subject))
-                foreach (Issue info in GUIInfos[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                    DrawIssueBox(MessageType.Info, null, info.issueText, info.showThisIssue, info.fixThisIssue);
-            if (GUILinks.ContainsKey(subject))
+                text = "Select"
+            };
+            button.AddToClassList("flex-1");
+            buttonsContainer.Add(button);
+        }
+        
+        if (issue.fixThisIssue != null)
+        {
+            var button = new Button(() =>
             {
-                EditorGUILayout.BeginVertical(style);
-                foreach (Issue error in GUILinks[subject].Where(s => !string.IsNullOrEmpty(s.issueText)))
-                {
-                    var s = error.issueText.Split('\n');
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.Label(s[0]);
-                    if (GUILayout.Button("Open Link", GUILayout.Width(100)))
-                        Application.OpenURL(s[1]);
-                    EditorGUILayout.EndHorizontal();
-                }
-                EditorGUILayout.EndVertical();
-            }
-
-            if (EditorGUI.EndChangeCheck())
-            {
+                issue.fixThisIssue();
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 EditorUtility.SetDirty(subject);
-                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+                RunValidations();
+            })
+            {
+                text = "Auto Fix"
+            };
+            button.AddToClassList("flex-1");
+            buttonsContainer.Add(button);
+        }
+        
+        container.Add(message);
+        container.Add(buttonsContainer);
+        return container;
+    }
+
+    private VisualElement CreateLinkBoxGUI(Issue issue)
+    {
+        var s = issue.issueText.Split('\n');
+        
+        var message = new HelpBox(s[0], HelpBoxMessageType.None);
+        message.AddToClassList("align-items-stretch");
+        var text = message.Q<Label>();
+        text.AddToClassList("flex-1");
+        text.AddToClassList("ml-1");
+        
+        var button = new Button(() =>
+        {
+            Application.OpenURL(s[1]);
+        })
+        {
+            text = "Open Link",
+            style =
+            {
+                maxWidth = 100,
+                minWidth = 50
+            }
+        };
+        button.AddToClassList("flex-1");
+        message.Add(button);
+
+        return (VisualElement) message;
+    }
+
+    internal VisualElement CreateFixIssuesToBuildOrTestGUI()
+    {
+        var text = new Label(FIX_ISSUES_TO_BUILD_OR_TEST_WARNING_STRING);
+        text.AddToClassList("text-center");
+        text.AddToClassList("white-space-normal");
+
+        var container = new HelpBox();
+        container.AddToClassList("row");
+        container.AddToClassList("align-items-center");
+        container.Add(new Image
+        {
+            image = warningIconGraphic,
+            style =
+            {
+                width = WARNING_ICON_SIZE,
+                height = WARNING_ICON_SIZE
+            }
+        });
+        container.Add(text);
+        return container;
+    }
+
+    internal VisualElement CreateIssuesGUI(Object subject = null)
+    {
+        var container = new VisualElement
+        {
+            name = "issues-list"
+        };
+        
+        if (subject == null) subject = this;
+
+        if (GUIErrors.TryGetValue(subject, out var issues))
+        {
+            foreach (var issue in issues.Where(i => !string.IsNullOrWhiteSpace(i.issueText)))
+            {
+                container.Add(CreateIssueBoxGUI(subject, issue, HelpBoxMessageType.Error));
             }
         }
-        catch (Exception)
+        
+        if (GUIWarnings.TryGetValue(subject, out issues))
         {
-            // Catches System.ArgumentException: Getting control 2's position in a group with only 2 controls when doing repaint
+            foreach (var issue in issues.Where(i => !string.IsNullOrWhiteSpace(i.issueText)))
+            {
+                container.Add(CreateIssueBoxGUI(subject, issue, HelpBoxMessageType.Warning));
+            }
         }
+        
+        if (GUIStats.TryGetValue(subject, out issues))
+        {
+            // Stats need to be displayed in order from very poor to excellent
+            var sortedIssues = issues.OrderBy(i => -(int) i.performanceRating);
+            foreach (var issue in sortedIssues.Where(i => !string.IsNullOrWhiteSpace(i.issueText)))
+            {
+                container.Add(CreateIssueBoxGUI(subject, issue, HelpBoxMessageType.Warning, GetPerformanceIconForRating(issue.performanceRating)));
+            }
+        }
+        
+        if (GUIInfos.TryGetValue(subject, out issues))
+        {
+            foreach (var issue in issues.Where(i => !string.IsNullOrWhiteSpace(i.issueText)))
+            {
+                container.Add(CreateIssueBoxGUI(subject, issue, HelpBoxMessageType.Info));
+            }
+        }
+        
+        if (GUILinks.TryGetValue(subject, out issues))
+        {
+            foreach (var issue in issues.Where(i => !string.IsNullOrWhiteSpace(i.issueText)))
+            {
+                container.Add(CreateLinkBoxGUI(issue));
+            }
+        }
+        
+
+        return container;
     }
-    
     #endregion
 
+    // Refresh platform switcher post-login to grab latest allowed platforms
+    private void RefreshPlatformSwitcher(object sender, ApiUserPlatforms userPlatforms)
+    {
+        rootVisualElement.schedule.Execute(() =>
+        {
+            var switcherBlock = _builderPanel?.Q<PlatformSwitcherPopup>("platform-switcher-popup");
+            switcherBlock?.Refresh();
+        }).ExecuteLater(300);
+    }
+    
     // Renders any builder-specific options on the settings panel
     private void ShowSettingsOptionsForBuilders()
     {
@@ -352,13 +421,18 @@ public partial class VRCSdkControlPanel : EditorWindow
         {
             PopulateSdkBuilders();
         }
+        bool hasShownAnySettings = false;
         for (int i = 0; i < _sdkBuilders.Length; i++)
         {
             IVRCSdkControlPanelBuilder builder = _sdkBuilders[i];
-            builder.ShowSettingsOptions();
-            if (i < _sdkBuilders.Length - 1)
+            if (builder.IsValidBuilder(out _))
             {
-                EditorGUILayout.Separator();
+                if (hasShownAnySettings)
+                {
+                    EditorGUILayout.Separator();
+                }
+                builder.ShowSettingsOptions();
+                hasShownAnySettings = true;
             }
         }
     }
@@ -460,6 +534,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     
 
     // Validates scene and project settings
+    [UsedImplicitly]
     private void CheckProjectSetup()
     {
         if (VRC.Core.ConfigManager.RemoteConfig.IsInitialized())
@@ -501,6 +576,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                 {
                     // This will be reimported automatically on build.
                     EditorUserBuildSettings.androidBuildSubtarget = MobileTextureSubtarget.ASTC;
+                    AssetDatabase.Refresh();
                 }
             );
         }
@@ -563,14 +639,15 @@ public partial class VRCSdkControlPanel : EditorWindow
         _builderNotificationBlock = _builderPanel.Q("builder-notification");
         _builderNotificationTitle = _builderPanel.Q<Label>("builder-notification-title");
         _builderNotificationContent = _builderPanel.Q("builder-notification-content");
-        _builderNotificationDismiss = _builderPanel.Q("builder-notification-dismiss");
-        
-        _builderNotificationDismiss.RegisterCallback<MouseDownEvent>(async evt =>
-        {
-            await DismissNotification();
-        });
+        _builderNotificationDismiss = _builderPanel.Q<Button>("builder-notification-dismiss");
+
+        _builderNotificationDismiss.clicked += () => DismissNotification().ConfigureAwait(false);
 
         CleanUpPipelineSavers();
+        
+        var infoFoldout = _builderPanel.Q<Foldout>("info-foldout");
+        var validationsFoldout = _builderPanel.Q<Foldout>("validations-foldout");
+        var validationsMounted = false;
 
         _builderPanel.schedule.Execute(() =>
         {
@@ -581,7 +658,7 @@ public partial class VRCSdkControlPanel : EditorWindow
             }
             PopulateSdkBuilders();
             
-            IVRCSdkControlPanelBuilder selectedBuilder = null;
+            _selectedBuilder = null;
             string errorMessage = null;
 
             // Grab the first valid builder, and if all builders are invalid then errorMessage will contain the last error.
@@ -589,7 +666,7 @@ public partial class VRCSdkControlPanel : EditorWindow
             {
                 if (sdkBuilder.IsValidBuilder(out string message))
                 {
-                    selectedBuilder = sdkBuilder;
+                    _selectedBuilder = sdkBuilder;
                     errorMessage = null;
                     break;
                 }
@@ -599,7 +676,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                 }
             }
 
-            if (selectedBuilder == null)
+            if (_selectedBuilder == null)
             {
                 _descriptorErrorBlock.RemoveFromClassList("d-none");
                 _builderPanel.Q("content-info-block")?.Clear();
@@ -650,16 +727,24 @@ public partial class VRCSdkControlPanel : EditorWindow
                         } },
                     null
                 );
-            
-                _validationsContainer.Add(new IMGUIContainer(() =>
-                {
-                    using (new GUILayout.VerticalScope())
-                    {
-                        CheckProjectSetup();
-                        OnGUIShowIssues();
-                    }
-                }));
+                
+                _validationsContainer.Add(CreateIssuesGUI());
                 return;
+            }
+
+            var headerImage = _selectedBuilder.GetHeaderImage();
+            if (headerImage != null)
+            {
+                rootVisualElement.Q("banner").style.backgroundImage = headerImage;
+            }
+            else
+            {
+                if (_defaultHeaderImage == null)
+                {
+                    _defaultHeaderImage = Resources.Load<Texture2D>("SDK_Panel_Banner");
+                }
+
+                rootVisualElement.Q("banner").style.backgroundImage = _defaultHeaderImage;
             }
 
             // Draw content info
@@ -669,104 +754,139 @@ public partial class VRCSdkControlPanel : EditorWindow
             infoBlock.RemoveFromClassList("d-none");
             if (infoBlock.childCount == 0)
             {
-                selectedBuilder.CreateContentInfoGUI(infoBlock);
-            }
+                _selectedBuilder.Initialize();
+                _selectedBuilder.CreateContentInfoGUI(infoBlock);
+                
+                validationsFoldout.style.maxHeight = new StyleLength(StyleKeyword.Auto);
 
-            // Draw platform switcher
-            var switcherBlock = _builderPanel.Q("platform-switcher");
-            if (switcherBlock.childCount == 0)
-            {
+                void MakeSpaceForUncollapse(bool infoSectionOpen, bool validationSectionOpen)
                 {
-                    var options = GetBuildTargetOptions();
-                    var currentTarget = GetCurrentBuildTarget();
-                    var selectedIndex = options.IndexOf(currentTarget);
-                    if (!BUILD_TARGET_ICONS.TryGetValue(currentTarget, out var iconClass))
-                    {
-                        iconClass = "";
-                    }
-                    if (selectedIndex == -1)
-                    {
-                        selectedIndex = 0;
-                    }
-                    var popup = new PopupField<string>("Selected Platform", options, selectedIndex)
-                    {
-                        name = "platform-switcher-popup"
-                    };
-                    var icon = new VisualElement();
-                    icon.AddToClassList("icon");
-                    icon.AddToClassList(iconClass);
-                    
-                    popup.hierarchy.Insert(0, icon);
-                    popup.schedule.Execute(() =>
-                    {
-                        currentTarget = GetCurrentBuildTarget();
-                        popup.SetValueWithoutNotify(currentTarget);
-                    }).Every(500);
-                    popup.RegisterValueChangedCallback(evt =>
-                    {
-                        switch (evt.newValue)
-                        {
-                            case "Windows":
-                            {
-                                if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Windows? This could take a while.", "Confirm", "Cancel"))
-                                {
-                                    EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Standalone;
-                                    EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
-                                }
+                    float parentHeight = infoFoldout.parent.contentRect.height;
+                        
+                    float validationSectionHeight = validationsFoldout.contentRect.height;
+                    float validationSectionContentHeight = validationsFoldout.contentContainer.contentRect.height;
+                    float validationSectionTabHeight = validationSectionHeight - validationSectionContentHeight;
+                        
+                    float infoSectionHeight = infoFoldout.contentRect.height;
+                    float infoSectionContentHeight = infoFoldout.contentContainer.contentRect.height;
+                    float infoSectionTabHeight = infoSectionHeight - infoSectionContentHeight;
+                        
+                    float tabHeights = infoSectionTabHeight + validationSectionTabHeight;
 
-                                break;
-                            }
-                            case "Android":
-                            {
-                                if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Android? This could take a while.", "Confirm", "Cancel"))
-                                {
-                                    EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Android;
-                                    EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Android, BuildTarget.Android);
-                                }
+                    float infoRequiredContentHeight = buildSectionHeightCollapseThreshold * (infoSectionOpen ? 1 : 0);
+                    float validationRequiredContentHeight = buildSectionHeightCollapseThreshold * (validationSectionOpen ? 1 : 0);
+                    if (infoSectionOpen && validationSectionOpen)
+                    {
+                        // Both are open, so now the info section will take up 2/3 of the space and validation will take up 1/3
+                        validationRequiredContentHeight *= 3.0f / 2.0f;
+                    }
 
-                                break;
-                            }
-                            case "iOS":
-                            {
-                                if (ApiUserPlatforms.CurrentUserPlatforms?.SupportsiOS != true) return;
-                                if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to iOS? This could take a while.", "Confirm", "Cancel"))
-                                {
-                                    EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.iOS;
-                                    EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.iOS, BuildTarget.iOS);
-                                }
-                                
-                                break;
-                            }
-                        }
-                    });
-                    popup.AddToClassList("flex-grow-1");
-                    switcherBlock.Add(popup);
+                    float contentHeights = infoRequiredContentHeight + validationRequiredContentHeight;
+                    float totalRequiredHeight = tabHeights + contentHeights * 1.1f; // Add 10% more content height just so it's not exactly on the collapse threshold
+  
+                    if (parentHeight < totalRequiredHeight)
+                    {
+                        var rect = window.position;
+                        rect.height = window.position.height + Mathf.Max(totalRequiredHeight - parentHeight, 0);
+                        window.position = rect;
+                    }
                 }
+                infoFoldout.RegisterValueChangedCallback(evt =>
+                {
+                    validationsFoldout.style.maxHeight = evt.newValue ? new StyleLength(new Length(50, LengthUnit.Percent)) : new StyleLength(StyleKeyword.Auto);
+                    if (evt.newValue)
+                    {
+                        MakeSpaceForUncollapse(true, validationsFoldout.value);
+                    }
+                });
+                
+                validationsFoldout.RegisterValueChangedCallback(evt =>
+                {
+                    if (evt.newValue)
+                    {
+                        MakeSpaceForUncollapse(infoFoldout.value, true);
+                    }
+                });
             }
 
-            // Draw validations
-            if (_validationsContainer.childCount == 0)
+            if (!validationsMounted)
             {
-                // Execute the code of the discovered builder class
-                _validationsContainer.Add(new IMGUIContainer(() =>
+                validationsMounted = true;
+
+                // Initial validations check
+                RunValidations();
+                
+                // Re-Validate on World/Avatar selection change
+                _selectedBuilder.OnContentChanged += (_, _) =>
                 {
-                    CheckProjectSetup();
-                    using (new GUILayout.VerticalScope())
-                    {
-                        selectedBuilder.ShowBuilder();
-                    }
-                }));
+                    RunValidations();
+                };
+                // Re-validate on forced revalidations, e.g. project settings adjustment, etc
+                _selectedBuilder.OnShouldRevalidate += (_, _) =>
+                {
+                    RunValidations();
+                };
+
+                // Re-validate on unity change publish
+                // Make sure we don't call RunValidations too often
+                var debouncedChangeCheck = new DebouncedCall(TimeSpan.FromSeconds(2), RunValidations, DebouncedCall.ExecuteMode.End);
+
+                void HandleSceneChanges(ref ObjectChangeEventStream _)
+                {
+                    debouncedChangeCheck.Invoke();
+                }
+                // Avoid double-subscribing to the event
+                ObjectChangeEvents.changesPublished -= HandleSceneChanges;
+                ObjectChangeEvents.changesPublished += HandleSceneChanges;
+                // Clean up on unmount
+                _validationsContainer.RegisterCallback<DetachFromPanelEvent>(_ =>
+                {
+                    ObjectChangeEvents.changesPublished -= HandleSceneChanges;
+                });
             }
             
             // Draw build panel
             var buildBlock = _builderPanel.Q("build-panel-gui");
             if (buildBlock.childCount == 0)
             {
-                selectedBuilder.CreateBuildGUI(buildBlock);
+                _selectedBuilder.CreateBuildGUI(buildBlock);
             }
         }).Every(1000);
+        
+        _builderPanel.schedule.Execute(() =>
+        {
+            _builderPanel.schedule.Execute(() =>
+            {
+                if (validationsFoldout != null &&
+                    validationsFoldout.contentRect.height < buildSectionHeightCollapseThreshold)
+                {
+                        validationsFoldout.value = false;
+                }
+
+                if (infoFoldout != null && infoFoldout.contentRect.height < buildSectionHeightCollapseThreshold)
+                {
+                    infoFoldout.value = false;
+                }
+
+                if (infoFoldout != null && validationsFoldout != null)
+                {
+                    validationsFoldout.style.maxHeight = infoFoldout.value
+                        ? new StyleLength(new Length(50, LengthUnit.Percent))
+                        : new StyleLength(StyleKeyword.Auto);
+                }
+            }).Every(200);
+        })
+        // This is delayed with ExecuteLater because for whatever reason opening the SDK with an uncollapsed validations section will cause it to be automatically closed by collapsing behavior,
+        // seemingly because it starts out with no size before the first update is ran
+        .ExecuteLater(0);  
     }
 
+    private void RunValidations()
+    {
+        CheckedForIssues = false;
+        _selectedBuilder?.CreateValidationsGUI(_validationsContainer);
+    }
+    
     private static void CleanUpPipelineSavers()
     {
         #pragma warning disable CS0618 // Disabled obsolete warnings because we're trying to get rid of the pipelineSavers in the scene
@@ -778,25 +898,47 @@ public partial class VRCSdkControlPanel : EditorWindow
         #pragma warning restore CS0618
     }
 
-    private bool _notificationShown = false;
+    private bool _notificationShown;
     private VisualElement _builderNotificationBlock;
     private VisualElement _builderNotificationContent;
     private Label _builderNotificationTitle;
-    private VisualElement _builderNotificationDismiss;
+    private Button _builderNotificationDismiss;
     private string _builderNotificationTitleColorClass;
+    private IVRCSdkControlPanelBuilder _selectedBuilder;
 
-    public async Task ShowBuilderNotification(string title, VisualElement content, string titleColor = null, int timeout = 0)
+    public async Task ShowBuilderNotification(string title, VisualElement content, string titleColor = null,
+        int timeout = 0)
     {
         if (_notificationShown)
         {
             await DismissNotification();
         }
-
+        
+        // If we're not on the builder tab or not logged in, defer the notification until we are
+        if ((PanelTab) VRCSettings.ActiveWindowPanel != PanelTab.Builder || !APIUser.IsLoggedIn)
+        {
+            var waitSource = new CancellationTokenSource();
+            // If unity is out of focus - the tabs will not re-render, so a large timeout is used here
+            // We should avoid kicking the user to the Account tab in the future every time assembly reloads, so this wouldn't be necessary
+            waitSource.CancelAfter(TimeSpan.FromMinutes(10));
+            try
+            {
+                await UniTask.WaitUntil(
+                    () => (PanelTab) VRCSettings.ActiveWindowPanel == PanelTab.Builder && APIUser.IsLoggedIn,
+                    PlayerLoopTiming.Update, waitSource.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                // no-op, we timed out
+            }
+        }
+        
+        // Assign the contents after tab-switch waiting, otherwise it will be cleared due to re-mounts
         _builderNotificationTitle.text = title;
 
         _builderNotificationTitle.RemoveFromClassList(_builderNotificationTitleColorClass);
         _builderNotificationTitleColorClass = null;
-        
+
         if (!string.IsNullOrWhiteSpace(titleColor))
         {
             _builderNotificationTitleColorClass = $"text-{titleColor}";
@@ -807,9 +949,18 @@ public partial class VRCSdkControlPanel : EditorWindow
         _builderNotificationContent.Add(content);
 
         _notificationShown = true;
-
-        _builderNotificationBlock.experimental.animation.Start(new StyleValues {bottom = -500},
-            new StyleValues {bottom = 0}, 500);
+        
+        _builderNotificationBlock.RemoveFromClassList("d-none");
+        
+        // wait for ui to rebuild and adjust size
+        _builderNotificationBlock.schedule.Execute(() =>
+        {
+            // ensure things fit correctly
+            if (_builderNotificationBlock.parent.contentRect.height < _builderNotificationBlock.hierarchy[0].layout.height + 40)
+            {
+                _builderNotificationBlock.parent.style.height = _builderNotificationBlock.hierarchy[0].layout.height + 40;
+            }
+        }).ExecuteLater(100);
 
         if (timeout > 0)
         {
@@ -828,8 +979,8 @@ public partial class VRCSdkControlPanel : EditorWindow
     {
         if (!_notificationShown) return;
         await UniTask.SwitchToMainThread();
-        _builderNotificationBlock.experimental.animation.Start(new StyleValues {bottom = 0},
-            new StyleValues {bottom = -500}, 500);
+        _builderNotificationBlock.AddToClassList("d-none");
+        _builderNotificationBlock.parent.style.height = StyleKeyword.Auto;
         _notificationShown = false;
         await Task.Delay(500);
     }
@@ -864,7 +1015,7 @@ public partial class VRCSdkControlPanel : EditorWindow
 
         return _perfIcon_Excellent;
     }
-
+    
     private List<string> GetBuildTargetOptions()
     {
         var options = new List<string>
@@ -915,68 +1066,7 @@ public partial class VRCSdkControlPanel : EditorWindow
         back.Apply(false);
         return back;
     }
-
-    public static void DrawBuildTargetSwitcher()
-    {
-        EditorGUILayout.LabelField("Active Build Target: " + EditorUserBuildSettings.activeBuildTarget);
-
-        if (GUILayout.Button("Switch Build Target"))
-        {
-            GenericMenu menu = new GenericMenu();
-            
-            menu.AddItem(new GUIContent("Windows"), EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows || EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64,
-                () =>
-                {
-                    if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Windows? This could take a while.", "Confirm", "Cancel"))
-                    {
-                        EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Standalone;
-                        EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
-                    }
-                });
-            
-            menu.AddItem(new GUIContent("Android"), EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android,
-                () =>
-                {
-                    if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to Android? This could take a while.", "Confirm", "Cancel"))
-                    {
-                        EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.Android;
-                        EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.Android, BuildTarget.Android);
-                    }
-                });
-
-            if (ApiUserPlatforms.CurrentUserPlatforms?.SupportsiOS == true)
-            {
-                menu.AddItem(new GUIContent("iOS"), EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS,
-                    () =>
-                    {
-                        if (EditorUtility.DisplayDialog("Build Target Switcher", "Are you sure you want to switch your build target to iOS? This could take a while.", "Confirm", "Cancel"))
-                        {
-                            EditorUserBuildSettings.selectedBuildTargetGroup = BuildTargetGroup.iOS;
-                            EditorUserBuildSettings.SwitchActiveBuildTargetAsync(BuildTargetGroup.iOS, BuildTarget.iOS);
-                        }
-                    });
-            }
-
-            menu.ShowAsContext();
-        }
-    }
-
-    public static string GetBuildAndPublishButtonString()
-    {
-        string buildButtonString = "Build & Publish for UNSUPPORTED";
-        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows || EditorUserBuildSettings.activeBuildTarget == BuildTarget.StandaloneWindows64)
-            buildButtonString = "Build & Publish for Windows";
-        if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
-            buildButtonString = "Build & Publish for Android";
-        if (ApiUserPlatforms.CurrentUserPlatforms?.SupportsiOS == true)
-        {
-            if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.iOS)
-                buildButtonString = "Build & Publish for iOS";
-        }
-
-        return buildButtonString;
-    }
-
+    
     public static Object[] GetSubstanceObjects(GameObject obj = null, bool earlyOut = false)
     {
         // if 'obj' is null we check entire scene
@@ -1037,34 +1127,79 @@ public partial class VRCSdkControlPanel : EditorWindow
 
     public static List<TextureImporter> GetOversizeTextureImporters(List<Renderer> renderers)
     {
+        HashSet<Material> uniqueMaterials = new HashSet<Material>();
         List<TextureImporter> badTextureImporters = new List<TextureImporter>();
-        List<Object> badTextures = new List<Object>();
-        foreach (Renderer r in renderers)
+
+        // Collect all unique materials from renderers
+        foreach (Renderer renderer in renderers)
         {
-            foreach (Material m in r.sharedMaterials)
+            foreach (Material material in renderer.sharedMaterials)
             {
-                if (!m)
-                    continue;
-                int[] texIDs = m.GetTexturePropertyNameIDs();
-                if (texIDs == null)
-                    continue;
-                foreach (int i in texIDs)
-                {
-                    Texture t = m.GetTexture(i);
-                    if (!t)
-                        continue;
-                    string path = AssetDatabase.GetAssetPath(t);
-                    if (string.IsNullOrEmpty(path))
-                        continue;
-                    TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
-                    if (importer != null && importer.maxTextureSize > MAX_SDK_TEXTURE_SIZE)
-                    {
-                        badTextureImporters.Add(importer);
-                        badTextures.Add(t);
-                    }
-                }
+                if (!material) { continue;}
+
+                uniqueMaterials.Add(material);
             }
         }
+
+        // Check textures in each unique material
+        foreach (Material material in uniqueMaterials)
+        {
+            int[] texIDs = material.GetTexturePropertyNameIDs();
+            foreach (int texID in texIDs)
+            {
+                Texture texture = material.GetTexture(texID);
+                if (!texture) { continue; }
+
+                string path = AssetDatabase.GetAssetPath(texture);
+                if (string.IsNullOrEmpty(path)) { continue; }
+
+                TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                if (importer == null || importer.maxTextureSize <= MAX_SDK_TEXTURE_SIZE)
+                { continue; }
+
+                badTextureImporters.Add(importer);
+            }
+        }
+
+        return badTextureImporters;
+    }
+
+    public static List<TextureImporter> GetBoxFilteredTextureImporters(List<Renderer> renderers)
+    {
+        HashSet<Material> uniqueMaterials = new HashSet<Material>();
+        List<TextureImporter> badTextureImporters = new List<TextureImporter>();
+
+        // Collect all unique materials from renderers
+        foreach (Renderer renderer in renderers)
+        {
+            foreach (Material material in renderer.sharedMaterials)
+            {
+                if (!material) { continue;}
+
+                uniqueMaterials.Add(material);
+            }
+        }
+
+        // Check textures in each unique material
+        foreach (Material material in uniqueMaterials)
+        {
+            int[] texIDs = material.GetTexturePropertyNameIDs();
+            foreach (int texID in texIDs)
+            {
+                Texture texture = material.GetTexture(texID);
+                if (!texture) { continue; }
+
+                string path = AssetDatabase.GetAssetPath(texture);
+                if (string.IsNullOrEmpty(path)) { continue; }
+
+                TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+                if (importer == null || importer.mipmapFilter != TextureImporterMipFilter.BoxFilter || !importer.mipmapEnabled)
+                { continue; }
+
+                badTextureImporters.Add(importer);
+            }
+        }
+
         return badTextureImporters;
     }
 

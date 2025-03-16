@@ -1,16 +1,18 @@
 ﻿.unity-box {
-    margin:2px;
-    padding:10px;
-    border-width:0px;
+    margin: 2px;
+    padding: 10px;
+    border-width: 0;
+    flex-shrink: 0;
 }
 
+
 #package-box {
-    margin:2px;
+    margin: 2px;
     border-width: 0;
     flex-direction:row;
     padding: 6px;
     justify-content: center;
-    align-items:center;
+    align-items: center;
 }
 
 #package-row {

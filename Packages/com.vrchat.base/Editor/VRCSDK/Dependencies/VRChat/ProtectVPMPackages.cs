@@ -6,15 +6,10 @@ namespace VRC.SDKBase.Editor
 {
     public class ProtectVPMPackages : UnityEditor.AssetModificationProcessor
     {
-        private static VRCPackageSettings _settings;
         public static string[] OnWillSaveAssets(string[] paths)
         {
             // skip check if settings allows changes
-            if (_settings == null)
-            {
-                _settings = VRCPackageSettings.Create();
-            }
-            if (_settings.allowVRCPackageChanges) return paths;
+            if (VRCPackageSettings.Instance.allowVRCPackageChanges) return paths;
             
             List<string> pathsToSave = new List<string>();
 

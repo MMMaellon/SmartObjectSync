@@ -13,15 +13,15 @@ namespace VRC.SDKBase.Validation
 {
     public static class WorldValidation
     {
-        private static readonly Lazy<int> _debugLevel = new Lazy<int>(InitializeLogging);
-        private static int DebugLevel => _debugLevel.Value;
+        private static readonly Lazy<string> _debugCategoryName = new Lazy<string>(InitializeLogging);
+        private static string DebugCategoryName => _debugCategoryName.Value;
 
-        private static int InitializeLogging()
+        private static string InitializeLogging()
         {
-            int hashCode = typeof(WorldValidation).GetHashCode();
-            VRC.Core.Logger.DescribeDebugLevel(hashCode, "WorldValidation", VRC.Core.Logger.Color.red);
-            VRC.Core.Logger.AddDebugLevel(hashCode);
-            return hashCode;
+            const string categoryName = "WorldValidation";
+            VRC.Core.Logger.DescribeCategory(categoryName, VRC.Core.Logger.Color.red);
+            VRC.Core.Logger.EnableCategory(categoryName);
+            return categoryName;
         }
 
         static string[] ComponentTypeWhiteList = null;
@@ -424,9 +424,7 @@ namespace VRC.SDKBase.Validation
             "RenderHeads.Media.AVProVideo.MediaPlayer",
             "RenderHeads.Media.AVProVideo.SubtitlesUGUI",
             "AlphaButtonClickMask",
-            "EventSystemChecker",
-            "VirtualMarketplaceItem",
-            "SDK2UrlLauncher"
+            "EventSystemChecker"
         };
 
         static readonly string[] ComponentTypeWhiteListSdk3 = new string[]
@@ -444,6 +442,12 @@ namespace VRC.SDKBase.Validation
             "VRC.SDK3.Components.VRCObjectSync",
             "VRC.SDK3.Components.VRCObjectPool",
             "VRC.SDK3.Components.VRCInputFieldKeyboardOverride",
+#if VRC_ENABLE_PLAYER_PERSISTENCE
+            "VRC.SDK3.Components.VRCPlayerObject",
+#endif
+#if VRC_ENABLE_PLAYER_PERSISTENCE || VRC_ENABLE_INSTANCE_PERSISTENCE
+            "VRC.SDK3.Components.VRCEnablePersistence",
+#endif
             "VRC.SDK3.Video.Components.VRCUnityVideoPlayer",
             "VRC.SDK3.Video.Components.AVPro.VRCAVProVideoPlayer",
             "VRC.SDK3.Video.Components.AVPro.VRCAVProVideoScreen",
@@ -459,6 +463,10 @@ namespace VRC.SDKBase.Validation
             "UnityEngine.Animations.RotationConstraint",
             "UnityEngine.Animations.ScaleConstraint",
             "UnityEngine.ParticleSystemForceField",
+            "Unity.AI.Navigation.NavMeshSurface",
+            "Unity.AI.Navigation.NavMeshLink",
+            "Unity.AI.Navigation.NavMeshModifier",
+            "Unity.AI.Navigation.NavMeshModifierVolume",
             "Cinemachine.Cinemachine3rdPersonAim",
             "Cinemachine.CinemachineBlendListCamera",
             "Cinemachine.CinemachineBrain",
@@ -551,7 +559,12 @@ namespace VRC.SDKBase.Validation
 
             foreach(GameObject target in targets)
             {
+#if VRC_CLIENT
                 ValidationUtils.RemoveIllegalComponents(target, tagWhitelistedTypes ?? whitelist, retry, true);
+#else
+                ValidationUtils.RemoveIllegalComponents(target, tagWhitelistedTypes ?? whitelist, retry, true, excludeEditorOnly:true, allowRemovingAssets:false);
+#endif
+
                 SecurityScan(target);
                 AddScanned(target);
 
@@ -597,7 +610,12 @@ namespace VRC.SDKBase.Validation
                 return;
             }
 
+#if VRC_CLIENT
             ValidationUtils.RemoveIllegalComponents(target, whitelist);
+#else
+            ValidationUtils.RemoveIllegalComponents(target, whitelist, excludeEditorOnly:true, allowRemovingAssets:false);
+#endif
+
             SecurityScan(target);
 #if VRC_CLIENT && UDON
             if (isSDK3)
@@ -620,7 +638,7 @@ namespace VRC.SDKBase.Validation
         [PublicAPI]
         public static IEnumerable<Shader> FindIllegalShaders(GameObject target)
         {
-            return ShaderValidation.FindIllegalShaders(target, ShaderWhiteList);
+            return ValidationUtils.FindIllegalShaders(target, ShaderWhiteList);
         }
 
         private static void SecurityScan(GameObject target)
@@ -694,7 +712,7 @@ namespace VRC.SDKBase.Validation
                     if(clip.asset is ControlPlayableAsset controlPlayableAsset && controlPlayableAsset.prefabGameObject != null)
                     {
                         UnityEngine.Object.Destroy(playableDirector);
-                        VRC.Core.Logger.LogWarning("PlayableDirector containing prefab removed", DebugLevel, playableDirector.gameObject);
+                        VRC.Core.Logger.LogWarning("PlayableDirector containing prefab removed", DebugCategoryName, playableDirector.gameObject);
                     }
                 }
             }

@@ -20,7 +20,6 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
 {
     using System;
     using System.Threading;
-
     public interface ICache : IDisposable
     {
         object Value { get; }
@@ -39,12 +38,13 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
     /// <seealso cref="System.IDisposable" />
     public sealed class Cache<T> : ICache where T : class, new()
     {
+        // VRC Unity John: PER-818 - Use a BCL SpinLock (rather than a hand-rolled Interlocked.CompareExchange loop) - this improved load times in testing.
+        private static SpinLock FreeValuesLock = new SpinLock(false);
+        // VRC Unity John: PER-818 end
         private static readonly bool IsNotificationReceiver = typeof(ICacheNotificationReceiver).IsAssignableFrom(typeof(T));
         private static object[] FreeValues = new object[4];
-
+        
         private bool isFree;
-
-        private static volatile int THREAD_LOCK_TOKEN = 0;
 
         private static int maxCacheSize = 5;
 
@@ -95,39 +95,39 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
         public static Cache<T> Claim()
         {
             Cache<T> result = null;
+            // VRC Unity John: PER-818 use BCL SpinLock
+            bool lockTaken = false;
 
-            // Very, very simple spinlock implementation
-            //  this lock will almost never be contested
-            //  and it will never be held for more than
-            //  an instant; therefore, we want to avoid paying
-            //  the lock(object) statement's semaphore
-            //  overhead.
-            while (true)
+            try
             {
-                if (Interlocked.CompareExchange(ref THREAD_LOCK_TOKEN, 1, 0) == 0)
+                FreeValuesLock.Enter(ref lockTaken);
+                // VRC Unity John: PER-818 end
+                
+                // We now hold the lock
+                var freeValues = FreeValues;
+                var length = freeValues.Length;
+
+                for (int i = 0; i < length; i++)
                 {
-                    break;
+                    result = (Cache<T>)freeValues[i];
+                    if (!object.ReferenceEquals(result, null))
+                    {
+                        freeValues[i] = null;
+                        result.isFree = false;
+                        break;
+                    }
+                }
+            // VRC Unity John: PER-818 use BCL SpinLock
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    FreeValuesLock.Exit(false);
                 }
             }
+            // VRC Unity John: PER-818 end
 
-            // We now hold the lock
-            var freeValues = FreeValues;
-            var length = freeValues.Length;
-
-            for (int i = 0; i < length; i++)
-            {
-                result = (Cache<T>)freeValues[i];
-                if (!object.ReferenceEquals(result, null))
-                {
-                    freeValues[i] = null;
-                    result.isFree = false;
-                    break;
-                }
-            }
-
-            // Release the lock
-            THREAD_LOCK_TOKEN = 0; 
-            
             if (result == null)
             {
                 result = new Cache<T>();
@@ -137,7 +137,7 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
             {
                 (result.Value as ICacheNotificationReceiver).OnClaimed();
             }
-
+            
             return result;
         }
 
@@ -164,58 +164,58 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
                 (cache.Value as ICacheNotificationReceiver).OnFreed();
             }
 
-            while (true)
+            // VRC Unity John: PER-818 use BCL SpinLock
+            bool lockTaken = false;
+
+            try
             {
-                if (Interlocked.CompareExchange(ref THREAD_LOCK_TOKEN, 1, 0) == 0)
+                FreeValuesLock.Enter(ref lockTaken);
+                // VRC Unity John: PER-818 end
+
+                // We now hold the lock
+                if (!cache.isFree)
                 {
-                    break;
+                    cache.isFree = true;
+
+                    var freeValues = FreeValues;
+                    var length = freeValues.Length;
+
+                    bool added = false;
+
+                    for (int i = 0; i < length; i++)
+                    {
+                        if (object.ReferenceEquals(freeValues[i], null))
+                        {
+                            freeValues[i] = cache;
+                            added = true;
+                            break;
+                        }
+                    }
+
+                    if (!added && length < MaxCacheSize)
+                    {
+                        var newArr = new object[length * 2];
+
+                        for (int i = 0; i < length; i++)
+                        {
+                            newArr[i] = freeValues[i];
+                        }
+
+                        newArr[length] = cache;
+
+                        FreeValues = newArr;
+                    }
+                }
+            // VRC Unity John: PER-818 use BCL SpinLock
+            }
+            finally
+            {
+                if (lockTaken)
+                {
+                    FreeValuesLock.Exit(false);
                 }
             }
-
-            // We now hold the lock
-
-            if (cache.isFree)
-            {
-                // Release the lock and leave - job's done already
-                THREAD_LOCK_TOKEN = 0;
-                return;
-            }
-
-
-            cache.isFree = true;
-
-            var freeValues = FreeValues;
-            var length = freeValues.Length;
-
-            bool added = false;
-
-            for (int i = 0; i < length; i++)
-            {
-                if (object.ReferenceEquals(freeValues[i], null))
-                {
-                    freeValues[i] = cache;
-                    added = true;
-                    break;
-                }
-            }
-
-            if (!added && length < MaxCacheSize)
-            {
-                var newArr = new object[length * 2];
-
-                for (int i = 0; i < length; i++)
-                {
-                    newArr[i] = freeValues[i];
-                }
-
-                newArr[length] = cache;
-
-                FreeValues = newArr;
-            }
-
-            // Release the lock
-            THREAD_LOCK_TOKEN = 0;
-
+            // VRC Unity John: PER-818 end
         }
 
         /// <summary>
@@ -223,26 +223,27 @@ namespace VRC.Udon.Serialization.OdinSerializer.Utilities
         /// </summary>
         public static void Purge()
         {
-            // Very, very simple spinlock implementation
-            //  this lock will almost never be contested
-            //  and it will never be held for more than
-            //  an instant; therefore, we want to avoid paying
-            //  the lock(object) statement's semaphore
-            //  overhead.
-            while (true)
+            // VRC Unity John: PER-818 use BCL SpinLock
+            bool lockTaken = false;
+
+            try
             {
-                if (Interlocked.CompareExchange(ref THREAD_LOCK_TOKEN, 1, 0) == 0)
+                FreeValuesLock.Enter(ref lockTaken);
+                // VRC Unity John: PER-818 end
+                
+                // We now hold the lock
+                // Clear the free values array
+                Array.Clear(FreeValues, 0, FreeValues.Length);
+            // VRC Unity John: PER-818 use spinlock
+            }
+            finally
+            {
+                if (lockTaken)
                 {
-                    break;
+                    FreeValuesLock.Exit(false);
                 }
             }
-
-            // We now hold the lock
-            // Clear the free values array
-            Array.Clear(FreeValues, 0, FreeValues.Length);
-
-            // Release the lock
-            THREAD_LOCK_TOKEN = 0;
+            // VRC Unity John: PER-818 end
         }
 
         /// <summary>

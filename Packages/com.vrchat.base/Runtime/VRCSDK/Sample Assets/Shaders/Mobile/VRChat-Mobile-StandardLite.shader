@@ -15,7 +15,6 @@
         [NoScaleOffset] _OcclusionMap("Occlusion(G)", 2D) = "white" {}
         _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
 
-        [Toggle(_EMISSION)]_EnableEmission("Enable Emission", int) = 0
         [NoScaleOffset] _EmissionMap("Emission(RGB)", 2D) = "white" {}
         _EmissionColor("Emission Color", Color) = (1,1,1)
 
@@ -28,6 +27,16 @@
 
         [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 0
         [ToggleOff] _GlossyReflections("Glossy Reflections", Float) = 0
+
+        [Toggle(_ENABLE_GEOMETRIC_SPECULAR_AA)] _EnableGeometricSpecularAA("EnableGeometricSpecularAA", Float) = 1.0
+        _SpecularAAScreenSpaceVariance("SpecularAAScreenSpaceVariance", Range(0.0, 1.0)) = 0.1
+        _SpecularAAThreshold("SpecularAAThreshold", Range(0.0, 1.0)) = 0.2
+
+        [Enum(Default,0,MonoSH,1,MonoSH (no highlights),2)] _LightmapType ("Lightmap Type", Float) = 0
+
+        // TODO: This has questionable performance impact on Mobile but very little discernable impact on PC. Should
+        // make a toggle once we have properly branched compilation between those platforms, that's PC-only
+        [Toggle(_BICUBIC)] _Bicubic ("Enable Bicubic Sampling", Float) = 0
     }
 
     SubShader
@@ -36,16 +45,38 @@
         LOD 200
 
         CGPROGRAM
-        #define UNITY_BRDF_PBS BRDF2_Unity_PBS
-        #include "UnityPBSLighting.cginc"
-
-        #pragma surface surf StandardMobile vertex:vert exclude_path:prepass exclude_path:deferred noforwardadd noshadow nodynlightmap nolppv noshadowmask
-
+        
+        //#define _DEBUG_VRC 
+        #ifdef _DEBUG_VRC
+            #define DEBUG_COL(rgb) debugCol = half4(rgb, 1)
+            #define DEBUG_VAL(val) debugCol = half4(val, val, val, 1)
+                half4 debugCol = half4(0,0,0,1);
+        #else
+            #define DEBUG_COL(rgb) 
+            #define DEBUG_VAL(val)
+        #endif
+        
         #pragma target 3.0
         #pragma multi_compile _ _EMISSION
         #pragma multi_compile _ _DETAIL
         #pragma multi_compile _ _SPECULARHIGHLIGHTS_OFF
         #pragma multi_compile _ _GLOSSYREFLECTIONS_OFF
+        #pragma multi_compile _ _MONOSH_SPECULAR _MONOSH_NOSPECULAR
+        #pragma multi_compile _ _ENABLE_GEOMETRIC_SPECULAR_AA
+        //#pragma multi_compile _ _BICUBIC
+
+        #if defined(LIGHTMAP_ON)
+            #if defined(_MONOSH_SPECULAR) || defined(_MONOSH_NOSPECULAR)
+                #define _MONOSH
+                #if defined(_MONOSH_SPECULAR)
+                    #define _LMSPEC
+                #endif
+            #endif
+        #endif
+
+        #include "VRChat.cginc"
+
+        #pragma surface surf StandardVRC vertex:vert exclude_path:prepass exclude_path:deferred noforwardadd noshadow nodynlightmap nolppv noshadowmask
 
         // -------------------------------------
 
@@ -55,20 +86,7 @@
             #ifdef _DETAIL
             float2 texcoord1;
             #endif
-            float4 color : COLOR;
-        };
-
-        struct SurfaceOutputStandardMobile
-        {
-            fixed3 Albedo;      // base (diffuse or specular) color
-            float3 Normal;      // tangent space normal, if written
-            half3 Emission;
-            half Metallic;      // 0=non-metal, 1=metal
-            // Smoothness is the user facing name, it should be perceptual smoothness but user should not have to deal with it.
-            // Everywhere in the code you meet smoothness it is perceptual smoothness
-            half Smoothness;    // 0=rough, 1=smooth
-            half Occlusion;
-            fixed Alpha;        // alpha for transparencies
+            fixed4 color : COLOR;
         };
 
         UNITY_DECLARE_TEX2D(_MainTex);
@@ -85,8 +103,13 @@
         UNITY_DECLARE_TEX2D(_OcclusionMap);
         uniform half _OcclusionStrength;
 
+        uniform half _SpecularAAScreenSpaceVariance;
+        uniform half _SpecularAAThreshold;
+
+#ifdef _EMISSION
         UNITY_DECLARE_TEX2D(_EmissionMap);
         half4 _EmissionColor;
+#endif
 
 #ifdef _DETAIL
         uniform half _UVSec;
@@ -105,76 +128,6 @@
         UNITY_INSTANCING_BUFFER_END(Props)
 
         // -------------------------------------
-
-        inline half4 LightingStandardMobile(SurfaceOutputStandardMobile s, float3 viewDir, UnityGI gi)
-        {
-            s.Normal = normalize(s.Normal);
-
-            half oneMinusReflectivity;
-            half3 specColor;
-            s.Albedo = DiffuseAndSpecularFromMetallic(s.Albedo, s.Metallic, /*out*/ specColor, /*out*/ oneMinusReflectivity);
-
-            half4 c = UNITY_BRDF_PBS(s.Albedo, specColor, oneMinusReflectivity, s.Smoothness, s.Normal, viewDir, gi.light, gi.indirect);
-            UNITY_OPAQUE_ALPHA(c.a);
-            return c;
-        }
-
-        inline UnityGI UnityGI_BaseMobile(UnityGIInput data, half occlusion, half3 normalWorld)
-        {
-            UnityGI o_gi;
-            ResetUnityGI(o_gi);
-
-            o_gi.light = data.light;
-            o_gi.light.color *= data.atten;
-
-            #if UNITY_SHOULD_SAMPLE_SH
-                o_gi.indirect.diffuse = ShadeSHPerPixel(normalWorld, data.ambient, data.worldPos);
-            #endif
-
-            #if defined(LIGHTMAP_ON)
-                // Baked lightmaps
-                half4 bakedColorTex = UNITY_SAMPLE_TEX2D(unity_Lightmap, data.lightmapUV.xy);
-                half3 bakedColor = DecodeLightmap(bakedColorTex);
-
-                #ifdef DIRLIGHTMAP_COMBINED
-                    fixed4 bakedDirTex = UNITY_SAMPLE_TEX2D_SAMPLER(unity_LightmapInd, unity_Lightmap, data.lightmapUV.xy);
-                    o_gi.indirect.diffuse += DecodeDirectionalLightmap(bakedColor, bakedDirTex, normalWorld);
-                #else // not directional lightmap
-                    o_gi.indirect.diffuse += bakedColor;
-                #endif
-            #endif
-
-            o_gi.indirect.diffuse *= occlusion;
-            return o_gi;
-        }
-
-        inline half3 UnityGI_IndirectSpecularMobile(UnityGIInput data, half occlusion, Unity_GlossyEnvironmentData glossIn)
-        {
-            half3 specular;
-
-            #ifdef _GLOSSYREFLECTIONS_OFF
-                specular = unity_IndirectSpecColor.rgb;
-            #else
-                half3 env0 = Unity_GlossyEnvironment(UNITY_PASS_TEXCUBE(unity_SpecCube0), data.probeHDR[0], glossIn);
-                specular = env0;
-            #endif
-
-            return specular * occlusion;
-        }
-
-        inline UnityGI UnityGlobalIlluminationMobile(UnityGIInput data, half occlusion, half3 normalWorld, Unity_GlossyEnvironmentData glossIn)
-        {
-            UnityGI o_gi = UnityGI_BaseMobile(data, occlusion, normalWorld);
-            o_gi.indirect.specular = UnityGI_IndirectSpecularMobile(data, occlusion, glossIn);
-            return o_gi;
-        }
-
-        inline void LightingStandardMobile_GI(SurfaceOutputStandardMobile s, UnityGIInput data, inout UnityGI gi)
-        {
-            Unity_GlossyEnvironmentData g = UnityGlossyEnvironmentSetup(s.Smoothness, data.worldViewDir, s.Normal, lerp(unity_ColorSpaceDielectricSpec.rgb, s.Albedo, s.Metallic));
-            gi = UnityGlobalIlluminationMobile(data, s.Occlusion, s.Normal, g);
-        }
-
 	void vert(inout appdata_full v, out Input o)
 	{
 	    UNITY_INITIALIZE_OUTPUT(Input,o);
@@ -184,7 +137,7 @@
 #endif
 	}
 
-        void surf(Input IN, inout SurfaceOutputStandardMobile o)
+        void surf(Input IN, inout SurfaceOutputStandardVRC o)
         {
             // Albedo comes from a texture tinted by color
             half4 albedoMap = UNITY_SAMPLE_TEX2D(_MainTex, IN.texcoord0) * _Color * IN.color;
@@ -196,19 +149,47 @@
             o.Smoothness = metallicGlossMap.a * _Glossiness;
 
             // Occlusion is sampled from the Green channel to match up with Standard. Can be packed to Metallic if you insert it into multiple slots.
-            o.Occlusion = UNITY_SAMPLE_TEX2D(_OcclusionMap, IN.texcoord0).g * _OcclusionStrength;
+            o.Occlusion = LerpOneTo(UNITY_SAMPLE_TEX2D(_OcclusionMap, IN.texcoord0).g, _OcclusionStrength);
 
-            o.Normal = UnpackScaleNormal(UNITY_SAMPLE_TEX2D(_BumpMap, IN.texcoord0), _BumpScale);
+            // only takes into account directional lights, so only use if using noforwardadd!
+            float dx0 = ddx(IN.texcoord0);
+            float dy0 = ddy(IN.texcoord0);
+            #if defined(LIGHTMAP_ON) && !defined(_MONOSH) && !defined(DIRLIGHTMAP_COMBINED) && defined(_GLOSSYREFLECTIONS_OFF)
+                UNITY_BRANCH if (any(_LightColor0.xyz))
+            #else
+                if (true)
+            #endif
+            {
+                o.Normal = UnpackScaleNormal(SAMPLE_TEXTURE2D_GRAD(_BumpMap, sampler_BumpMap, IN.texcoord0, dx0, dy0), _BumpScale);
+            } else {
+                o.Normal = half3(0, 0, 1);
+            }
+
+            #ifdef _ENABLE_GEOMETRIC_SPECULAR_AA
+                o.SpecularAAVariance = _SpecularAAScreenSpaceVariance;
+                o.SpecularAAThreshold = _SpecularAAThreshold;
+            #endif
 
             #ifdef _DETAIL
                 half4 detailMask = UNITY_SAMPLE_TEX2D(_DetailMask, IN.texcoord0);
-                half4 detailAlbedoMap = UNITY_SAMPLE_TEX2D(_DetailAlbedoMap, IN.texcoord1);
-                o.Albedo *= LerpWhiteTo(detailAlbedoMap.rgb * unity_ColorSpaceDouble.rgb, detailMask.a);
+                float dx1 = ddx(IN.texcoord1);
+                float dy1 = ddy(IN.texcoord1);
+                UNITY_BRANCH
+                if (detailMask.a > 0)
+                {
+                    half4 detailAlbedoMap = SAMPLE_TEXTURE2D_GRAD(_DetailAlbedoMap, sampler_DetailAlbedoMap, IN.texcoord1, dx1, dy1);
+                    o.Albedo *= LerpWhiteTo(detailAlbedoMap.rgb * unity_ColorSpaceDouble.rgb, detailMask.a);
 
-                half4 detailNormalMap = UNITY_SAMPLE_TEX2D(_DetailNormalMap, IN.texcoord1);
-                half3 detailNormalTangent = UnpackScaleNormal(UNITY_SAMPLE_TEX2D(_DetailNormalMap, IN.texcoord1), _DetailNormalMapScale);
-                o.Normal = lerp(o.Normal, BlendNormals(o.Normal, detailNormalTangent), detailMask.a);
-
+                    #if defined(LIGHTMAP_ON) && !defined(_MONOSH) && !defined(DIRLIGHTMAP_COMBINED) && defined(_GLOSSYREFLECTIONS_OFF)
+                        UNITY_BRANCH if (any(_LightColor0.xyz))
+                    #else
+                        if (true)
+                    #endif
+                    {
+                        half3 detailNormalTangent = UnpackScaleNormal(SAMPLE_TEXTURE2D_GRAD(_DetailNormalMap, sampler_DetailNormalMap, IN.texcoord1, dx1, dy1), _DetailNormalMapScale);
+                        o.Normal = lerp(o.Normal, BlendNormals(o.Normal, detailNormalTangent), detailMask.a);
+                    }
+                }
             #endif
 
             #ifdef _EMISSION

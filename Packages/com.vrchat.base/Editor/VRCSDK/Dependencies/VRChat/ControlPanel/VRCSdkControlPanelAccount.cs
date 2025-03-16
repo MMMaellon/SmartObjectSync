@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 using VRC.Core;
 using System.Text.RegularExpressions;
 using UnityEngine.UIElements;
-using VRC.SDKBase;
 using VRC.SDKBase.Editor;
 
 public enum TwoFactorType
@@ -26,6 +26,10 @@ public partial class VRCSdkControlPanel : EditorWindow
     public static bool FutureProofPublishEnabled { get { return UnityEditor.EditorPrefs.GetBool("futureProofPublish", DefaultFutureProofPublishEnabled); } }
     //public static bool DefaultFutureProofPublishEnabled { get { return !SDKClientUtilities.IsInternalSDK(); } }
     public static bool DefaultFutureProofPublishEnabled { get { return false; } }
+
+    internal static event EventHandler<APIUser> OnPanelLoggedIn;
+    internal static event EventHandler OnPanelLoggedOut;
+    internal static event EventHandler<ApiUserPlatforms> OnUserPlatformsFetched;
 
     static string storedUsername
     {
@@ -99,14 +103,26 @@ public partial class VRCSdkControlPanel : EditorWindow
             return;
 
         if (!APIUser.IsLoggedIn && ApiCredentials.Load())
-            APIUser.InitialFetchCurrentUser((c) =>
+        {
+            APIUser.InitialFetchCurrentUser(c =>
             {
                 window.rootVisualElement.Q<IMGUIContainer>().MarkDirtyRepaint();
-                var apiUser = c.Model as APIUser;
+                if (c.Model is not APIUser apiUser)
+                {
+                    VRC.Core.Logger.LogError("Failed to load user information, please log in again");
+                    return;
+                }
                 AnalyticsSDK.LoggedInUserChanged(apiUser);
-                ApiUserPlatforms.Fetch(apiUser.id, null, null);
+                
+                OnPanelLoggedIn?.Invoke(window, apiUser);
+                ApiUserPlatforms.Fetch(apiUser.id, userPlatforms =>
+                {
+                    OnUserPlatformsFetched?.Invoke(window, userPlatforms);   
+                }, null);
             }, null);
+        }
 
+        // This code proceeds without waiting for the user fetch above to complete
         clientInstallPath = SDKClientUtilities.GetSavedVRCInstallPath();
         if (string.IsNullOrEmpty(clientInstallPath))
             clientInstallPath = SDKClientUtilities.LoadRegistryVRCInstallPath();
@@ -115,24 +131,6 @@ public partial class VRCSdkControlPanel : EditorWindow
         isInitialized = true;
 
         ClearContent();
-    }
-
-    public static bool OnShowStatus()
-    {
-        API.SetOnlineMode(true);
-
-        SignIn(false);
-
-        EditorGUILayout.BeginVertical();
-
-        if (APIUser.IsLoggedIn)
-        {
-            OnCreatorStatusGUI();
-        }
-
-        EditorGUILayout.EndVertical();
-
-        return APIUser.IsLoggedIn;
     }
 
     static bool OnAccountGUI()
@@ -178,6 +176,7 @@ public partial class VRCSdkControlPanel : EditorWindow
                     VRC.Tools.ClearCookies();
                     APIUser.Logout();
                     ClearContent();
+                    OnPanelLoggedOut?.Invoke(window, EventArgs.Empty);
                 }
                 return !signingIn;
             }
@@ -225,7 +224,7 @@ public partial class VRCSdkControlPanel : EditorWindow
         {
             if (GUILayout.Button("More Info..."))
             {
-                VRCSdkControlPanel.ShowContentPublishPermissionsDialog();
+                ShowContentPublishPermissionsDialog();
             }
         }
 
@@ -235,11 +234,11 @@ public partial class VRCSdkControlPanel : EditorWindow
 
     void ShowAccount()
     {
-        if (VRC.Core.ConfigManager.RemoteConfig.IsInitialized())
+        if (ConfigManager.RemoteConfig.IsInitialized())
         {
-            if (VRC.Core.ConfigManager.RemoteConfig.HasKey("sdkUnityVersion"))
+            if (ConfigManager.RemoteConfig.HasKey("sdkUnityVersion"))
             {
-                string sdkUnityVersion = VRC.Core.ConfigManager.RemoteConfig.GetString("sdkUnityVersion");
+                string sdkUnityVersion = ConfigManager.RemoteConfig.GetString("sdkUnityVersion");
                 if (string.IsNullOrEmpty(sdkUnityVersion))
                     EditorGUILayout.LabelField("Could not fetch remote config.");
                 else if (Application.unityVersion != sdkUnityVersion)
@@ -273,8 +272,8 @@ public partial class VRCSdkControlPanel : EditorWindow
         }
         else
         {
-            VRC.Core.API.SetOnlineMode(true, "vrchat");
-            VRC.Core.ConfigManager.RemoteConfig.Init();
+            API.SetOnlineMode(true);
+            ConfigManager.RemoteConfig.Init();
         }
 
         OnAccountGUI();
@@ -286,17 +285,19 @@ public partial class VRCSdkControlPanel : EditorWindow
     private const string ENTER_2FA_CODE_TITLE_STRING = "Enter a numeric code from your authenticator app.";
     private const string ENTER_2FA_CODE_LABEL_STRING = "Code:";
 
+    private const string ENTER_2FA_CODE_GUI_EVENT = "Authentication Code Field";
+
     private const string ENTER_EMAIL_2FA_CODE_TITLE_STRING = "Check your email for a numeric code.";
 
     private const string CHECKING_2FA_CODE_STRING = "Checking code...";
-    private const string ENTER_2FA_CODE_INVALID_CODE_STRING = "Invalid Code";
+    private const string ENTER_2FA_CODE_INVALID_CODE_STRING = "Oops, that code didn't work.\nTry again!";
 
     private const string ENTER_2FA_CODE_VERIFY_STRING = "Verify";
     private const string ENTER_2FA_CODE_CANCEL_STRING = "Cancel";
     private const string ENTER_2FA_CODE_HELP_STRING = "Help";
 
     private const int WARNING_ICON_SIZE = 60;
-    private const int WARNING_FONT_HEIGHT = 18;
+    private const int WARNING_FONT_HEIGHT = 14;
 
     static private Texture2D warningIconGraphic;
 
@@ -306,6 +307,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     static private int previousAuthenticationCodeLength = 0;
     static bool checkingCode;
     static string authenticationCode = "";
+    static string lastCheckedAuthenticationCode = "";
 
     static System.Action onAuthenticationVerifiedAction;
 
@@ -321,6 +323,7 @@ public partial class VRCSdkControlPanel : EditorWindow
         {
             _twoFactorAuthenticationEntryType = value;
             authenticationCode = "";
+            lastCheckedAuthenticationCode = "";
             if (_twoFactorAuthenticationEntryType == TwoFactorType.None && !authorizationCodeWasVerified)
                 Logout();
         }
@@ -374,28 +377,29 @@ public partial class VRCSdkControlPanel : EditorWindow
         // Invalid code text
         if (entered2faCodeIsInvalid)
         {
-            GUIStyle s = new GUIStyle(EditorStyles.label);
-            s.alignment = TextAnchor.UpperLeft;
-            s.normal.textColor = Color.red;
-            s.fontSize = WARNING_FONT_HEIGHT;
-            s.padding = new RectOffset(0, 0, (WARNING_ICON_SIZE - s.fontSize) / 2, 0);
-            s.fixedHeight = WARNING_ICON_SIZE;
+            GUIStyle s = new GUIStyle(EditorStyles.label)
+            {
+                normal =
+                {
+                    textColor = new Color(1,0.3f,0.3f)
+                },
+                fontSize = WARNING_FONT_HEIGHT,
+                fixedHeight = WARNING_ICON_SIZE
+            };
 
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-
-            EditorGUILayout.BeginVertical();
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.BeginHorizontal();
-            var textDimensions = s.CalcSize(new GUIContent(ENTER_2FA_CODE_INVALID_CODE_STRING));
-            GUILayout.Label(new GUIContent(warningIconGraphic), GUILayout.Width(WARNING_ICON_SIZE), GUILayout.Height(WARNING_ICON_SIZE));
-            EditorGUILayout.LabelField(ENTER_2FA_CODE_INVALID_CODE_STRING, s, GUILayout.Width(textDimensions.x));
-            EditorGUILayout.EndHorizontal();
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndVertical();
-
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.FlexibleSpace();
+                using (new EditorGUILayout.VerticalScope())
+                {
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        GUILayout.Label(new GUIContent(warningIconGraphic), GUILayout.Width(WARNING_ICON_SIZE), GUILayout.Height(WARNING_ICON_SIZE));
+                        EditorGUILayout.LabelField(ENTER_2FA_CODE_INVALID_CODE_STRING, s);
+                    }
+                }
+                GUILayout.FlexibleSpace();
+            }
         }
         else if (checkingCode)
         {
@@ -439,12 +443,16 @@ public partial class VRCSdkControlPanel : EditorWindow
         GUILayout.Space(ENTER_2FA_CODE_BORDER_SIZE);
         GUILayout.FlexibleSpace();
         Vector2 size = EditorStyles.boldLabel.CalcSize(new GUIContent(ENTER_2FA_CODE_LABEL_STRING));
+        
         EditorGUILayout.LabelField(ENTER_2FA_CODE_LABEL_STRING, EditorStyles.boldLabel, GUILayout.MaxWidth(size.x));
         authenticationCode = EditorGUILayout.TextField(authenticationCode);
-
+        
+        
         // Verify 2FA code button
-        if (GUILayout.Button(ENTER_2FA_CODE_VERIFY_STRING, GUILayout.Width(ENTER_2FA_CODE_VERIFY_BUTTON_WIDTH)))
+        if (lastCheckedAuthenticationCode != authenticationCode && IsValidAuthenticationCodeFormat()
+            || GUILayout.Button(ENTER_2FA_CODE_VERIFY_STRING, GUILayout.Width(ENTER_2FA_CODE_VERIFY_BUTTON_WIDTH)))
         {
+            lastCheckedAuthenticationCode = authenticationCode;
             checkingCode = true;
             string authCodeType = API2FA.TIME_BASED_ONE_TIME_PASSWORD_AUTHENTICATION;
             switch (twoFactorType)
@@ -556,7 +564,9 @@ public partial class VRCSdkControlPanel : EditorWindow
                 storedUsername = null;
                 storedPassword = null;
                 AnalyticsSDK.LoggedInUserChanged(user);
-
+                
+                OnPanelLoggedIn?.Invoke(window, user);
+                
                 if (!APIUser.CurrentUser.canPublishAllContent)
                 {
                     if (UnityEditor.SessionState.GetString("HasShownContentPublishPermissionsDialogForUser", "") != user.id)
@@ -567,7 +577,9 @@ public partial class VRCSdkControlPanel : EditorWindow
                 }
 
                 // Fetch platforms that the user can publish to
-                ApiUserPlatforms.Fetch(user.id, null, null);
+                ApiUserPlatforms.Fetch(user.id, userPlatforms => {
+                    OnUserPlatformsFetched?.Invoke(window, userPlatforms);
+                }, null);
             },
             delegate (ApiModelContainer<APIUser> c)
             {
@@ -625,6 +637,7 @@ public partial class VRCSdkControlPanel : EditorWindow
         storedPassword = null;
         VRC.Tools.ClearCookies();
         APIUser.Logout();
+        OnPanelLoggedOut?.Invoke(window, EventArgs.Empty);
     }
 
     private void AccountDestroy()

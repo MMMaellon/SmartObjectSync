@@ -1,33 +1,52 @@
-﻿#if VRC_SDK_VRCSDK3
+﻿#if VRC_SDK_VRCSDK3 && UNITY_EDITOR
 
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using System;
+using UnityEngine.UIElements;
+using VRCStation = VRC.SDK3.Components.VRCStation;
 
-[CustomEditor(typeof(VRC.SDK3.Components.VRCStation))]
-public class VRCPlayerStationEditor3 : Editor 
+namespace VRC.SDK3.Editor
 {
-    VRC.SDK3.Components.VRCStation myTarget;
-
-	void OnEnable()
+	[CanEditMultipleObjects]
+	[CustomEditor(typeof(VRCStation))]
+	public class VRCPlayerStationEditor3 : VRCInspectorBase
 	{
-		if(myTarget == null)
-			myTarget = (VRC.SDK3.Components.VRCStation)target;
-	}
+		
+		private SerializedProperty propPlayerMobility;
+		private SerializedProperty propCanUseStationFromStation;
+		private SerializedProperty propAnimatorController;
+		private SerializedProperty propDisableStationExit;
+		private SerializedProperty propSeated;
+		private SerializedProperty propStationEnterPlayerLocation;
+		private SerializedProperty propStationExitPlayerLocation;
+		
+		
+		private void OnEnable()
+		{
+			propPlayerMobility = serializedObject.FindProperty(nameof(VRCStation.PlayerMobility));
+			propCanUseStationFromStation = serializedObject.FindProperty(nameof(VRCStation.canUseStationFromStation));
+			propAnimatorController = serializedObject.FindProperty(nameof(VRCStation.animatorController));
+			propDisableStationExit = serializedObject.FindProperty(nameof(VRCStation.disableStationExit));
+			propSeated = serializedObject.FindProperty(nameof(VRCStation.seated));
+			propStationEnterPlayerLocation = serializedObject.FindProperty(nameof(VRCStation.stationEnterPlayerLocation));
+			propStationExitPlayerLocation = serializedObject.FindProperty(nameof(VRCStation.stationExitPlayerLocation));
+		}
 
-	public override void OnInspectorGUI()
-	{
-		myTarget.PlayerMobility = (VRC.SDKBase.VRCStation.Mobility)EditorGUILayout.EnumPopup("Player Mobility", myTarget.PlayerMobility);
-		myTarget.canUseStationFromStation = EditorGUILayout.Toggle("Can Use Station From Station", myTarget.canUseStationFromStation);
-		myTarget.animatorController = (RuntimeAnimatorController) EditorGUILayout.ObjectField("Animator Controller", myTarget.animatorController, typeof(RuntimeAnimatorController), false );
-		myTarget.disableStationExit = EditorGUILayout.Toggle("Disable Station Exit", myTarget.disableStationExit );
-		myTarget.seated = EditorGUILayout.Toggle("Seated", myTarget.seated);
-		myTarget.stationEnterPlayerLocation = (Transform)EditorGUILayout.ObjectField("Player Enter Location", myTarget.stationEnterPlayerLocation, typeof(Transform), true);
-		myTarget.stationExitPlayerLocation = (Transform)EditorGUILayout.ObjectField("Player Exit Location", myTarget.stationExitPlayerLocation, typeof(Transform), true);
-		myTarget.controlsObject = (VRC.SDKBase.VRC_ObjectApi)EditorGUILayout.ObjectField("API Object", myTarget.controlsObject, typeof(VRC.SDKBase.VRC_ObjectApi), false);
+		public override void BuildInspectorGUI()
+		{
+			base.BuildInspectorGUI();
+			
+			AddField(propPlayerMobility);
+			AddField(propSeated);
+			AddField(propDisableStationExit);
+			AddField(propCanUseStationFromStation);
+			AddField(propStationEnterPlayerLocation);
+			AddField(propStationExitPlayerLocation);
+			AddField(propAnimatorController);
+		}
 	}
-	
 }
 #endif

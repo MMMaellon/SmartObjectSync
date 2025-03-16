@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CSharp;
 using UnityEngine;
 using VRC.Udon.Compiler.Compilers;
+using VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView;
 using VRC.Udon.Graph;
 using VRC.Udon.Graph.Interfaces;
 using CompressionLevel = System.IO.Compression.CompressionLevel;
@@ -174,7 +175,9 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
                 "Event_OnPurchaseUse",
                 "Event_OnPurchaseExpired",
                 "Event_OnListPurchases",
-                "Event_OnListAvailableProducts"
+                "Event_OnListAvailableProducts",
+                "Event_OnMasterTransferred",
+                "Event_OnPlayerSuspendChanged",
             };
 
                 // Don't show for any of these
@@ -185,6 +188,10 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
                     !definition.type.Namespace.Contains("System")));
         }
 
+        private const string Url1DArrays =
+            "https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/arrays#single-dimensional-arrays";
+        private const string UrlObjectToString =
+            "https://learn.microsoft.com/en-us/dotnet/api/system.object.tostring?view=netframework-4.8";
         public static string GetDocumentationLink(UdonNodeDefinition definition)
         {
             if (definition.fullName.StartsWithCached("Event_"))
@@ -213,10 +220,53 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
 
             if (definition.name.Contains("[]"))
             {
-                string url = "https://docs.microsoft.com/en-us/dotnet/api/system.array.";
-                url += definition.name.Split(' ')[1];
-                url += "?view=netframework-4.8";
-                return url;
+                try
+                {
+                    // link to generic 1D Array docs, best we have for describing Set & Get
+                    if (definition.fullName.Contains("__Set__") || definition.fullName.Contains("__Get__"))
+                    {
+                        return Url1DArrays;
+                    }
+                    
+                    // link to generic Object.GetString docs. GetString on arrays doesn't return anything useful.
+                    if (definition.fullName.Contains("__ToString__SystemString"))
+                    {
+                        return UrlObjectToString;
+                    }
+                    
+                    string url = "https://docs.microsoft.com/en-us/dotnet/api/system.array.";
+                    
+                    if (definition.fullName.Contains("__get_") || definition.fullName.Contains("__set_"))
+                    {
+                        if (definition.fullName.Contains("__get_"))
+                        {
+                            url += definition.name.Split(new[] { "get_" }, StringSplitOptions.None)[1];
+                        }
+                        else
+                        {
+                            url += definition.name.Split(new[] { "set_" }, StringSplitOptions.None)[1];
+                        }
+                    }
+                    else if (!(definition.fullName.Contains("Const_") || definition.fullName.Contains("Type_") || definition.fullName.Contains("Variable_")))
+                    {
+                        // remove get_ or set_ frome name for array properties
+                        string definitionName = definition.name;
+                        if (definition.fullName.Contains("__get_") || definition.fullName.Contains("__set_"))
+                        {
+                            definitionName = definitionName.Replace("get_", "").Replace("set_", "");
+                        }
+                        url += definitionName.Split(' ')[1];
+                    }
+                    
+                    url += "?view=netframework-4.8";
+                    return url;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Exception while parsing {definition.fullName}");
+                    Debug.LogException(e);
+                    throw;
+                }
             }
 
             if (definition.type.Namespace.Contains("UnityEngine"))
@@ -260,12 +310,12 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
 
             if (definition.type.Namespace.Contains("System"))
             {
-                string url = "https://docs.microsoft.com/en-us/dotnet/api/system.";
-                url += definition.type.Name;
+                string url = "https://docs.microsoft.com/en-us/dotnet/api/";
+                url += $"{definition.type.Namespace}.{definition.type.Name}";
+
                 if (definition.fullName.Contains("__get_") || definition.fullName.Contains("__set_"))
                 {
-                    url += "." + definition.name.Split(' ')[1].Replace("get_", "").Replace("set_", "");
-                    url += "?view=netframework-4.8";
+                    url += "?view=netframework-4.8#properties";
                     return url;
                 }
 
@@ -287,17 +337,15 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
                     url += "?view=netframework-4.8";
                     return url;
                 }
-
+                
+                // Methods
+                // not entirely sure what case this catches, but we were always doing the split before, and it was breaking if we didn't have . in the name.
+                if (definition.name.Contains('.'))
                 {
-                    // Methods
-                    // not entirely sure what case this catches, but we were always doing the split before, and it was breaking if we didn't have . in the name.
-                    if (definition.name.Contains('.'))
-                    {
-                        url += "." + definition.name.Split(' ')[1];
-                    }
-                    url += "?view=netframework-4.8";
-                    return url;
+                    url += "." + definition.name.Split(' ')[1];
                 }
+                url += "?view=netframework-4.8";
+                return url;
             }
 
             return "";
@@ -309,6 +357,20 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
         {
             return UdonGraphCompiler.GetVariableChangeEventName(variableName);
         }
+
+        private static readonly HashSet<string> KeepArrayInName = new()
+        {
+            "SystemArray",
+            "Type.get_IsArray",
+            "Type.get_IsSZArray",
+            "Type.GetTypeArray",
+            "VRCSDKBaseUtilities.ShuffleArray",
+        };
+        
+        private static readonly HashSet<string> KeepSystemInName = new()
+        {
+            "SystemType.__get_UnderlyingSystemType",
+        };
 
         public static string FriendlyNameify(this string typeString)
         {
@@ -331,9 +393,9 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
             typeString = typeString.Replace("IUdonEventReceiver", "UdonBehaviour");
             typeString = typeString.Replace("Const_VRCUdonCommonInterfacesIUdonEventReceiver", "UdonBehaviour");
 
-
-            if(typeString != "SystemArray")
-            {
+            // Convert Array to [] except in special cases
+            if (typeString.EndsWith("Array") && !KeepArrayInName.Contains(typeString))
+            { 
                 typeString = typeString.Replace("Array", "[]");
             }
 
@@ -352,11 +414,13 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
             typeString = typeString.Replace("TMPro", "");
             typeString = typeString.Replace("VideoVideo", "Video");
             typeString = typeString.Replace("VRCUdonCommon", "");
-            typeString = typeString.Replace("Shuffle[]", "ShuffleArray");
             typeString = typeString.Replace("Economy", "");
             typeString = typeString.Replace("RenderingPostProcessing", "");
             typeString = typeString.Replace("VRCSDK3Rendering", "");
             typeString = typeString.Replace("VRCSDK3PlatformScreenUpdateData", "ScreenUpdateData");
+            typeString = typeString.Replace("TextstringBuilder", "StringBuilder");
+            typeString = typeString.Replace("TextRegularExpressionsRegex", "Regex");
+            
             // ReSharper disable once StringLiteralTypo
             if (typeString.Replace("ector", "").Contains("ctor")) //Handle "Vector/vector"
             {
@@ -454,7 +518,15 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
 
         public static string PrettyBaseName(string baseIdentifier)
         {
-            string result = baseIdentifier.Replace("UnityEngine", "").Replace("System", "");
+            string result = UdonRegistrySearchWindow.TopNamesToKeep.Contains(baseIdentifier.Replace("Type_", ""))
+                ? baseIdentifier
+                : baseIdentifier.Replace("UnityEngine", "");
+            
+            // remove System from name except for special cases
+            if (!KeepSystemInName.Contains(baseIdentifier))
+            {
+                result = result.Replace("System", "");
+            }
             string[] resultSplit = result.Split(new[] { "__" }, StringSplitOptions.None);
             if (resultSplit.Length >= 2)
             {
@@ -520,14 +592,10 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI
         {
             string fullName = nodeDefinition.fullName;
             string result;
-            if (keepLong)
-            {
-                result = fullName.Replace("UnityEngine", "UnityEngine.").Replace("System", "System.");
-            }
-            else
-            {
-                result = fullName.Replace("UnityEngine", "").Replace("System", "");
-            }
+            
+            // keep long names for SystemRandom,UnityEngineRandom
+            keepLong = keepLong || UdonRegistrySearchWindow.TopNamesToKeep.Contains(fullName.Replace("Type_",""));
+            result = keepLong ? fullName.Replace("UnityEngine", "UnityEngine.").Replace("System", "System.") : fullName.Replace("UnityEngine", "").Replace("System", "");
 
             string[] resultSplit = result.Split(new[] { "__" }, StringSplitOptions.None);
             if (resultSplit.Length >= 3)

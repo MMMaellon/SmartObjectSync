@@ -8,7 +8,8 @@
         "VRC.SDKBase",
         "UniTask",
         "Unity.TextMeshPro",
-        "Unity.Postprocessing.Runtime"
+        "Unity.Postprocessing.Runtime",
+        "Unity.TextMeshPro.Editor"
     ],
     "includePlatforms": [
         "Editor"

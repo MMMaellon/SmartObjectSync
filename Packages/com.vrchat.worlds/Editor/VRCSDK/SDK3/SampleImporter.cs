@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 
 namespace VRC.SDK3.Editor
 {
@@ -13,8 +14,10 @@ namespace VRC.SDK3.Editor
             "Packages/com.vrchat.worlds/Samples/GraphicsBlitExampleScene/Minimap Sample Scene.unity";
         private const string midiPlaybackScenePath = 
             "Packages/com.vrchat.worlds/Samples/MidiPlaybackExampleScene/MidiPlaybackScene.unity";
+        private const string aiNavigationScenePath = 
+            "Packages/com.vrchat.worlds/Samples/AINavmeshScene/AINavmeshSceneExample.unity";
         
-        [MenuItem("VRChat SDK/Samples/UdonExampleScene")]
+        [MenuItem("VRChat SDK/Samples/UdonExampleScene", false, 981)]
         private static void OpenSampleUdonExampleScene()
         {
             if(EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -23,7 +26,7 @@ namespace VRC.SDK3.Editor
             }
         }
         
-        [MenuItem("VRChat SDK/Samples/ControllerColliderPlayerHit")]
+        [MenuItem("VRChat SDK/Samples/ControllerColliderPlayerHit", false, 982)]
         private static void OpenCCPlayerHitExampleScene()
         {
             if(EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -32,7 +35,7 @@ namespace VRC.SDK3.Editor
             }
         }
         
-        [MenuItem("VRChat SDK/Samples/Minimap")]
+        [MenuItem("VRChat SDK/Samples/Minimap", false, 983)]
         private static void OpenMinimapExampleScene()
         {
             if(EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
@@ -41,12 +44,27 @@ namespace VRC.SDK3.Editor
             }
         }
         
-        [MenuItem("VRChat SDK/Samples/MidiPlayback")]
-        private static void OpenMididPlaybackExampleScene()
+        [MenuItem("VRChat SDK/Samples/MidiPlayback", false, 984)]
+        private static void OpenMidiPlaybackExampleScene()
         {
             if(EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
             {
                 EditorSceneManager.OpenScene(midiPlaybackScenePath);
+            }
+        }
+
+        [MenuItem("VRChat SDK/Samples/Show Sample Documentation", false, 985)]
+        private static void ShowSampleDocumentation()
+        {
+            Application.OpenURL("https://creators.vrchat.com/worlds/examples/");
+        }
+        
+        [MenuItem("VRChat SDK/Samples/AI Navigation")]
+        private static void OpenAINavigationScene()
+        {
+            if(EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                EditorSceneManager.OpenScene(aiNavigationScenePath);
             }
         }
     }

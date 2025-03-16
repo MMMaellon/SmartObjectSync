@@ -57,10 +57,10 @@ namespace VRC.Core
         private static Dictionary<Type, AllowedMethodFilter> AllowedUnityEventTargetTypes => _allowedUnityEventTargetTypes.Value;
 
         private static Lazy<Dictionary<Type, TypeInfo>> _typesWithUnityEventFields = new Lazy<Dictionary<Type, TypeInfo>>(InitTypesWithUnityEvents);
-        private static Dictionary<Type, TypeInfo> TypesWithUnityEvents = _typesWithUnityEventFields.Value;
+        private static Dictionary<Type, TypeInfo> TypesWithUnityEvents => _typesWithUnityEventFields.Value;
 
-        private static readonly Lazy<int> _debugLevel = new Lazy<int>(InitializeLogging);
-        private static int DebugLevel => _debugLevel.Value;
+        private static readonly Lazy<string> _debugCategoryName = new Lazy<string>(InitializeLogging);
+        private static string DebugCategoryName => _debugCategoryName.Value;
 
         // Builds a HashSet of allowed types, and their derived types, and removes explicitly prohibited types. 
         private static Dictionary<Type, AllowedMethodFilter> GetRuntimeUnityEventTargetAccessFilterDictionary()
@@ -223,12 +223,12 @@ namespace VRC.Core
         }
         #endif
 
-        private static int InitializeLogging()
+        private static string InitializeLogging()
         {
-            int hashCode = typeof(UnityEventFilter).GetHashCode();
-            Logger.DescribeDebugLevel(hashCode, "UnityEventFilter", Logger.Color.red);
-            Logger.AddDebugLevel(hashCode);
-            return hashCode;
+            const string categoryName = "UnityEventFilter";
+            Logger.DescribeCategory(categoryName, Logger.Color.red);
+            Logger.EnableCategory(categoryName);
+            return categoryName;
         }
 
         [PublicAPI]
@@ -434,12 +434,12 @@ namespace VRC.Core
         [Conditional("VERBOSE_EVENT_SANITIZATION_LOGGING")]
         private static void VerboseLog(string message, UnityEngine.Object target = null)
         {
-            Logger.LogWarning(message, DebugLevel, target);
+            Logger.LogWarning(message, DebugCategoryName, target);
         }
 
         private static void LogRemoval(string message, UnityEngine.Object target = null)
         {
-            Logger.LogWarning(message, DebugLevel, target);
+            Logger.LogWarning(message, DebugCategoryName, target);
         }
 
         private static bool IsTargetPermitted(UnityEngine.Object target, string targetMethod)

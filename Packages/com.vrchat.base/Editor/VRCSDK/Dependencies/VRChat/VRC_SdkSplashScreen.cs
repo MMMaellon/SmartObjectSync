@@ -54,10 +54,7 @@ namespace VRC.SDKBase.Editor
                 rootVisualElement.Q<Button>("help-center-button").RemoveFromClassList("last");
                 var examplesButton = rootVisualElement.Q<Button>("examples-button");
                 examplesButton.RemoveFromClassList("d-none");
-                examplesButton.clicked += () =>
-                {
-                    Application.OpenURL("https://creators.vrchat.com/worlds/examples/");
-                };
+                examplesButton.clicked += () => EditorApplication.ExecuteMenuItem("VRChat SDK/🏠 Example Central");
                 rootVisualElement.Q("bottom-block").style.backgroundImage = Resources.Load<Texture2D>("vrcSdkSplashUdon2");
                 var bottomButton = rootVisualElement.Q<Button>("bottom-block-button");
                 bottomButton.text = "Join other Creators in our Discord";

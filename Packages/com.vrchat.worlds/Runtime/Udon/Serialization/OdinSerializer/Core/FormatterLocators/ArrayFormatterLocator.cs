@@ -16,7 +16,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using VRC.Udon.Serialization.OdinSerializer;
+using VRC.Udon.Serialization.OdinSerializer.Utilities;
 
 [assembly: RegisterFormatterLocator(typeof(ArrayFormatterLocator), -80)]
 
@@ -26,6 +28,10 @@ namespace VRC.Udon.Serialization.OdinSerializer
 
     internal class ArrayFormatterLocator : IFormatterLocator
     {
+        // VRC Unity John: PER-818 - Introduce a type-keyed cache of created formatters to avoid creating duplicates (which was happening previously).
+        private static readonly Dictionary<Type, IFormatter> FormatterInstances = new(FastTypeComparer.Instance);
+        // VRC Unity John: PER-818 - end
+        
         public bool TryGetFormatter(Type type, FormatterLocationStep step, ISerializationPolicy policy, out IFormatter formatter)
         {
             if (!type.IsArray)
@@ -34,6 +40,14 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 return false;
             }
 
+            // VRC Unity John: PER-818 - Introduce a type-keyed cache of created formatters to avoid creating duplicates (which was happening previously).
+            // If we've serialized this type before, we'll have a cached formatter
+            if (FormatterInstances.TryGetValue(type, out formatter))
+            {
+                return true;
+            }
+            // VRC Unity John: PER-818 - end
+            
             var elementType = type.GetElementType();
 
             if (type.GetArrayRank() == 1)
@@ -101,6 +115,10 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 #endif
                 formatter = (IFormatter)Activator.CreateInstance(typeof(MultiDimensionalArrayFormatter<,>).MakeGenericType(type, type.GetElementType()));
             }
+
+            // VRC Unity John: PER-818 - Introduce a type-keyed cache of created formatters to avoid creating duplicates (which was happening previously).
+            FormatterInstances.Add(type, formatter);
+            // VRC Unity John: PER-818 - end
 
             return true;
         }

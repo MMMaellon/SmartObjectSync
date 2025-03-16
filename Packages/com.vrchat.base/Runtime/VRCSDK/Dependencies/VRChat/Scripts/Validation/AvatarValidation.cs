@@ -6,8 +6,10 @@ namespace VRC.SDKBase.Validation
         public static readonly string[] ComponentTypeWhiteListCommon = new string[]
         {
             #if UNITY_STANDALONE
-            "DynamicBone",
-            "DynamicBoneCollider",
+            #if VRC_CLIENT
+            "DynamicBone", // Deprecated, whitelisted in the client only for backwards compatibility
+            "DynamicBoneCollider", // Deprecated, whitelisted in the client only for backwards compatibility
+            #endif // VRC_CLIENT
             "RootMotion.FinalIK.IKExecutionOrder",
             "RootMotion.FinalIK.VRIK",
             "RootMotion.FinalIK.FullBodyBipedIK",
@@ -46,7 +48,7 @@ namespace VRC.SDKBase.Validation
             "UnityEngine.Camera",
             "UnityEngine.AudioSource",
             "ONSPAudioSource",
-            #endif
+            #endif // UNITY_STANDALONE
             #if !VRC_CLIENT
             "VRC.Core.PipelineSaver",
             #endif
@@ -93,6 +95,12 @@ namespace VRC.SDKBase.Validation
             "VRC.SDK3.Avatars.Components.VRCHeadChop",
             "VRC.SDK3.Dynamics.PhysBone.Components.VRCPhysBone",
             "VRC.SDK3.Dynamics.PhysBone.Components.VRCPhysBoneCollider",
+            "VRC.SDK3.Dynamics.Constraint.Components.VRCAimConstraint",
+            "VRC.SDK3.Dynamics.Constraint.Components.VRCLookAtConstraint",
+            "VRC.SDK3.Dynamics.Constraint.Components.VRCParentConstraint",
+            "VRC.SDK3.Dynamics.Constraint.Components.VRCPositionConstraint",
+            "VRC.SDK3.Dynamics.Constraint.Components.VRCRotationConstraint",
+            "VRC.SDK3.Dynamics.Constraint.Components.VRCScaleConstraint",
             "VRC.SDK3.Dynamics.Contact.Components.VRCContactSender",
             "VRC.SDK3.Dynamics.Contact.Components.VRCContactReceiver",
         };
@@ -113,5 +121,6 @@ namespace VRC.SDKBase.Validation
         public const int MAX_AVD_PHYSBONES_PER_AVATAR = 256;
         public const int MAX_AVD_COLLIDERS_PER_AVATAR = 256;
         public const int MAX_AVD_CONTACTS_PER_AVATAR = 256;
+        public const int MAX_AVD_CONSTRAINTS_PER_AVATAR = 2000;
     }
 }

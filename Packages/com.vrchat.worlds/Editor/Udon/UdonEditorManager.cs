@@ -460,6 +460,10 @@ namespace VRC.Udon.Editor
                 {
                     topRegistries["UnityEngine"].Add(nodeRegistry);
                 }
+                else if (nodeRegistry.Key.StartsWith("UnityAINavigation"))
+                {
+                    topRegistries["UnityEngine"].Add(nodeRegistry);
+                }
                 else
                 {
                     // Todo: note and handle these

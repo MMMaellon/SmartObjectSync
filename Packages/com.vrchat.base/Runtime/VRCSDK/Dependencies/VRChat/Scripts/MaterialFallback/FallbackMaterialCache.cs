@@ -34,7 +34,14 @@ public class FallbackMaterialCache
         Material[] cachedFallbackMaterials = _fallbackMaterialCache.Values.ToArray();
         for(int i = cachedFallbackMaterials.Length - 1; i >= 0; i--)
         {
-            Object.Destroy(cachedFallbackMaterials[i]);
+            if (Application.isPlaying)
+            {
+                Object.Destroy(cachedFallbackMaterials[i]);
+            }
+            else
+            {
+                Object.DestroyImmediate(cachedFallbackMaterials[i]);
+            }
         }
 
         _fallbackMaterialCache.Clear();

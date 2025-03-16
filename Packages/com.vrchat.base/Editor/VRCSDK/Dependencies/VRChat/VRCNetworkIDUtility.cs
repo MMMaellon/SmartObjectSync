@@ -7,14 +7,11 @@ using VRC.SDKBase;
 using System;
 using BestHTTP.JSON;
 using System.Linq;
-using System.Collections.Immutable;
 using System.Data;
 using VRC;
 
 public class VRCNetworkIDUtility : EditorWindow
 {
-    public static VRCNetworkIDUtility Instance;
-
     public class NetworkObjectRef
     {
         public int ID;
@@ -92,9 +89,9 @@ public class VRCNetworkIDUtility : EditorWindow
                 || (Type == ConflictType.NotFound && Paths.Contains(objRef.gameObjectPath))
                 || (Type == ConflictType.TypeMismatch && IDs.Contains(objRef.ID));
         
-        public bool IsMatch(VRC.SDKBase.Network.NetworkIDPair netRef)
+        public bool IsMatch(VRC.SDKBase.Network.NetworkIDPair netRef, VRCNetworkIDUtility utility)
             => (Type == ConflictType.Object && IDs.Contains(netRef.ID)) 
-                || (Type == ConflictType.ID && Paths.Contains(VRCNetworkIDUtility.Instance.Path(netRef.gameObject)))
+                || (Type == ConflictType.ID && Paths.Contains(utility.Path(netRef.gameObject)))
                 || (Type == ConflictType.TypeMismatch && IDs.Contains(netRef.ID));
 
         public void AddScene(NetworkObjectRef objRef)
@@ -155,11 +152,6 @@ public class VRCNetworkIDUtility : EditorWindow
         window.titleContent = new GUIContent(titleName);
         window.minSize = new Vector2(325, 410);
         window.Show();
-    }
-
-    void Awake()
-    {
-        Instance = this;
     }
 
     void Init()
@@ -291,7 +283,7 @@ public class VRCNetworkIDUtility : EditorWindow
 
         // Retest for conflicts
         var currentRefs = networkTarget.NetworkIDCollection
-            .Where(nid => !conflicts.Any(c => c.IsMatch(nid)))
+            .Where(nid => !conflicts.Any(c => c.IsMatch(nid, this)))
             .OrderBy(nid => nid.ID)
             .ToDictionary(
                 nid => nid.ID,
@@ -303,6 +295,12 @@ public class VRCNetworkIDUtility : EditorWindow
                 });
 
         DetectConflicts(currentRefs, conflicts);
+
+        var hasDuplicatePaths = networkTarget.NetworkIDCollection
+            .GroupBy(nid => Path(nid.gameObject))
+            .Any(group => group.Count() > 1);
+        if (hasDuplicatePaths)
+            EditorGUILayout.HelpBox("Some networked behaviours share the same transform path, this tool is not reliable under these circumstances.", MessageType.Warning);
 
         using (new EditorGUILayout.VerticalScope(objectAreaGuiStyle))
         using (var scrollView = new EditorGUILayout.ScrollViewScope(scrollPos, false, false))
@@ -359,13 +357,14 @@ public class VRCNetworkIDUtility : EditorWindow
 
             foreach (var netRef in networkTarget.NetworkIDCollection)
             {
-                if (!conflicts.Any(c => c.IsMatch(netRef)))
+                if (!conflicts.Any(c => c.IsMatch(netRef, this)))
                 {
                     DrawNoConflict(netRef);
                     EditorGUILayout.Space(5);
                 }
             }
         }
+        
     }
 
     void Clear()
@@ -375,6 +374,9 @@ public class VRCNetworkIDUtility : EditorWindow
             networkTarget.NetworkIDCollection.Clear();
             conflicts.Clear();
             fileRefs.Clear();
+            
+            ((Component)networkTarget).gameObject.MarkDirty();
+            PrefabUtility.RecordPrefabInstancePropertyModifications(((Component)networkTarget));
         }
     }
 
@@ -394,6 +396,7 @@ public class VRCNetworkIDUtility : EditorWindow
             if (newIDs.Count() > 0)
             {
                 ((Component)networkTarget).gameObject.MarkDirty();
+                PrefabUtility.RecordPrefabInstancePropertyModifications(((Component)networkTarget));
                 UnityEditor.AssetDatabase.SaveAssets();
             }
         }
@@ -480,6 +483,12 @@ public class VRCNetworkIDUtility : EditorWindow
         DetectConflicts(loadedRefs, conflicts);
     }
 
+    private struct ObjectPathEqualityComparer : IEqualityComparer<KeyValuePair<int, NetworkObjectRef>>
+    {
+        public bool Equals(KeyValuePair<int, NetworkObjectRef> x, KeyValuePair<int, NetworkObjectRef> y) => x.Value.gameObjectPath == y.Value.gameObjectPath;
+        public int GetHashCode(KeyValuePair<int, NetworkObjectRef> obj) => obj.Value.gameObjectPath.GetHashCode();
+    }
+
     void DetectConflicts(Dictionary<int, NetworkObjectRef> loadedRefs, List<Conflict> conflictList)
     {
         Dictionary<string, NetworkObjectRef> loadedPaths = new Dictionary<string, NetworkObjectRef>();
@@ -487,15 +496,20 @@ public class VRCNetworkIDUtility : EditorWindow
             if (!loadedPaths.ContainsKey(kvp.Value.gameObjectPath))
                 loadedPaths.Add(kvp.Value.gameObjectPath, kvp.Value);
         
-        var sceneRefs = networkTarget.NetworkIDCollection.OrderBy(nid => nid.ID).ToDictionary(
-            nid => nid.ID,
-            nid => new NetworkObjectRef {
-                ID = nid.ID,
-                gameObject = nid.gameObject,
-                gameObjectPath = Path(nid.gameObject),
-                typeNames = nid.SerializedTypeNames
-            });
-        var scenePaths = sceneRefs.ToDictionary(kvp => kvp.Value.gameObjectPath, kvp => kvp.Value);
+        var sceneRefs = networkTarget.NetworkIDCollection
+            .OrderBy(nid => nid.ID)
+            .Where(nid => nid.gameObject != null)
+            .ToDictionary(
+                nid => nid.ID,
+                nid => new NetworkObjectRef {
+                    ID = nid.ID,
+                    gameObject = nid.gameObject,
+                    gameObjectPath = Path(nid.gameObject),
+                    typeNames = nid.SerializedTypeNames
+                });
+        var scenePaths = sceneRefs
+            .Distinct(new ObjectPathEqualityComparer())
+            .ToDictionary(kvp => kvp.Value.gameObjectPath, kvp => kvp.Value);
 
         // Loaded that match an ID or Path
         foreach (NetworkObjectRef sceneRef in sceneRefs.Values.OrderBy(t => t.ID))
@@ -505,7 +519,7 @@ public class VRCNetworkIDUtility : EditorWindow
             {
                 // Do they match refs?
                 if (loadedRefByID.gameObject != sceneRef.gameObject)
-                RecordConflict(sceneRef, loadedRefByID, ConflictType.Object);
+                    RecordConflict(sceneRef, loadedRefByID, ConflictType.Object);
                 
                 // Do they match types?
                 if (!DoTypesMatch(sceneRef, loadedRefByID))
@@ -517,7 +531,7 @@ public class VRCNetworkIDUtility : EditorWindow
             {
                 // Do they match ids?
                 if (loadedRefByPath.ID != sceneRef.ID)
-                RecordConflict(sceneRef, loadedRefByPath, ConflictType.ID);
+                    RecordConflict(sceneRef, loadedRefByPath, ConflictType.ID);
                 
                 // Do they match types?
                 if (!DoTypesMatch(sceneRef, loadedRefByPath))
@@ -743,6 +757,10 @@ public class VRCNetworkIDUtility : EditorWindow
                 gameObject = desired,
                 SerializedTypeNames = objRef.typeNames
             }).ToList();
+        
+        
+        ((Component)networkTarget).gameObject.MarkDirty();
+        PrefabUtility.RecordPrefabInstancePropertyModifications(((Component)networkTarget));
         
         RemoveFileRef(objRef);
         

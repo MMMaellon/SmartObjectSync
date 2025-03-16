@@ -91,7 +91,7 @@ public partial class VRCSdkControlPanel : EditorWindow
     private static void FetchAvatars(int offset = 0)
     {
         ApiAvatar.FetchList(
-            delegate (IEnumerable<ApiAvatar> obj)
+            delegate (IEnumerable<ApiAvatar> obj, bool _)
             {
                 if (obj.FirstOrDefault() != null)
                     fetchingAvatars = EditorCoroutine.Start(() =>

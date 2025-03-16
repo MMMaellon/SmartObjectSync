@@ -18,14 +18,9 @@ namespace VRC.PackageManagement
         private CancellationTokenSource _retrySource;
         private int _retryFrequencyMS = 5000;
         private const string MessageProjectConnected = "projectConnected";
-        private static VRCPackageSettings _settings;
 
         public UnityWindowWebSocketClient()
         {
-            if (_settings == null)
-            {
-                _settings = VRCPackageSettings.Create();
-            }
             InitializeClient();
         }
 
@@ -51,7 +46,7 @@ namespace VRC.PackageManagement
 
         private void LogForWebsocket(string message)
         {
-            if(_settings.debugVCCConnection)
+            if(VRCPackageSettings.Instance.debugVCCConnection)
                 Debug.Log(message);
         }
 

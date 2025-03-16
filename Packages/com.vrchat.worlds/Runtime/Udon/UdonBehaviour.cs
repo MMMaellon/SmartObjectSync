@@ -29,6 +29,9 @@ using UnityEditor.SceneManagement;
 namespace VRC.Udon
 {
     public sealed class UdonBehaviour : AbstractUdonBehaviour, ISerializationCallbackReceiver
+#if VRC_CLIENT
+        , INetworkReadyReceiver
+#endif
     {
         #region Odin Serialized Fields
 
@@ -93,7 +96,7 @@ namespace VRC.Udon
                 {
                     foreach(UdonBehaviour ub in behaviours)
                     {
-                    if(ub != null && ub._syncMethod != SyncType.None)
+                        if(ub != null && ub._syncMethod != SyncType.None)
                         {
                             ub._syncMethod = value;
                         }
@@ -101,6 +104,10 @@ namespace VRC.Udon
                 }
             }
         }
+
+        public bool HasDoneStart => _hasDoneStart;
+
+        public bool HasError => _hasError;
 
         public bool SyncIsContinuous => SyncMethod == SyncType.Continuous;
         public bool SyncIsManual => SyncMethod == SyncType.Manual;
@@ -115,7 +122,6 @@ namespace VRC.Udon
 #if UNITY_EDITOR && !VRC_CLIENT
         [SerializeField]
         public AbstractUdonProgramSource programSource;
-
 #endif
 
         #endregion
@@ -165,6 +171,8 @@ namespace VRC.Udon
 
         public ulong ProgramSize => serializedProgramAsset != null ? serializedProgramAsset.GetSerializedProgramSize() : 0L;
 
+        public bool IsInitialized => _initialized;
+
         #endregion
 
         #region Private Fields and Properties
@@ -173,12 +181,12 @@ namespace VRC.Udon
         private IUdonProgram _program;
         private IUdonVM _udonVM;
         private bool _isReady;
-        private int _debugLevel;
+        private string _categoryName;
         private bool _hasError;
         private bool _hasDoneStart;
         private bool _initialized;
         private bool _isNetworkingSupported = false;
-
+        
         private bool _hasInteractiveEvents;
         private bool _hasUpdateEvent;
         private bool _hasLateUpdateEvent;
@@ -242,6 +250,7 @@ namespace VRC.Udon
 
             if(_program == null)
             {
+                _udonManager.VerifySignature(serializedProgramAsset as IUdonSignatureHolder);
                 _program = serializedProgramAsset.RetrieveProgram();
             }
 
@@ -448,15 +457,27 @@ namespace VRC.Udon
             bool success = true;
             foreach (string symbolName in symbolTable.GetSymbols())
             {
-                uint symbolAddress = symbolTable.GetAddressFromSymbol(symbolName);
-                object heapValue = heap.GetHeapVariable(symbolAddress);
-                if (!(heapValue is UdonBaseHeapReference udonBaseHeapReference))
+                try
                 {
-                    continue;
-                }
+                    uint symbolAddress = symbolTable.GetAddressFromSymbol(symbolName);
+                    object heapValue = heap.GetHeapVariable(symbolAddress);
+                    if (!(heapValue is UdonBaseHeapReference udonBaseHeapReference))
+                    {
+                        continue;
+                    }
 
-                if (!ResolveUdonHeapReference(heap, symbolAddress, udonBaseHeapReference))
+                    if (!ResolveUdonHeapReference(heap, symbolAddress, udonBaseHeapReference))
+                    {
+                        success = false;
+                    }
+                }
+                catch (Exception e)
                 {
+#if UNITY_EDITOR
+                    Logger.LogError($"{e.Message}\n{e.StackTrace}");
+#else
+                    Logger.LogError(e.Message);
+#endif
                     success = false;
                 }
             }
@@ -496,7 +517,7 @@ namespace VRC.Udon
                     {
                         Logger.Log(
                             $"Unsupported GameObject/Component reference type: {udonBaseHeapReference.GetType().Name}. Only GameObject, Transform, and UdonBehaviour are supported.",
-                            _debugLevel,
+                            _categoryName,
                             this);
 
                         return false;
@@ -506,7 +527,7 @@ namespace VRC.Udon
                 {
                     Logger.Log(
                         $"Unknown heap reference type: {udonBaseHeapReference.GetType().Name}",
-                        _debugLevel,
+                        _categoryName,
                         this);
 
                     return false;
@@ -657,6 +678,16 @@ namespace VRC.Udon
         {
             serializedPublicVariablesBytesString = null;
             publicVariablesUnityEngineObjects = null;
+            
+            foreach (AbstractUdonBehaviourEventProxy proxy in _eventProxies)
+            {
+                if (proxy)
+                {
+                    Destroy(proxy);
+                }
+            }
+
+            _eventProxies.Clear();
 
             if(_program == null)
             {
@@ -672,14 +703,6 @@ namespace VRC.Udon
 
             _udonVM = null;
             _program = null;
-            
-            foreach (AbstractUdonBehaviourEventProxy proxy in _eventProxies)
-            {
-                if (proxy)
-                {
-                    Destroy(proxy);
-                }
-            }
         }
 
         public void OnDisable()
@@ -916,7 +939,7 @@ namespace VRC.Udon
 
 #if VRC_CLIENT
         [PublicAPI]
-        private void OnNetworkReady()
+        public void OnNetworkReady()
         {
             _isReady = true;
         }
@@ -957,7 +980,10 @@ namespace VRC.Udon
                 return;
             }
 
-            RunEvent("_onPreSerialization");
+            if (!RunEvent(UdonManager.UDON_EVENT_ONPRESERIALIZATION)
+                && !_hasError
+                && _eventTable.ContainsKey(UdonManager.UDON_EVENT_ONPRESERIALIZATION))
+                Logger.LogErrorFormat("OnPreSerialization event failed for {0}", gameObject.name);
         }
 
         //Called via delegate by UdonSync
@@ -969,7 +995,10 @@ namespace VRC.Udon
                 return;
             }
 
-            RunEvent("_onPostSerialization", ("result", result));
+            if (!RunEvent(UdonManager.UDON_EVENT_ONPOSTSERIALIZATION, ("result", result))
+                && !_hasError
+                && _eventTable.ContainsKey(UdonManager.UDON_EVENT_ONPOSTSERIALIZATION))
+                Logger.LogErrorFormat("OnPostSerialization event failed for {0}", gameObject.name);
         }
 
         //Called via delegate by UdonSync
@@ -981,7 +1010,10 @@ namespace VRC.Udon
                 return;
             }
 
-            RunEvent("_onDeserialization", ("result", result));
+            if (!RunEvent(UdonManager.UDON_EVENT_ONDESERIALIZATION, ("result", result))
+                && !_hasError
+                && _eventTable.ContainsKey(UdonManager.UDON_EVENT_ONDESERIALIZATION))
+                Logger.LogErrorFormat("OnDeserialization event failed for {0}", gameObject.name);
         }
 
         #endregion
@@ -1027,12 +1059,13 @@ namespace VRC.Udon
 
             try
             {
+                _udonManager.IncrementDepthCount();
                 uint result = _udonVM.Interpret();
                 if (result != 0)
                 {
                     Logger.LogError(
                         $"Udon VM execution errored, this UdonBehaviour will be halted.",
-                        _debugLevel,
+                        _categoryName,
                         this);
 
                     _hasError = true;
@@ -1041,18 +1074,22 @@ namespace VRC.Udon
             }
             catch (UdonVMException error)
             {
-                string errorStr = error.ToString();
                 Logger.LogError(
-                    "An exception occurred during Udon execution, this UdonBehaviour will be halted.\n" + errorStr,
-                    _debugLevel,
+                    "An exception occurred during Udon execution, this UdonBehaviour will be halted.\n" + error,
+                    _categoryName,
                     this);
 
                 _hasError = true;
                 enabled = false;
             }
+            finally
+            {
+                _udonManager.DecrementDepthCount();
+            }
 
+            // pi: note that _udonVM can be null here if the UdonBehaviour destroys itself during the Interpret call
             _udonManager.currentlyExecuting = originalExecuting;
-            if (originalAddress < 0xFFFFFFFC)
+            if (originalAddress < 0xFFFFFFFC && _udonVM != null)
             {
                 _udonVM.SetProgramCounter(originalAddress);
             }
@@ -1159,7 +1196,7 @@ namespace VRC.Udon
 #if VRC_CLIENT || UNITY_EDITOR
                 if (UdonManager.Instance.DebugLogging)
                 {
-                    Logger.Log($"{gameObject.name} not ready to respond to {eventName}: initialized={_initialized} enabled={enabled} hasStarted={_hasDoneStart}", _debugLevel);
+                    Logger.Log($"{gameObject.name} not ready to respond to {eventName}: initialized={_initialized} enabled={enabled} hasStarted={_hasDoneStart}", _categoryName);
                 }
 #endif
 
@@ -1172,7 +1209,7 @@ namespace VRC.Udon
 #if VRC_CLIENT || UNITY_EDITOR
                 if (UdonManager.Instance.DebugLogging)
                 {
-                    Logger.Log($"{gameObject.name} will not respond to {eventName}", _debugLevel);
+                    Logger.Log($"{gameObject.name} will not respond to {eventName}", _categoryName);
                 }
 #endif
 
@@ -1185,7 +1222,7 @@ namespace VRC.Udon
 #if VRC_CLIENT || UNITY_EDITOR
                 if (UdonManager.Instance.DebugLogging)
                 {
-                    Logger.LogError($"{gameObject.name} failed to respond to {eventName}", _debugLevel);
+                    Logger.LogError($"{gameObject.name} failed to respond to {eventName}", _categoryName);
                 }
 #endif
 
@@ -1467,6 +1504,7 @@ namespace VRC.Udon
 
                 if(_program == null)
                 {
+                    UdonManager.Instance.VerifySignature(serializedProgramAsset as IUdonSignatureHolder);
                     _program = serializedProgramAsset.RetrieveProgram();
                 }
             }
@@ -1491,7 +1529,7 @@ namespace VRC.Udon
                     enabled = false;
                     Logger.LogError(
                         $"Could not find the UdonManager; the UdonBehaviour on '{gameObject.name}' will not run.",
-                        _debugLevel,
+                        _categoryName,
                         this);
 
                     return;
@@ -1502,7 +1540,7 @@ namespace VRC.Udon
                     enabled = false;
                     Logger.Log(
                         $"Could not load the program; the UdonBehaviour on '{gameObject.name}' will not run.",
-                        _debugLevel,
+                        _categoryName,
                         this);
 
                     return;
@@ -1518,7 +1556,7 @@ namespace VRC.Udon
                     enabled = false;
                     Logger.Log(
                         $"Invalid program; the UdonBehaviour on '{gameObject.name}' will not run.",
-                        _debugLevel,
+                        _categoryName,
                         this);
 
                     return;
@@ -1529,7 +1567,7 @@ namespace VRC.Udon
                     enabled = false;
                     Logger.Log(
                         $"Failed to resolve a GameObject/Component Reference; the UdonBehaviour on '{gameObject.name}' will not run.",
-                        _debugLevel,
+                        _categoryName,
                         this);
 
                     return;
@@ -1542,7 +1580,7 @@ namespace VRC.Udon
                     enabled = false;
                     Logger.LogError(
                         $"No UdonVM; the UdonBehaviour on '{gameObject.name}' will not run.",
-                        _debugLevel,
+                        _categoryName,
                         this);
 
                     return;
@@ -1584,7 +1622,7 @@ namespace VRC.Udon
                 enabled = false;
                 Logger.LogError(
                     $"An exception '{exception.Message}' occurred during initialization; the UdonBehaviour on '{gameObject.name}' will not run. Exception:\n{exception}",
-                    _debugLevel,
+                    _categoryName,
                     this
                 );
             }
@@ -1817,7 +1855,7 @@ namespace VRC.Udon
             if (!_program.SymbolTable.TryGetAddressFromSymbol(symbolName, out uint symbolAddress))
             {
 #if UNITY_EDITOR
-                Logger.LogError($"Could not find symbol {symbolName}; available: [{string.Join(",", _program.SymbolTable.GetSymbols())}]", _debugLevel);
+                Logger.LogError($"Could not find symbol {symbolName}; available: [{string.Join(",", _program.SymbolTable.GetSymbols())}]", _categoryName);
 #endif
                 return null;
             }
@@ -1867,14 +1905,14 @@ namespace VRC.Udon
 
         private void SetupLogging()
         {
-            _debugLevel = GetType().GetHashCode();
-            if (Logger.DebugLevelIsDescribed(_debugLevel))
+            _categoryName = "UdonBehaviour";
+            if (Logger.CategoryIsDescribed(_categoryName))
             {
                 return;
             }
 
-            Logger.DescribeDebugLevel(_debugLevel, "UdonBehaviour");
-            Logger.AddDebugLevel(_debugLevel);
+            Logger.DescribeCategory(_categoryName);
+            Logger.EnableCategory(_categoryName);
         }
 
         #endregion

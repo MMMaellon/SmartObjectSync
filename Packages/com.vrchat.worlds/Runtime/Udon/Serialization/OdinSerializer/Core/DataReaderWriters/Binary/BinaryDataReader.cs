@@ -2196,452 +2196,115 @@ namespace VRC.Udon.Serialization.OdinSerializer
             return false;
         }
 
-        [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
-        private bool UNSAFE_Read_2_Int16(out short value)
+	// VRChat Start - Changes to serialization to avoid unaligned reads/writes on arm64 architectures [PER-795]
+        [MethodImpl((MethodImplOptions)0x100)] // Set aggressive inlining flag, for the runtimes that understand that
+        private bool ReadValueTypeFromBuffer<T>(out T value) where T : unmanaged
         {
-            if (this.HasBufferData(2))
+            int sizeInBytes = sizeof(T);
+
+            if (this.HasBufferData(sizeInBytes))
             {
-                fixed (byte* basePtr = this.buffer)
+                if (BitConverter.IsLittleEndian)
                 {
-                    if (BitConverter.IsLittleEndian)
+                    if (ArchitectureInfo.Architecture_Supports_Unaligned_Float32_Reads)
                     {
-                        value = *((short*)(basePtr + this.bufferIndex));
+                        fixed (byte* basePtr = this.buffer)
+                        {
+                            // We can read directly from the buffer, safe in the knowledge that any potential unaligned reads will work
+                            value = *((T*)(basePtr + this.bufferIndex));
+                        }
                     }
                     else
                     {
-                        short val = 0;
-                        byte* toPtr = (byte*)&val + 1;
-                        byte* fromPtr = basePtr + this.bufferIndex;
+                        // Avoid depending on any particular alignment
+		        value = Unsafe.ReadUnaligned<T>(ref this.buffer[this.bufferIndex]);
+                    }
+                }
+                else
+                {
+                    fixed (byte* basePtr = this.buffer)
+                    {
+                        fixed (T* valueAddress = &value)
+                        {
+                            byte* ptrTo = basePtr + this.bufferIndex;
+                            int lastByteIndex = sizeInBytes - 1;
+                            byte* ptrFrom = (byte*)&valueAddress + lastByteIndex;
 
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
+                            for (int i = 0; i < sizeInBytes; ++i)
+                            {
+                                ptrTo[i] = ptrFrom[lastByteIndex - i];
+                            }
+                        }
                     }
                 }
 
-                this.bufferIndex += 2;
+                this.bufferIndex += sizeInBytes;
                 return true;
             }
 
             this.bufferIndex = this.bufferEnd;
-            value = 0;
+            value = default;
             return false;
+        }
+
+        [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
+        private bool UNSAFE_Read_2_Int16(out short value)
+        {
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_2_UInt16(out ushort value)
         {
-            if (this.HasBufferData(2))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        value = *((ushort*)(basePtr + this.bufferIndex));
-                    }
-                    else
-                    {
-                        ushort val = 0;
-                        byte* toPtr = (byte*)&val + 1;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 2;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_2_Char(out char value)
         {
-            if (this.HasBufferData(2))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        value = *((char*)(basePtr + this.bufferIndex));
-                    }
-                    else
-                    {
-                        char val = default(char);
-                        byte* toPtr = (byte*)&val + 1;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 2;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = default(char);
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_4_Int32(out int value)
         {
-            if (this.HasBufferData(4))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        value = *((int*)(basePtr + this.bufferIndex));
-                    }
-                    else
-                    {
-                        int val = 0;
-                        byte* toPtr = (byte*)&val + 3;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 4;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_4_UInt32(out uint value)
         {
-            if (this.HasBufferData(4))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        value = *((uint*)(basePtr + this.bufferIndex));
-                    }
-                    else
-                    {
-                        uint val = 0;
-                        byte* toPtr = (byte*)&val + 3;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 4;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_4_Float32(out float value)
         {
-            if (this.HasBufferData(4))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        if (ArchitectureInfo.Architecture_Supports_Unaligned_Float32_Reads)
-                        {
-                            // We can read directly from the buffer, safe in the knowledge that any potential unaligned reads will work
-                            value = *((float*)(basePtr + this.bufferIndex));
-                        }
-                        else
-                        {
-                            // We do a read through a 32-bit int and a locally addressed float instead, should be almost as fast as the real deal
-                            float result = 0;
-                            *(int*)&result = *(int*)(basePtr + this.bufferIndex);
-                            value = result;
-                        }
-                    }
-                    else
-                    {
-                        float val = 0;
-                        byte* toPtr = (byte*)&val + 3;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 4;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
         
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_8_Int64(out long value)
         {
-            if (this.HasBufferData(8))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                        {
-                            // We can read directly from the buffer, safe in the knowledge that any potential unaligned reads will work
-                            value = *((long*)(basePtr + this.bufferIndex));
-                        }
-                        else
-                        {
-                            // We do an int-by-int read instead, into an address that we know is aligned
-                            long result = 0;
-                            int* toPtr = (int*)&result;
-                            int* fromPtr = (int*)(basePtr + this.bufferIndex);
-                            
-                            *toPtr++ = *fromPtr++;
-                            *toPtr = *fromPtr;
-
-                            value = result;
-                        }
-                    }
-                    else
-                    {
-                        long val = 0;
-                        byte* toPtr = (byte*)&val + 7;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 8;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_8_UInt64(out ulong value)
         {
-            if (this.HasBufferData(8))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                        {
-                            // We can read directly from the buffer, safe in the knowledge that any potential unaligned reads will work
-                            value = *((ulong*)(basePtr + this.bufferIndex));
-                        }
-                        else
-                        {
-                            // We do an int-by-int read instead, into an address that we know is aligned
-                            ulong result = 0;
-
-                            int* toPtr = (int*)&result;
-                            int* fromPtr = (int*)(basePtr + this.bufferIndex);
-
-                            *toPtr++ = *fromPtr++;
-                            *toPtr = *fromPtr;
-
-                            value = result;
-                        }
-                    }
-                    else
-                    {
-                        ulong val = 0;
-                        byte* toPtr = (byte*)&val + 7;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 8;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_8_Float64(out double value)
         {
-            if (this.HasBufferData(8))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                        {
-                            // We can read directly from the buffer, safe in the knowledge that any potential unaligned reads will work
-                            value = *((double*)(basePtr + this.bufferIndex));
-                        }
-                        else
-                        {
-                            // We do an int-by-int read instead, into an address that we know is aligned
-                            double result = 0;
-
-                            int* toPtr = (int*)&result;
-                            int* fromPtr = (int*)(basePtr + this.bufferIndex);
-
-                            *toPtr++ = *fromPtr++;
-                            *toPtr = *fromPtr;
-
-                            value = result;
-                        }
-                    }
-                    else
-                    {
-                        double val = 0;
-                        byte* toPtr = (byte*)&val + 7;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 8;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
         private bool UNSAFE_Read_16_Decimal(out decimal value)
         {
-            if (this.HasBufferData(16))
-            {
-                fixed (byte* basePtr = this.buffer)
-                {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                        {
-                            // We can read directly from the buffer, safe in the knowledge that any potential unaligned reads will work
-                            value = *((decimal*)(basePtr + this.bufferIndex));
-                        }
-                        else
-                        {
-                            // We do an int-by-int read instead, into an address that we know is aligned
-                            decimal result = 0;
-
-                            int* toPtr = (int*)&result;
-                            int* fromPtr = (int*)(basePtr + this.bufferIndex);
-
-                            *toPtr++ = *fromPtr++;
-                            *toPtr++ = *fromPtr++;
-                            *toPtr++ = *fromPtr++;
-                            *toPtr = *fromPtr;
-
-                            value = result;
-                        }
-                    }
-                    else
-                    {
-                        decimal val = 0;
-                        byte* toPtr = (byte*)&val + 15;
-                        byte* fromPtr = basePtr + this.bufferIndex;
-
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr-- = *fromPtr++;
-                        *toPtr = *fromPtr;
-
-                        value = val;
-                    }
-                }
-
-                this.bufferIndex += 16;
-                return true;
-            }
-
-            this.bufferIndex = this.bufferEnd;
-            value = 0;
-            return false;
+            return ReadValueTypeFromBuffer(out value);
         }
 
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that
@@ -2654,33 +2317,13 @@ namespace VRC.Udon.Serialization.OdinSerializer
                 // See http://stackoverflow.com/questions/10190817/guid-byte-order-in-net
 
                 // TODO: Test if this actually works on big-endian architecture. Where the hell do we find that?
-
-                fixed (byte* basePtr = this.buffer)
+                if (BitConverter.IsLittleEndian)
                 {
-                    if (BitConverter.IsLittleEndian)
-                    {
-                        if (ArchitectureInfo.Architecture_Supports_All_Unaligned_ReadWrites)
-                        {
-                            // We can read directly from the buffer, safe in the knowledge that any potential unaligned reads will work
-                            value = *((Guid*)(basePtr + this.bufferIndex));
-                        }
-                        else
-                        {
-                            // We do an int-by-int read instead, into an address that we know is aligned
-                            Guid result = default(Guid);
-
-                            int* toPtr = (int*)&result;
-                            int* fromPtr = (int*)(basePtr + this.bufferIndex);
-
-                            *toPtr++ = *fromPtr++;
-                            *toPtr++ = *fromPtr++;
-                            *toPtr++ = *fromPtr++;
-                            *toPtr = *fromPtr;
-
-                            value = result;
-                        }
-                    }
-                    else
+                    return ReadValueTypeFromBuffer(out value);
+                }
+                else
+                {
+                    fixed (byte* basePtr = this.buffer)
                     {
                         Guid val = default(Guid);
                         byte* toPtr = (byte*)&val;
@@ -2718,6 +2361,7 @@ namespace VRC.Udon.Serialization.OdinSerializer
             value = default(Guid);
             return false;
         }
+	// VRChat End - Changes to serialization to avoid unaligned reads/writes on arm64 architectures [PER-795]
 
         
         [MethodImpl((MethodImplOptions)0x100)]  // Set aggressive inlining flag, for the runtimes that understand that

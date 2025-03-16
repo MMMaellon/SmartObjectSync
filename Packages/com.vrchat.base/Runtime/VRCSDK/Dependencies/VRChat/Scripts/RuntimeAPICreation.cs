@@ -246,7 +246,7 @@ namespace VRCSDK2
                 delegate (ApiFile apiFile, string message)
                 {
                     newFileUrl = apiFile.GetFileURL();
-                    if (VRC.Core.Logger.DebugLevelIsEnabled(DebugLevel.API))
+                    if (VRC.Core.Logger.CategoryIsEnabled(DebugLevel.API))
                         VRC.Core.Logger.Log(fileType + " upload succeeded: " + message + " (" + filename +
                               ") => " + apiFile.ToString(), DebugLevel.API);
                     else

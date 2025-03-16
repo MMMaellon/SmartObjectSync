@@ -24,7 +24,8 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView.UdonNodes
             "_onDestroy", "_onDisable", "_onDrawGizmos", "_onDrawGizmosSelected", "_onEnable", "_onJointBreak", "_onJointBreak2D", "_onMouseDown", "_onMouseDrag", "_onMouseEnter", "_onMouseExit", "_onMouseOver", "_onMouseUp", "_onMouseUpAsButton",
             "_onPlayerParticleCollision", "_onParticleCollision", "_onParticleTrigger", "_onPostRender", "_onPreCull", "_onPreRender", "_onRenderImage", "_onRenderObject", "_onTransformChildrenChanged", "_onTransformParentChanged", "_onValidate", "_onWillRenderObject",
             "_interact", "_onDrop", "_onPickup", "_onPickupUseDown", "_onPickupUseUp", "_onPreSerialization", "_onPostSerialization", "_onDeserialization", "_onVideoEnd", "_onVideoPause", "_onVideoPlay", "_onVideoStart", "_midiNoteOn", "_midiNoteOff", "_midiControlChange",
-            "_onOwnershipRequest", "_onNetworkReady", "_onOwnershipTransferred", "_onPlayerJoined", "_onPlayerLeft", "_onSpawn", "_onStationEntered", "_onStationExited",
+            "_onOwnershipRequest", "_onNetworkReady", "_onOwnershipTransferred", "_onPlayerJoined", "_onPlayerLeft", "_onSpawn", "_onStationEntered", "_onStationExited", "_onPlayerRespawn", "_onPlayerDataUpdated", "_onPlayerRestored", "_onInstanceRestored",
+            "_onMasterTransferred",
         };
         
         public enum ProgramPopupType

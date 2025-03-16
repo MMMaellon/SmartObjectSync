@@ -29,6 +29,11 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
         {
         };
 
+        public static readonly HashSet<string> TopNamesToKeep = new HashSet<string>()
+        {
+            "UnityEngineRandom", "SystemRandom", "SystemRandom[]", "SystemRandomArray"
+        };
+
         public void Initialize(UdonGraphWindow editorWindow, UdonGraph graphView, UdonSearchManager manager)
         {
             base.Initialize(editorWindow, graphView);
@@ -104,7 +109,13 @@ namespace VRC.Udon.Editor.ProgramSources.UdonGraphProgram.UI.GraphView
 
                 foreach (KeyValuePair<string, INodeRegistry> registry in topRegistry.Value.OrderBy(s => s.Key))
                 {
-                    string baseRegistryName = registry.Key.Replace("NodeRegistry", "").FriendlyNameify().ReplaceFirst(topName, "");
+                    string baseRegistryName = registry.Key.Replace("NodeRegistry", "").FriendlyNameify();
+                    // Remove topname registries from name, except for some special cases like UnityEngineRandom/SystemRandom
+                    if (!TopNamesToKeep.Contains(baseRegistryName))
+                    {
+                        baseRegistryName = baseRegistryName.ReplaceFirst(topName, "");
+                    }
+                    
                     string registryName = baseRegistryName.UppercaseFirst();
                     
                     // Plural-ize Event->Events and Type->Types

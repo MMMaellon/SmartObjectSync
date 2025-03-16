@@ -664,7 +664,15 @@ namespace VRC.Udon.Serialization.OdinSerializer
             }
 
             // Finally, we fall back to a reflection-based formatter if nothing else has been found
-            return (IFormatter)Activator.CreateInstance(typeof(ReflectionFormatter<>).MakeGenericType(type));
+            // VRC Unity John: PER-818 - Use the Formatter instance cache here too, to avoid creating duplicate ReflectionFormatter<T> instances.
+            if (!FormatterInstances.TryGetValue(type, out IFormatter reflectionFormatter))
+            {
+                reflectionFormatter = (IFormatter)Activator.CreateInstance(typeof(ReflectionFormatter<>).MakeGenericType(type));
+                FormatterInstances.Add(type, reflectionFormatter);
+            }
+            
+            return reflectionFormatter;
+            // VRC Unity John: PER-818 end.
         }
 
         private static IFormatter GetFormatterInstance(Type type)

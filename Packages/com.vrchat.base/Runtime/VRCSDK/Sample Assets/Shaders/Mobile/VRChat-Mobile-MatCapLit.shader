@@ -36,7 +36,7 @@ Shader "VRChat/Mobile/MatCap Lit"
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
                 float3 normal : NORMAL;
-                float4 color : COLOR;
+                fixed4 color : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -45,9 +45,9 @@ Shader "VRChat/Mobile/MatCap Lit"
                 float4 pos : SV_POSITION;
                 float2 uv : TEXCOORD0;
                 float4 worldPos : TEXCOORD1;
-                float4 color : TEXCOORD2;
-                float4 indirect : TEXCOORD3;
-                float4 direct : TEXCOORD4;
+                fixed4 color : TEXCOORD2;
+                fixed4 indirect : TEXCOORD3;
+                fixed4 direct : TEXCOORD4;
                 float2 matcapUV : TEXCOORD5;
                 SHADOW_COORDS(7)
                 UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -79,7 +79,7 @@ Shader "VRChat/Mobile/MatCap Lit"
                 o.worldPos = mul(unity_ObjectToWorld, v.vertex);
                 o.uv = v.uv;
                 
-                half3 indirectDiffuse = ShadeSH9(float4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
+                half3 indirectDiffuse = ShadeSH9(half4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
                 half4 lightCol = _LightColor0;
                  
                 //If we don't have a directional light or realtime light in the scene, we can derive light color from a slightly modified indirect color.
@@ -87,10 +87,8 @@ Shader "VRChat/Mobile/MatCap Lit"
                 if(lightEnv != 1)
                     lightCol = indirectDiffuse.xyzz * 0.2; 
             
-                float4 lighting = lightCol; 
-                
                 o.color = v.color;
-                o.direct = lighting;
+                o.direct = lightCol;
                 o.indirect = indirectDiffuse.xyzz;
                 
                 float3 worldNorm = normalize(unity_WorldToObject[0].xyz * v.normal.x + unity_WorldToObject[1].xyz * v.normal.y + unity_WorldToObject[2].xyz * v.normal.z);
@@ -101,15 +99,15 @@ Shader "VRChat/Mobile/MatCap Lit"
                 return o;
             }
             
-            float4 frag (VertexOutput i, float facing : VFACE) : SV_Target
+            fixed4 frag (VertexOutput i, float facing : VFACE) : SV_Target
             {
                 UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
             
-                float4 albedo = UNITY_SAMPLE_TEX2D(_MainTex, TRANSFORM_TEX(i.uv, _MainTex));
-                float4 mc = UNITY_SAMPLE_TEX2D(_MatCap, i.matcapUV);
+                fixed4 albedo = UNITY_SAMPLE_TEX2D(_MainTex, TRANSFORM_TEX(i.uv, _MainTex));
+                fixed4 mc = UNITY_SAMPLE_TEX2D(_MatCap, i.matcapUV);
                 half4 final = (albedo * i.color * mc) * (i.direct * attenuation + i.indirect);
                 
-                return float4(final.rgb, 1);
+                return half4(final.rgb, 1);
             }
             ENDCG
         }

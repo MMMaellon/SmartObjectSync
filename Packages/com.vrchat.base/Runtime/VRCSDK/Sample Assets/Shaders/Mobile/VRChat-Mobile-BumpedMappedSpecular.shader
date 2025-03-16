@@ -35,7 +35,7 @@ Shader "VRChat/Mobile/Bumped Mapped Specular"
         struct Input
         {
             float2 uv_MainTex;
-            float4 color : COLOR;
+            fixed4 color : COLOR;
         };
 
         void surf (Input IN, inout SurfaceOutput o)
