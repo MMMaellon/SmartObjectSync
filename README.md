@@ -7,7 +7,6 @@ If it has been a long time since May 2024, you should probably check the status 
 
 ## Ask questions on my Discord Server: <https://discord.gg/S5sDC4PnFp>
 ## Search answers on [my AnswerOverflow](https://www.answeroverflow.com/c/1023675328582910073)
-Questions asked on my discord show up in AnswerOverflow so others can see them without having to join the discord
 
 A drop-in replacement for VRC_ObjectSync that allows for better syncing of objects in VRChat. Demo video here: https://twitter.com/MMMaellon/status/1614152548780478464
 
