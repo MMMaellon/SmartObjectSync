@@ -1,4 +1,4 @@
-# Maintenance Mode
+# ⚠️ Maintenance Mode ⚠️
 SmartObjectSync still works as of May 2024, and if you've been using it in your projects, I would continue to use it.
 I just won't be adding any new features. I may still do minor bug fixes.
 If it has been a long time since May 2024, you should probably check the status of [LightSync](https://github.com/MMMaellon/LightSync). That prefab is still getting new features but may be unstable.
